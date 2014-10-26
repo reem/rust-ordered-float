@@ -9,3 +9,7 @@ authors = ["Jonathan Reem <jonathan.reem@gmail.com>"]
 name = "ordered-float"
 path = "src/lib.rs"
 
+[dev-dependencies.stainless]
+
+git = "https://github.com/reem/stainless"
+

@@ -1,12 +1,17 @@
 #![license = "MIT"]
 #![deny(missing_doc)]
 #![deny(warnings)]
+#![feature(globs, phase)]
 
-//! Crate comment goes here
+//! Wrappers for total order on f64s.
+
+#[cfg(test)] #[phase(plugin)] extern crate stainless;
+
+use std::num::Float;
 
 /// A wrapper around f64 providing an implementation of Ord.
 ///
-/// NaN is sorted as *smaller* than all other values and *equal*
+/// NaN is sorted as *greater* than all other values and *equal*
 /// to itself, in contradiction with the IEEE standard.
 #[deriving(PartialOrd, Show, Clone)]
 pub struct OrderedFloat(pub f64);
@@ -28,10 +33,10 @@ impl Ord for OrderedFloat {
                     if other.unwrap().is_nan() {
                         Equal
                     } else {
-                        Less
+                        Greater
                     }
                 } else {
-                    Greater
+                    Less
                 }
             }
         }
@@ -84,10 +89,9 @@ impl NotNaN {
 
 impl Ord for NotNaN {
     fn cmp(&self, other: &NotNaN) -> Ordering {
-        match self.partial_cmp(other) {
-            Some(ordering) => ordering,
-            None => fail!("NaN encountered in NotNaN comparison.")
-        }
+        self.unwrap()
+            .partial_cmp(&other.unwrap())
+            .expect("NaN encountered in NotNaN comparison.")
     }
 }
 
@@ -102,4 +106,47 @@ impl PartialEq for NotNaN {
 }
 
 impl Eq for NotNaN {}
+
+#[cfg(test)]
+mod tests {
+    pub use super::*;
+
+    describe! ordered_float {
+        it "should compare regular floats" {
+            assert_eq!(OrderedFloat(7.0).cmp(&OrderedFloat(7.0)), Equal)
+            assert_eq!(OrderedFloat(8.0).cmp(&OrderedFloat(7.0)), Greater)
+            assert_eq!(OrderedFloat(4.0).cmp(&OrderedFloat(7.0)), Less)
+        }
+
+        it "should compare NaN" {
+            assert_eq!(OrderedFloat(Float::nan()).cmp(&OrderedFloat(Float::nan())), Equal);
+            assert_eq!(OrderedFloat(Float::nan()).cmp(&OrderedFloat(-100000.0)), Greater);
+            assert_eq!(OrderedFloat(-100.0).cmp(&OrderedFloat(Float::nan())), Less);
+        }
+    }
+
+    describe! not_nan {
+        it "should compare regular floats" {
+            assert_eq!(NotNaN(7.0).cmp(&NotNaN(7.0)), Equal)
+            assert_eq!(NotNaN(8.0).cmp(&NotNaN(7.0)), Greater)
+            assert_eq!(NotNaN(4.0).cmp(&NotNaN(7.0)), Less)
+        }
+
+        failing "should fail when comparing NaN to NaN" {
+            NotNaN(Float::nan()).cmp(&NotNaN(Float::nan()));
+        }
+
+        failing "should fail when comparing NaN to a regular float" {
+            NotNaN(Float::nan()).cmp(&NotNaN(7.0));
+        }
+
+        failing "should fail when comparing a regular float to NaN" {
+            NotNaN(7.0).cmp(&NotNaN(Float::nan()));
+        }
+
+        failing "should fail when constructing NotNaN with NaN" {
+            NotNaN::new(Float::nan());
+        }
+    }
+}
 
