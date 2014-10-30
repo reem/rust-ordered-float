@@ -3,29 +3,29 @@
 #![deny(warnings)]
 #![feature(globs, phase)]
 
-//! Wrappers for total order on f64s.
+//! Wrappers for total order on Floats.
 
 #[cfg(test)] #[phase(plugin)] extern crate stainless;
 
 use std::num::Float;
 
-/// A wrapper around f64 providing an implementation of Ord.
+/// A wrapper around Floats providing an implementation of Ord.
 ///
 /// NaN is sorted as *greater* than all other values and *equal*
 /// to itself, in contradiction with the IEEE standard.
 #[deriving(PartialOrd, Show, Clone)]
-pub struct OrderedFloat(pub f64);
+pub struct OrderedFloat<T: Float>(pub T);
 
-impl OrderedFloat {
+impl<T: Float> OrderedFloat<T> {
     /// Get the value out.
-    pub fn unwrap(self) -> f64 {
+    pub fn unwrap(self) -> T {
         let OrderedFloat(val) = self;
         val
     }
 }
 
-impl Ord for OrderedFloat {
-    fn cmp(&self, other: &OrderedFloat) -> Ordering {
+impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
+    fn cmp(&self, other: &OrderedFloat<T>) -> Ordering {
         match self.unwrap().partial_cmp(&other.unwrap()) {
             Some(ordering) => ordering,
             None => {
@@ -43,8 +43,8 @@ impl Ord for OrderedFloat {
     }
 }
 
-impl PartialEq for OrderedFloat {
-    fn eq(&self, other: &OrderedFloat) -> bool {
+impl<T: Float + PartialEq> PartialEq for OrderedFloat<T> {
+    fn eq(&self, other: &OrderedFloat<T>) -> bool {
         if self.unwrap().is_nan() {
             if other.unwrap().is_nan() {
                 true
@@ -60,43 +60,43 @@ impl PartialEq for OrderedFloat {
     }
 }
 
-impl Eq for OrderedFloat { }
+impl<T: Float + PartialEq> Eq for OrderedFloat<T> { }
 
-/// A wrapper around f64 providing an implementation of Ord.
+/// A wrapper around Floats providing an implementation of Ord.
 ///
 /// If NaN is encountered becuase NotNaN was manually constructed
 /// with a NaN value, this will fail.
 #[deriving(PartialOrd, Show, Clone)]
-pub struct NotNaN(pub f64);
+pub struct NotNaN<T: Float>(pub T);
 
-impl NotNaN {
-    /// Creat a NotNaN value.
+impl<T: Float> NotNaN<T> {
+    /// Create a NotNaN value.
     ///
     /// ## Failure
     ///
     /// Fails if the val is NaN
-    pub fn new(val: f64) -> NotNaN {
+    pub fn new(val: T) -> NotNaN<T> {
         if val.is_nan() { fail!("NaN encountered in NotNaN construction.") }
         NotNaN(val)
     }
 
     /// Get the value out.
-    pub fn unwrap(self) -> f64 {
+    pub fn unwrap(self) -> T {
         let NotNaN(val) = self;
         val
     }
 }
 
-impl Ord for NotNaN {
-    fn cmp(&self, other: &NotNaN) -> Ordering {
+impl<T: Float + PartialOrd> Ord for NotNaN<T> {
+    fn cmp(&self, other: &NotNaN<T>) -> Ordering {
         self.unwrap()
             .partial_cmp(&other.unwrap())
             .expect("NaN encountered in NotNaN comparison.")
     }
 }
 
-impl PartialEq for NotNaN {
-    fn eq(&self, other: &NotNaN) -> bool {
+impl<T: Float + PartialEq> PartialEq for NotNaN<T> {
+    fn eq(&self, other: &NotNaN<T>) -> bool {
         if self.unwrap().is_nan() || other.unwrap().is_nan() {
             fail!("NaN encountered in NotNaN comparison.")
         } else {
@@ -105,47 +105,91 @@ impl PartialEq for NotNaN {
     }
 }
 
-impl Eq for NotNaN {}
+impl<T: Float + PartialEq> Eq for NotNaN<T> {}
 
 #[cfg(test)]
 mod tests {
     pub use super::*;
 
-    describe! ordered_float {
+    describe! ordered_float32 {
         it "should compare regular floats" {
-            assert_eq!(OrderedFloat(7.0).cmp(&OrderedFloat(7.0)), Equal)
-            assert_eq!(OrderedFloat(8.0).cmp(&OrderedFloat(7.0)), Greater)
-            assert_eq!(OrderedFloat(4.0).cmp(&OrderedFloat(7.0)), Less)
+            assert_eq!(OrderedFloat(7.0f32).cmp(&OrderedFloat(7.0)), Equal)
+            assert_eq!(OrderedFloat(8.0f32).cmp(&OrderedFloat(7.0)), Greater)
+            assert_eq!(OrderedFloat(4.0f32).cmp(&OrderedFloat(7.0)), Less)
         }
 
         it "should compare NaN" {
-            assert_eq!(OrderedFloat(Float::nan()).cmp(&OrderedFloat(Float::nan())), Equal);
-            assert_eq!(OrderedFloat(Float::nan()).cmp(&OrderedFloat(-100000.0)), Greater);
-            assert_eq!(OrderedFloat(-100.0).cmp(&OrderedFloat(Float::nan())), Less);
+            let f32_nan: f32 = Float::nan();
+            assert_eq!(OrderedFloat(f32_nan).cmp(&OrderedFloat(Float::nan())), Equal);
+            assert_eq!(OrderedFloat(Float::nan()).cmp(&OrderedFloat(-100000.0f32)), Greater);
+            assert_eq!(OrderedFloat(-100.0f32).cmp(&OrderedFloat(Float::nan())), Less);
         }
     }
 
-    describe! not_nan {
+    describe! ordered_float64 {
         it "should compare regular floats" {
-            assert_eq!(NotNaN(7.0).cmp(&NotNaN(7.0)), Equal)
-            assert_eq!(NotNaN(8.0).cmp(&NotNaN(7.0)), Greater)
-            assert_eq!(NotNaN(4.0).cmp(&NotNaN(7.0)), Less)
+            assert_eq!(OrderedFloat(7.0f64).cmp(&OrderedFloat(7.0)), Equal)
+            assert_eq!(OrderedFloat(8.0f64).cmp(&OrderedFloat(7.0)), Greater)
+            assert_eq!(OrderedFloat(4.0f64).cmp(&OrderedFloat(7.0)), Less)
+        }
+
+        it "should compare NaN" {
+            let f64_nan: f64 = Float::nan();
+            assert_eq!(OrderedFloat(f64_nan).cmp(&OrderedFloat(Float::nan())), Equal);
+            assert_eq!(OrderedFloat(Float::nan()).cmp(&OrderedFloat(-100000.0f64)), Greater);
+            assert_eq!(OrderedFloat(-100.0f64).cmp(&OrderedFloat(Float::nan())), Less);
+        }
+    }
+
+    describe! not_nan32 {
+        it "should compare regular floats" {
+            assert_eq!(NotNaN(7.0f32).cmp(&NotNaN(7.0)), Equal)
+            assert_eq!(NotNaN(8.0f32).cmp(&NotNaN(7.0)), Greater)
+            assert_eq!(NotNaN(4.0f32).cmp(&NotNaN(7.0)), Less)
         }
 
         failing "should fail when comparing NaN to NaN" {
-            NotNaN(Float::nan()).cmp(&NotNaN(Float::nan()));
+            let f32_nan: f32 = Float::nan();
+            NotNaN(f32_nan).cmp(&NotNaN(Float::nan()));
         }
 
         failing "should fail when comparing NaN to a regular float" {
-            NotNaN(Float::nan()).cmp(&NotNaN(7.0));
+            NotNaN(Float::nan()).cmp(&NotNaN(7.0f32));
         }
 
         failing "should fail when comparing a regular float to NaN" {
-            NotNaN(7.0).cmp(&NotNaN(Float::nan()));
+            NotNaN(7.0f32).cmp(&NotNaN(Float::nan()));
         }
 
         failing "should fail when constructing NotNaN with NaN" {
-            NotNaN::new(Float::nan());
+            let f32_nan: f32 = Float::nan();
+            NotNaN::new(f32_nan);
+        }
+    }
+
+    describe! not_nan64 {
+        it "should compare regular floats" {
+            assert_eq!(NotNaN(7.0f64).cmp(&NotNaN(7.0)), Equal)
+            assert_eq!(NotNaN(8.0f64).cmp(&NotNaN(7.0)), Greater)
+            assert_eq!(NotNaN(4.0f64).cmp(&NotNaN(7.0)), Less)
+        }
+
+        failing "should fail when comparing NaN to NaN" {
+            let f64_nan: f64 = Float::nan();
+            NotNaN(f64_nan).cmp(&NotNaN(Float::nan()));
+        }
+
+        failing "should fail when comparing NaN to a regular float" {
+            NotNaN(Float::nan()).cmp(&NotNaN(7.0f64));
+        }
+
+        failing "should fail when comparing a regular float to NaN" {
+            NotNaN(7.0f64).cmp(&NotNaN(Float::nan()));
+        }
+
+        failing "should fail when constructing NotNaN with NaN" {
+            let f64_nan: f64 = Float::nan();
+            NotNaN::new(f64_nan);
         }
     }
 }
