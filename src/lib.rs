@@ -76,7 +76,7 @@ impl NotNaN {
     ///
     /// Fails if the val is NaN
     pub fn new(val: f64) -> NotNaN {
-        if val.is_nan() { fail!("NaN encountered in NotNaN construction.") }
+        if val.is_nan() { panic!("NaN encountered in NotNaN construction.") }
         NotNaN(val)
     }
 
@@ -98,7 +98,7 @@ impl Ord for NotNaN {
 impl PartialEq for NotNaN {
     fn eq(&self, other: &NotNaN) -> bool {
         if self.unwrap().is_nan() || other.unwrap().is_nan() {
-            fail!("NaN encountered in NotNaN comparison.")
+            panic!("NaN encountered in NotNaN comparison.")
         } else {
             self.unwrap() == other.unwrap()
         }
