@@ -1,5 +1,5 @@
 #![license = "MIT"]
-#![deny(missing_doc)]
+#![deny(missing_docs)]
 #![deny(warnings)]
 #![feature(globs, phase)]
 
@@ -65,18 +65,18 @@ impl<T: Float + PartialEq> Eq for OrderedFloat<T> { }
 /// A wrapper around Floats providing an implementation of Ord.
 ///
 /// If NaN is encountered becuase NotNaN was manually constructed
-/// with a NaN value, this will fail.
+/// with a NaN value, this will panic.
 #[deriving(PartialOrd, Show, Clone)]
 pub struct NotNaN<T: Float>(pub T);
 
 impl<T: Float> NotNaN<T> {
     /// Create a NotNaN value.
     ///
-    /// ## Failure
+    /// ## Panics
     ///
-    /// Fails if the val is NaN
+    /// Panics if the val is NaN
     pub fn new(val: T) -> NotNaN<T> {
-        if val.is_nan() { fail!("NaN encountered in NotNaN construction.") }
+        if val.is_nan() { panic!("NaN encountered in NotNaN construction.") }
         NotNaN(val)
     }
 
@@ -98,7 +98,7 @@ impl<T: Float + PartialOrd> Ord for NotNaN<T> {
 impl<T: Float + PartialEq> PartialEq for NotNaN<T> {
     fn eq(&self, other: &NotNaN<T>) -> bool {
         if self.unwrap().is_nan() || other.unwrap().is_nan() {
-            fail!("NaN encountered in NotNaN comparison.")
+            panic!("NaN encountered in NotNaN comparison.")
         } else {
             self.unwrap() == other.unwrap()
         }
@@ -174,7 +174,7 @@ mod tests {
             assert_eq!(NotNaN(4.0f64).cmp(&NotNaN(7.0)), Less)
         }
 
-        failing "should fail when comparing NaN to NaN" {
+        failing "should panic when comparing NaN to NaN" {
             let f64_nan: f64 = Float::nan();
             NotNaN(f64_nan).cmp(&NotNaN(Float::nan()));
         }
