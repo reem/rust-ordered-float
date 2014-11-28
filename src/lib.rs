@@ -1,5 +1,5 @@
 #![license = "MIT"]
-#![deny(missing_doc)]
+#![deny(missing_docs)]
 #![deny(warnings)]
 #![feature(globs, phase)]
 
@@ -76,7 +76,7 @@ impl<T: Float> NotNaN<T> {
     ///
     /// Fails if the val is NaN
     pub fn new(val: T) -> NotNaN<T> {
-        if val.is_nan() { fail!("NaN encountered in NotNaN construction.") }
+        if val.is_nan() { panic!("NaN encountered in NotNaN construction.") }
         NotNaN(val)
     }
 
@@ -98,7 +98,7 @@ impl<T: Float + PartialOrd> Ord for NotNaN<T> {
 impl<T: Float + PartialEq> PartialEq for NotNaN<T> {
     fn eq(&self, other: &NotNaN<T>) -> bool {
         if self.unwrap().is_nan() || other.unwrap().is_nan() {
-            fail!("NaN encountered in NotNaN comparison.")
+            panic!("NaN encountered in NotNaN comparison.")
         } else {
             self.unwrap() == other.unwrap()
         }
