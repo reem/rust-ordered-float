@@ -110,6 +110,7 @@ impl<T: Float + PartialEq> Eq for NotNaN<T> {}
 #[cfg(test)]
 mod tests {
     pub use super::*;
+    pub use std::num::Float;
 
     describe! ordered_float32 {
         it "should compare regular floats" {
