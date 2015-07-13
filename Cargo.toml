@@ -9,6 +9,8 @@ repository = "https://github.com/reem/rust-ordered-float"
 
 [dependencies]
 num = { version = "0.1", default_features = false }
+serde = { version = "0.7", optional = true }
+rustc-serialize = { version = "0.3", optional = true }
 unreachable = "0.0"
 
 [dev-dependencies]
