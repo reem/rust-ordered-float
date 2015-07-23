@@ -3,13 +3,13 @@
 name = "ordered-float"
 version = "0.0.1"
 authors = ["Jonathan Reem <jonathan.reem@gmail.com>"]
+license = "MIT"
+description = "Wrappers for total ordering on floats."
+repository = "https://github.com/reem/rust-ordered-float"
 
-[lib]
+[dependencies]
+num = "0.1"
 
-name = "ordered-float"
-path = "src/lib.rs"
-
-[dev-dependencies.stainless]
-
-git = "https://github.com/reem/stainless"
+[dev-dependencies]
+stainless = "*"
 
