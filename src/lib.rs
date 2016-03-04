@@ -63,7 +63,7 @@ impl<T: Float + Copy + PartialEq> Eq for OrderedFloat<T> { }
 
 /// A wrapper around Floats providing an implementation of Ord.
 ///
-/// If NaN is encountered becuase NotNaN was manually constructed
+/// If NaN is encountered because NotNaN was manually constructed
 /// with a NaN value, this will panic.
 #[derive(PartialOrd, Debug, Clone, Hash, Copy)]
 pub struct NotNaN<T: Float + Copy>(pub T);
