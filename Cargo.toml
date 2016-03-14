@@ -8,7 +8,7 @@ description = "Wrappers for total ordering on floats."
 repository = "https://github.com/reem/rust-ordered-float"
 
 [dependencies]
-num = "0.1"
+num = { version = "0.1", default_features = false }
 
 [dev-dependencies]
 stainless = "*"
