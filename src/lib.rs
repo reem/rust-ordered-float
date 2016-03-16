@@ -204,6 +204,9 @@ impl Into<f64> for NotNaN<f64> {
     }
 }
 
+/// Creates a NotNaN value from a Float.
+///
+/// Panics if the provided value is NaN.
 impl<T: Float> From<T> for NotNaN<T> {
     fn from(v: T) -> Self {
         assert!(!v.is_nan());
