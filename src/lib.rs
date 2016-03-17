@@ -81,13 +81,12 @@ impl<T: Float + PartialEq> PartialEq for OrderedFloat<T> {
 
 impl<T: Float> Hash for OrderedFloat<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let (man, exp, sign) = if self.as_ref().is_nan() {
+        if self.is_nan() {
             // normalize to one representation of NaN
-            T::nan().integer_decode()
+            hash_float(&T::nan(), state)
         } else {
-            self.as_ref().integer_decode()
-        };
-        (man ^ exp as u64 ^ sign as u64).hash(state)
+            hash_float(self.as_ref(), state)
+        }
     }
 }
 
@@ -181,8 +180,7 @@ impl<T: Float + PartialOrd> Ord for NotNaN<T> {
 
 impl<T: Float> Hash for NotNaN<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let (man, exp, sign) = self.as_ref().integer_decode();
-        (man ^ exp as u64 ^ sign as u64).hash(state)
+        hash_float(self.as_ref(), state)
     }
 }
 
@@ -244,6 +242,18 @@ impl Into<io::Error> for FloatIsNaN {
     fn into(self) -> io::Error {
         io::Error::new(io::ErrorKind::InvalidInput, self)
     }
+}
+
+#[inline]
+fn hash_float<F: Float, H: Hasher>(f: &F, state: &mut H) {
+    let (man, exp, sign) = f.integer_decode();
+    if man == 0 {
+        // Consolidate the representation of zero, whether signed or not
+        // The IEEE standard considers positive and negative zero to be equal
+        0
+    } else {
+        (man ^ ((exp as u64) << 48) ^ sign as u64)
+    }.hash(state)
 }
 
 #[cfg(feature = "rustc-serialize")]
