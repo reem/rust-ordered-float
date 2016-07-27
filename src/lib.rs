@@ -8,7 +8,7 @@ extern crate unreachable;
 
 use std::cmp::Ordering;
 use std::error::Error;
-use std::ops::{Deref, DerefMut};
+use std::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::hash::{Hash, Hasher};
 use std::fmt;
 use std::io;
@@ -221,6 +221,124 @@ impl<T: Float> Deref for NotNaN<T> {
 }
 
 impl<T: Float + PartialEq> Eq for NotNaN<T> {}
+
+impl<T: Float> Add for NotNaN<T> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        unsafe { NotNaN::unchecked_new(*self + *other) }
+    }
+}
+
+impl AddAssign for NotNaN<f64> {
+    fn add_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val += *other;
+    }
+}
+
+impl AddAssign for NotNaN<f32> {
+    fn add_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val += *other;
+    }
+}
+
+impl<T: Float> Sub for NotNaN<T> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        unsafe { NotNaN::unchecked_new(*self - *other) }
+    }
+}
+
+impl SubAssign for NotNaN<f64> {
+    fn sub_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val -= *other;
+    }
+}
+
+impl SubAssign for NotNaN<f32> {
+    fn sub_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val -= *other;
+    }
+}
+
+impl<T: Float> Mul for NotNaN<T> {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        unsafe { NotNaN::unchecked_new(*self * *other) }
+    }
+}
+
+impl MulAssign for NotNaN<f64> {
+    fn mul_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val *= *other;
+    }
+}
+
+impl MulAssign for NotNaN<f32> {
+    fn mul_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val *= *other;
+    }
+}
+
+impl<T: Float> Div for NotNaN<T> {
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+        unsafe { NotNaN::unchecked_new(*self / *other) }
+    }
+}
+
+impl DivAssign for NotNaN<f64> {
+    fn div_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val /= *other;
+    }
+}
+
+impl DivAssign for NotNaN<f32> {
+    fn div_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val /= *other;
+    }
+}
+
+impl<T: Float> Rem for NotNaN<T> {
+    type Output = Self;
+
+    fn rem(self, other: Self) -> Self {
+        unsafe { NotNaN::unchecked_new(*self % *other) }
+    }
+}
+
+impl RemAssign for NotNaN<f64> {
+    fn rem_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val %= *other;
+    }
+}
+
+impl RemAssign for NotNaN<f32> {
+    fn rem_assign(&mut self, other: Self) {
+        let NotNaN(ref mut val) = *self;
+        *val %= *other;
+    }
+}
+
+impl<T: Float> Neg for NotNaN<T> {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        unsafe { NotNaN::unchecked_new(-*self) }
+    }
+}
 
 /// An error indicating an attempt to construct NotNaN from a NaN
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
