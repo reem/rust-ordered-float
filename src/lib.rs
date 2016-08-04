@@ -226,21 +226,51 @@ impl<T: Float> Add for NotNaN<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        unsafe { NotNaN::unchecked_new(*self + *other) }
+        NotNaN(self.0 + other.0)
+    }
+}
+
+/// Adds a float directly.
+///
+/// Panics if the provided value is NaN.
+impl<T: Float> Add<T> for NotNaN<T> {
+    type Output = Self;
+
+    fn add(self, other: T) -> Self {
+        assert!(!other.is_nan());
+        NotNaN(self.0 + other)
     }
 }
 
 impl AddAssign for NotNaN<f64> {
     fn add_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val += *other;
+        self.0 += other.0;
     }
 }
 
 impl AddAssign for NotNaN<f32> {
     fn add_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val += *other;
+        self.0 += other.0;
+    }
+}
+
+/// Adds a float directly.
+///
+/// Panics if the provided value is NaN.
+impl AddAssign<f64> for NotNaN<f64> {
+    fn add_assign(&mut self, other: f64) {
+        assert!(!other.is_nan());
+        self.0 += other;
+    }
+}
+
+/// Adds a float directly.
+///
+/// Panics if the provided value is NaN.
+impl AddAssign<f32> for NotNaN<f32> {
+    fn add_assign(&mut self, other: f32) {
+        assert!(!other.is_nan());
+        self.0 += other;
     }
 }
 
@@ -248,21 +278,51 @@ impl<T: Float> Sub for NotNaN<T> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        unsafe { NotNaN::unchecked_new(*self - *other) }
+        NotNaN(self.0 - other.0)
+    }
+}
+
+/// Subtracts a float directly.
+///
+/// Panics if the provided value is NaN.
+impl<T: Float> Sub<T> for NotNaN<T> {
+    type Output = Self;
+
+    fn sub(self, other: T) -> Self {
+        assert!(!other.is_nan());
+        NotNaN(self.0 - other)
     }
 }
 
 impl SubAssign for NotNaN<f64> {
     fn sub_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val -= *other;
+        self.0 -= other.0;
     }
 }
 
 impl SubAssign for NotNaN<f32> {
     fn sub_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val -= *other;
+        self.0 -= other.0;
+    }
+}
+
+/// Subtracts a float directly.
+///
+/// Panics if the provided value is NaN.
+impl SubAssign<f64> for NotNaN<f64> {
+    fn sub_assign(&mut self, other: f64) {
+        assert!(!other.is_nan());
+        self.0 -= other;
+    }
+}
+
+/// Subtracts a float directly.
+///
+/// Panics if the provided value is NaN.
+impl SubAssign<f32> for NotNaN<f32> {
+    fn sub_assign(&mut self, other: f32) {
+        assert!(!other.is_nan());
+        self.0 -= other;
     }
 }
 
@@ -270,21 +330,51 @@ impl<T: Float> Mul for NotNaN<T> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        unsafe { NotNaN::unchecked_new(*self * *other) }
+        NotNaN(self.0 * other.0)
+    }
+}
+
+/// Multiplies a float directly.
+///
+/// Panics if the provided value is NaN.
+impl<T: Float> Mul<T> for NotNaN<T> {
+    type Output = Self;
+
+    fn mul(self, other: T) -> Self {
+        assert!(!other.is_nan());
+        NotNaN(self.0 * other)
     }
 }
 
 impl MulAssign for NotNaN<f64> {
     fn mul_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val *= *other;
+        self.0 *= other.0;
     }
 }
 
 impl MulAssign for NotNaN<f32> {
     fn mul_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val *= *other;
+        self.0 *= other.0;
+    }
+}
+
+/// Multiplies a float directly.
+///
+/// Panics if the provided value is NaN.
+impl MulAssign<f64> for NotNaN<f64> {
+    fn mul_assign(&mut self, other: f64) {
+        assert!(!other.is_nan());
+        self.0 *= other;
+    }
+}
+
+/// Multiplies a float directly.
+///
+/// Panics if the provided value is NaN.
+impl MulAssign<f32> for NotNaN<f32> {
+    fn mul_assign(&mut self, other: f32) {
+        assert!(!other.is_nan());
+        self.0 *= other;
     }
 }
 
@@ -292,21 +382,51 @@ impl<T: Float> Div for NotNaN<T> {
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
-        unsafe { NotNaN::unchecked_new(*self / *other) }
+        NotNaN(self.0 / other.0)
+    }
+}
+
+/// Divides a float directly.
+///
+/// Panics if the provided value is NaN.
+impl<T: Float> Div<T> for NotNaN<T> {
+    type Output = Self;
+
+    fn div(self, other: T) -> Self {
+        assert!(!other.is_nan());
+        NotNaN(self.0 / other)
     }
 }
 
 impl DivAssign for NotNaN<f64> {
     fn div_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val /= *other;
+        self.0 /= other.0;
     }
 }
 
 impl DivAssign for NotNaN<f32> {
     fn div_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val /= *other;
+        self.0 /= other.0;
+    }
+}
+
+/// Divides a float directly.
+///
+/// Panics if the provided value is NaN.
+impl DivAssign<f64> for NotNaN<f64> {
+    fn div_assign(&mut self, other: f64) {
+        assert!(!other.is_nan());
+        self.0 /= other;
+    }
+}
+
+/// Divides a float directly.
+///
+/// Panics if the provided value is NaN.
+impl DivAssign<f32> for NotNaN<f32> {
+    fn div_assign(&mut self, other: f32) {
+        assert!(!other.is_nan());
+        self.0 /= other;
     }
 }
 
@@ -314,21 +434,51 @@ impl<T: Float> Rem for NotNaN<T> {
     type Output = Self;
 
     fn rem(self, other: Self) -> Self {
-        unsafe { NotNaN::unchecked_new(*self % *other) }
+        NotNaN(self.0 % other.0)
+    }
+}
+
+/// Calculates `%` with a float directly.
+///
+/// Panics if the provided value is NaN.
+impl<T: Float> Rem<T> for NotNaN<T> {
+    type Output = Self;
+
+    fn rem(self, other: T) -> Self {
+        assert!(!other.is_nan());
+        NotNaN(self.0 % other)
     }
 }
 
 impl RemAssign for NotNaN<f64> {
     fn rem_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val %= *other;
+        self.0 %= other.0;
     }
 }
 
 impl RemAssign for NotNaN<f32> {
     fn rem_assign(&mut self, other: Self) {
-        let NotNaN(ref mut val) = *self;
-        *val %= *other;
+        self.0 %= other.0;
+    }
+}
+
+/// Calculates `%=` with a float directly.
+///
+/// Panics if the provided value is NaN.
+impl RemAssign<f64> for NotNaN<f64> {
+    fn rem_assign(&mut self, other: f64) {
+        assert!(!other.is_nan());
+        self.0 %= other;
+    }
+}
+
+/// Calculates `%=` with a float directly.
+///
+/// Panics if the provided value is NaN.
+impl RemAssign<f32> for NotNaN<f32> {
+    fn rem_assign(&mut self, other: f32) {
+        assert!(!other.is_nan());
+        self.0 %= other;
     }
 }
 
@@ -336,7 +486,7 @@ impl<T: Float> Neg for NotNaN<T> {
     type Output = Self;
 
     fn neg(self) -> Self {
-        unsafe { NotNaN::unchecked_new(-*self) }
+        NotNaN(-self.0)
     }
 }
 
