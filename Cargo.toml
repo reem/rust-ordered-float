@@ -1,7 +1,7 @@
 [package]
 
 name = "ordered-float"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Jonathan Reem <jonathan.reem@gmail.com>"]
 license = "MIT"
 description = "Wrappers for total ordering on floats."
@@ -11,7 +11,7 @@ repository = "https://github.com/reem/rust-ordered-float"
 num = { version = "0.1", default_features = false }
 serde = { version = "0.7", optional = true }
 rustc-serialize = { version = "0.3", optional = true }
-unreachable = "0.0"
+unreachable = "0.1"
 
 [dev-dependencies]
 stainless = "0.1"
