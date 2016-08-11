@@ -3,7 +3,7 @@
 
 //! Wrappers for total order on Floats.
 
-extern crate num;
+extern crate num_traits;
 extern crate unreachable;
 
 use std::cmp::Ordering;
@@ -13,7 +13,7 @@ use std::hash::{Hash, Hasher};
 use std::fmt;
 use std::io;
 use unreachable::unreachable;
-use num::Float;
+use num_traits::Float;
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -530,7 +530,7 @@ mod impl_rustc {
     use self::rustc_serialize::{Encodable, Encoder, Decodable, Decoder};
     use super::{OrderedFloat, NotNaN};
     use std::error::Error;
-    use num::Float;
+    use num_traits::Float;
 
     impl<T: Float + Encodable> Encodable for OrderedFloat<T> {
         fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
@@ -563,7 +563,7 @@ mod impl_serde {
     use self::serde::{Serialize, Serializer, Deserialize, Deserializer};
     use self::serde::de::Error;
     use super::{OrderedFloat, NotNaN};
-    use num::Float;
+    use num_traits::Float;
 
     impl<T: Float + Serialize> Serialize for OrderedFloat<T> {
         fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {

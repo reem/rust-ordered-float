@@ -2,10 +2,10 @@
 #![plugin(stainless)]
 
 extern crate ordered_float;
-extern crate num;
+extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num::Float;
+pub use num_traits::Float;
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
