@@ -8,12 +8,23 @@ extern crate unreachable;
 
 use std::cmp::Ordering;
 use std::error::Error;
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem,
+               RemAssign, Sub, SubAssign};
 use std::hash::{Hash, Hasher};
 use std::fmt;
 use std::io;
+use std::mem;
 use unreachable::unreachable;
 use num_traits::Float;
+
+// masks for the parts of the IEEE 754 float
+const SIGN_MASK: u64 = 0x8000000000000000u64;
+const EXP_MASK: u64 = 0x7ff0000000000000u64;
+const MAN_MASK: u64 = 0x000fffffffffffffu64;
+
+// canonical raw bit patterns (for hashing)
+const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000u64;
+const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -66,11 +77,7 @@ impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
 impl<T: Float + PartialEq> PartialEq for OrderedFloat<T> {
     fn eq(&self, other: &OrderedFloat<T>) -> bool {
         if self.as_ref().is_nan() {
-            if other.as_ref().is_nan() {
-                true
-            } else {
-                false
-            }
+            if other.as_ref().is_nan() { true } else { false }
         } else if other.as_ref().is_nan() {
             false
         } else {
@@ -128,7 +135,7 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
     }
 }
 
-impl<T: Float + PartialEq> Eq for OrderedFloat<T> { }
+impl<T: Float + PartialEq> Eq for OrderedFloat<T> {}
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -496,7 +503,7 @@ pub struct FloatIsNaN;
 
 impl Error for FloatIsNaN {
     fn description(&self) -> &str {
-        return "NotNaN constructed with NaN"
+        return "NotNaN constructed with NaN";
     }
 }
 
@@ -514,14 +521,23 @@ impl Into<io::Error> for FloatIsNaN {
 
 #[inline]
 fn hash_float<F: Float, H: Hasher>(f: &F, state: &mut H) {
+    raw_double_bits(f).hash(state);
+}
+
+#[inline]
+fn raw_double_bits<F: Float>(f: &F) -> u64 {
+    if f.is_nan() {
+        return CANONICAL_NAN_BITS;
+    }
+
     let (man, exp, sign) = f.integer_decode();
     if man == 0 {
-        // Consolidate the representation of zero, whether signed or not
-        // The IEEE standard considers positive and negative zero to be equal
-        0
-    } else {
-        (man ^ ((exp as u64) << 48) ^ sign as u64)
-    }.hash(state)
+        return CANONICAL_ZERO_BITS;
+    }
+
+    let exp_u64 = unsafe { mem::transmute::<i16, u16>(exp) } as u64;
+    let sign_u64 = if sign > 0 { 1u64 } else { 0u64 };
+    (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
 }
 
 #[cfg(feature = "rustc-serialize")]
@@ -585,7 +601,10 @@ mod impl_serde {
 
     impl<T: Float + Deserialize> Deserialize for NotNaN<T> {
         fn deserialize<D: Deserializer>(d: &mut D) -> Result<Self, D::Error> {
-            T::deserialize(d).and_then(|v| NotNaN::new(v).map_err(|_| <D::Error as Error>::invalid_value("value cannot be NaN")))
+            T::deserialize(d).and_then(|v| {
+                NotNaN::new(v)
+                    .map_err(|_| <D::Error as Error>::invalid_value("value cannot be NaN"))
+            })
         }
     }
 }
