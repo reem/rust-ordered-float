@@ -596,33 +596,34 @@ mod impl_rustc {
 mod impl_serde {
     extern crate serde;
     use self::serde::{Serialize, Serializer, Deserialize, Deserializer};
-    use self::serde::de::Error;
+    use self::serde::de::{Error, Unexpected};
     use super::{OrderedFloat, NotNaN};
     use num_traits::Float;
+    use std::f64;
 
     impl<T: Float + Serialize> Serialize for OrderedFloat<T> {
-        fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
             self.0.serialize(s)
         }
     }
 
     impl<T: Float + Deserialize> Deserialize for OrderedFloat<T> {
-        fn deserialize<D: Deserializer>(d: &mut D) -> Result<Self, D::Error> {
+        fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
             T::deserialize(d).map(OrderedFloat)
         }
     }
 
     impl<T: Float + Serialize> Serialize for NotNaN<T> {
-        fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
             self.0.serialize(s)
         }
     }
 
     impl<T: Float + Deserialize> Deserialize for NotNaN<T> {
-        fn deserialize<D: Deserializer>(d: &mut D) -> Result<Self, D::Error> {
+        fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
             T::deserialize(d).and_then(|v| {
                 NotNaN::new(v)
-                    .map_err(|_| <D::Error as Error>::invalid_value("value cannot be NaN"))
+                    .map_err(|_| <D::Error as Error>::invalid_value(Unexpected::Float(f64::NAN), &"NaN"))
             })
         }
     }
