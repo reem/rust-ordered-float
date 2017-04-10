@@ -15,3 +15,4 @@ unreachable = "0.1"
 
 [dev-dependencies]
 stainless = "0.1"
+serde_test = "0.9"
