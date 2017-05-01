@@ -605,8 +605,6 @@ mod impl_serde {
     extern crate serde_test;
     #[cfg(test)]
     use self::serde_test::{Token, assert_tokens, assert_de_tokens_error};
-    #[cfg(test)]
-    use self::serde_test::Error::Message;
 
     impl<T: Float + Serialize> Serialize for OrderedFloat<T> {
         fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
@@ -614,8 +612,8 @@ mod impl_serde {
         }
     }
 
-    impl<T: Float + Deserialize> Deserialize for OrderedFloat<T> {
-        fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
+    impl<'de, T: Float + Deserialize<'de>> Deserialize<'de> for OrderedFloat<T> {
+        fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             T::deserialize(d).map(OrderedFloat)
         }
     }
@@ -626,8 +624,8 @@ mod impl_serde {
         }
     }
 
-    impl<T: Float + Deserialize> Deserialize for NotNaN<T> {
-        fn deserialize<D: Deserializer>(d: D) -> Result<Self, D::Error> {
+    impl<'de, T: Float + Deserialize<'de>> Deserialize<'de> for NotNaN<T> {
+        fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let float = T::deserialize(d)?;
             NotNaN::new(float).map_err(|_| {
                 Error::invalid_value(Unexpected::Float(f64::NAN), &"float (but not NaN)")
@@ -651,6 +649,6 @@ mod impl_serde {
     fn test_fail_on_nan() {
         assert_de_tokens_error::<NotNaN<f64>>(
             &[Token::F64(f64::NAN)],
-            Message("invalid value: floating point `NaN`, expected float (but not NaN)".into()));
+            "invalid value: floating point `NaN`, expected float (but not NaN)");
     }
 }
