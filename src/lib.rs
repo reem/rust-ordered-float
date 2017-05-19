@@ -559,71 +559,63 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
 }
 
-#[cfg(feature = "rustc-serialize")]
-mod impl_rustc {
-    extern crate rustc_serialize;
-    use self::rustc_serialize::{Encodable, Encoder, Decodable, Decoder};
-    use super::{OrderedFloat, NotNaN};
-    use std::error::Error;
-    use num_traits::Float;
-
-    impl<T: Float + Encodable> Encodable for OrderedFloat<T> {
-        fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-            self.0.encode(s)
-        }
-    }
-
-    impl<T: Float + Decodable> Decodable for OrderedFloat<T> {
-        fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-            T::decode(d).map(OrderedFloat)
-        }
-    }
-
-    impl<T: Float + Encodable> Encodable for NotNaN<T> {
-        fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-            self.0.encode(s)
-        }
-    }
-
-    impl<T: Float + Decodable> Decodable for NotNaN<T> {
-        fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
-            T::decode(d).and_then(|v| NotNaN::new(v).map_err(|e| d.error(e.description())))
-        }
-    }
-}
-
 #[cfg(feature = "serde")]
 mod impl_serde {
     extern crate serde;
     use self::serde::{Serialize, Serializer, Deserialize, Deserializer};
-    use self::serde::de::Error;
+    use self::serde::de::{Error, Unexpected};
     use super::{OrderedFloat, NotNaN};
     use num_traits::Float;
+    use std::f64;
+
+    #[cfg(test)]
+    extern crate serde_test;
+    #[cfg(test)]
+    use self::serde_test::{Token, assert_tokens, assert_de_tokens_error};
 
     impl<T: Float + Serialize> Serialize for OrderedFloat<T> {
-        fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
             self.0.serialize(s)
         }
     }
 
-    impl<T: Float + Deserialize> Deserialize for OrderedFloat<T> {
-        fn deserialize<D: Deserializer>(d: &mut D) -> Result<Self, D::Error> {
+    impl<'de, T: Float + Deserialize<'de>> Deserialize<'de> for OrderedFloat<T> {
+        fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             T::deserialize(d).map(OrderedFloat)
         }
     }
 
     impl<T: Float + Serialize> Serialize for NotNaN<T> {
-        fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
             self.0.serialize(s)
         }
     }
 
-    impl<T: Float + Deserialize> Deserialize for NotNaN<T> {
-        fn deserialize<D: Deserializer>(d: &mut D) -> Result<Self, D::Error> {
-            T::deserialize(d).and_then(|v| {
-                NotNaN::new(v)
-                    .map_err(|_| <D::Error as Error>::invalid_value("value cannot be NaN"))
+    impl<'de, T: Float + Deserialize<'de>> Deserialize<'de> for NotNaN<T> {
+        fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let float = T::deserialize(d)?;
+            NotNaN::new(float).map_err(|_| {
+                Error::invalid_value(Unexpected::Float(f64::NAN), &"float (but not NaN)")
             })
         }
+    }
+
+    #[test]
+    fn test_ordered_float() {
+        let float = OrderedFloat(1.0f64);
+        assert_tokens(&float, &[Token::F64(1.0)]);
+    }
+
+    #[test]
+    fn test_not_nan() {
+        let float = NotNaN(1.0f64);
+        assert_tokens(&float, &[Token::F64(1.0)]);
+    }
+
+    #[test]
+    fn test_fail_on_nan() {
+        assert_de_tokens_error::<NotNaN<f64>>(
+            &[Token::F64(f64::NAN)],
+            "invalid value: floating point `NaN`, expected float (but not NaN)");
     }
 }
