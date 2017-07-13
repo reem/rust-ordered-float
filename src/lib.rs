@@ -17,6 +17,16 @@ use std::mem;
 use unreachable::unreachable;
 use num_traits::Float;
 
+/// A wrapper around Floats providing an implementation of Ord and Hash.
+///
+/// A NaN value cannot be stored in this type.
+#[deprecated(since = "0.6.0", note = "renamed to `NotNan`")]
+pub type NotNaN<T> = NotNan<T>;
+
+/// An error indicating an attempt to construct NotNan from a NaN
+#[deprecated(since = "0.6.0", note = "renamed to `FloatIsNan`")]
+pub type FloatIsNaN = FloatIsNan;
+
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
 const EXP_MASK: u64 = 0x7ff0000000000000u64;
