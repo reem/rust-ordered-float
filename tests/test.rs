@@ -5,7 +5,7 @@ extern crate ordered_float;
 extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num_traits::{Bounded, Float, FromPrimitive, One, Zero};
+pub use num_traits::{Bounded, Float, FromPrimitive, One, ToPrimitive, Zero};
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
@@ -137,6 +137,24 @@ describe! not_nan32 {
         assert_eq!(NotNaN::<f32>::from_f32(Float::nan()), None);
         assert_eq!(NotNaN::<f32>::from_f64(Float::nan()), None);
     }
+
+    it "should implement ToPrimitive" {
+        let x = NotNaN::from(42.0f32);
+        assert_eq!(x.to_u8(), Some(42u8));
+        assert_eq!(x.to_i8(), Some(42i8));
+        assert_eq!(x.to_u16(), Some(42u16));
+        assert_eq!(x.to_i16(), Some(42i16));
+        assert_eq!(x.to_u32(), Some(42u32));
+        assert_eq!(x.to_i32(), Some(42i32));
+        assert_eq!(x.to_u64(), Some(42u64));
+        assert_eq!(x.to_i64(), Some(42i64));
+        assert_eq!(x.to_usize(), Some(42usize));
+        assert_eq!(x.to_isize(), Some(42isize));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f64(), Some(42f64));
+        assert_eq!(x.to_f64(), Some(42f64));
+    }
 }
 
 describe! not_nan64 {
@@ -232,6 +250,24 @@ describe! not_nan64 {
         assert_eq!(NotNaN::<f64>::from_f64(42f64), Some(NotNaN::from(42.0)));
         assert_eq!(NotNaN::<f64>::from_f32(Float::nan()), None);
         assert_eq!(NotNaN::<f64>::from_f64(Float::nan()), None);
+    }
+
+    it "should implement ToPrimitive" {
+        let x = NotNaN::from(42.0f64);
+        assert_eq!(x.to_u8(), Some(42u8));
+        assert_eq!(x.to_i8(), Some(42i8));
+        assert_eq!(x.to_u16(), Some(42u16));
+        assert_eq!(x.to_i16(), Some(42i16));
+        assert_eq!(x.to_u32(), Some(42u32));
+        assert_eq!(x.to_i32(), Some(42i32));
+        assert_eq!(x.to_u64(), Some(42u64));
+        assert_eq!(x.to_i64(), Some(42i64));
+        assert_eq!(x.to_usize(), Some(42usize));
+        assert_eq!(x.to_isize(), Some(42isize));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f64(), Some(42f64));
+        assert_eq!(x.to_f64(), Some(42f64));
     }
 }
 
