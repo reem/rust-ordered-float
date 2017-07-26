@@ -168,6 +168,11 @@ describe! not_nan32 {
         assert_eq!(NotNaN::from(50f32).abs_sub(&NotNaN::from(8f32)), NotNaN::from(42f32));
         assert_eq!(NotNaN::from(8f32).abs_sub(&NotNaN::from(50f32)), NotNaN::from(0f32));
     }
+
+    it "should implement NumCast" {
+        assert_eq!(<NotNaN<f32> as num_traits::NumCast>::from(42), Some(NotNaN::from(42f32)));
+        assert_eq!(<NotNaN<f32> as num_traits::NumCast>::from(f32::nan()), None);
+    }
 }
 
 describe! not_nan64 {
@@ -294,6 +299,11 @@ describe! not_nan64 {
 
         assert_eq!(NotNaN::from(50f64).abs_sub(&NotNaN::from(8f64)), NotNaN::from(42f64));
         assert_eq!(NotNaN::from(8f64).abs_sub(&NotNaN::from(50f64)), NotNaN::from(0f64));
+    }
+
+    it "should implement NumCast" {
+        assert_eq!(<NotNaN<f64> as num_traits::NumCast>::from(42), Some(NotNaN::from(42f64)));
+        assert_eq!(<NotNaN<f64> as num_traits::NumCast>::from(f64::nan()), None);
     }
 }
 
