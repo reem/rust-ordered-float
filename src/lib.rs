@@ -15,7 +15,8 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::{Bounded, Float, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
+use num_traits::{Bounded, Float, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive,
+                 Zero};
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -662,6 +663,12 @@ impl<T: Float + Signed> Signed for NotNaN<T> {
     fn signum(&self) -> Self { NotNaN(self.0.signum()) }
     fn is_positive(&self) -> bool { self.0.is_positive() }
     fn is_negative(&self) -> bool { self.0.is_negative() }
+}
+
+impl<T: Float + NumCast> NumCast for NotNaN<T> {
+    fn from<F: ToPrimitive>(n: F) -> Option<Self> {
+        T::from(n).and_then(|n| NotNaN::new(n).ok())
+    }
 }
 
 #[cfg(feature = "serde")]
