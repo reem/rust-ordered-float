@@ -5,7 +5,7 @@ extern crate ordered_float;
 extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num_traits::{Bounded, Float, One, Zero};
+pub use num_traits::{Bounded, Float, FromPrimitive, One, Zero};
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
@@ -118,6 +118,25 @@ describe! not_nan32 {
         assert_eq!(NotNaN::<f32>::min_value(), NotNaN::from(<f32 as Bounded>::min_value()));
         assert_eq!(NotNaN::<f32>::max_value(), NotNaN::from(<f32 as Bounded>::max_value()));
     }
+
+    it "should implement FromPrimitive" {
+        assert_eq!(NotNaN::<f32>::from_i8(42i8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u8(42u8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_i16(42i16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u16(42u16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_i32(42i32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u32(42u32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_i64(42i64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u64(42u64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_isize(42isize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_usize(42usize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f32(Float::nan()), None);
+        assert_eq!(NotNaN::<f32>::from_f64(Float::nan()), None);
+    }
 }
 
 describe! not_nan64 {
@@ -194,6 +213,25 @@ describe! not_nan64 {
     it "should implement Bounded" {
         assert_eq!(NotNaN::<f64>::min_value(), NotNaN::from(<f64 as Bounded>::min_value()));
         assert_eq!(NotNaN::<f64>::max_value(), NotNaN::from(<f64 as Bounded>::max_value()));
+    }
+
+    it "should implement FromPrimitive" {
+        assert_eq!(NotNaN::<f64>::from_i8(42i8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u8(42u8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_i16(42i16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u16(42u16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_i32(42i32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u32(42u32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_i64(42i64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u64(42u64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_isize(42isize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_usize(42usize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f32(Float::nan()), None);
+        assert_eq!(NotNaN::<f64>::from_f64(Float::nan()), None);
     }
 }
 
