@@ -5,7 +5,7 @@ extern crate ordered_float;
 extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num_traits::{Bounded, Float, FromPrimitive, Num, One, ToPrimitive, Zero};
+pub use num_traits::{Bounded, Float, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
@@ -160,6 +160,14 @@ describe! not_nan32 {
         assert_eq!(NotNaN::<f32>::from_str_radix("42.0", 10).unwrap(), NotNaN::from(42.0f32));
         assert!(NotNaN::<f32>::from_str_radix("NaN", 10).is_err());
     }
+
+    it "should implement Signed" {
+        assert_eq!(NotNaN::from(42f32).abs(), NotNaN::from(42f32));
+        assert_eq!(NotNaN::from(-42f32).abs(), NotNaN::from(42f32));
+
+        assert_eq!(NotNaN::from(50f32).abs_sub(&NotNaN::from(8f32)), NotNaN::from(42f32));
+        assert_eq!(NotNaN::from(8f32).abs_sub(&NotNaN::from(50f32)), NotNaN::from(0f32));
+    }
 }
 
 describe! not_nan64 {
@@ -278,6 +286,14 @@ describe! not_nan64 {
     it "should implement Num" {
         assert_eq!(NotNaN::<f64>::from_str_radix("42.0", 10).unwrap(), NotNaN::from(42.0f64));
         assert!(NotNaN::<f64>::from_str_radix("NaN", 10).is_err());
+    }
+
+    it "should implement Signed" {
+        assert_eq!(NotNaN::from(42f64).abs(), NotNaN::from(42f64));
+        assert_eq!(NotNaN::from(-42f64).abs(), NotNaN::from(42f64));
+
+        assert_eq!(NotNaN::from(50f64).abs_sub(&NotNaN::from(8f64)), NotNaN::from(42f64));
+        assert_eq!(NotNaN::from(8f64).abs_sub(&NotNaN::from(50f64)), NotNaN::from(0f64));
     }
 }
 
