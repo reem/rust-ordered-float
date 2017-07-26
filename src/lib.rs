@@ -15,7 +15,7 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::{Bounded, Float, FromPrimitive, One, Zero};
+use num_traits::{Bounded, Float, FromPrimitive, One, ToPrimitive, Zero};
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -603,6 +603,22 @@ impl<T: Float + FromPrimitive> FromPrimitive for NotNaN<T> {
     fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).and_then(|n| NotNaN::new(n).ok()) }
     fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).and_then(|n| NotNaN::new(n).ok()) }
     fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).and_then(|n| NotNaN::new(n).ok()) }
+}
+
+impl<T: Float + ToPrimitive> ToPrimitive for NotNaN<T> {
+    fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
+    fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
+
+    fn to_isize(&self) -> Option<isize> { self.0.to_isize() }
+    fn to_i8(&self) -> Option<i8> { self.0.to_i8() }
+    fn to_i16(&self) -> Option<i16> { self.0.to_i16() }
+    fn to_i32(&self) -> Option<i32> { self.0.to_i32() }
+    fn to_usize(&self) -> Option<usize> { self.0.to_usize() }
+    fn to_u8(&self) -> Option<u8> { self.0.to_u8() }
+    fn to_u16(&self) -> Option<u16> { self.0.to_u16() }
+    fn to_u32(&self) -> Option<u32> { self.0.to_u32() }
+    fn to_f32(&self) -> Option<f32> { self.0.to_f32() }
+    fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
 }
 
 #[cfg(feature = "serde")]
