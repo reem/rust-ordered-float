@@ -15,7 +15,7 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::Float;
+use num_traits::{Bounded, Float};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -557,6 +557,16 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
     let exp_u64 = unsafe { mem::transmute::<i16, u16>(exp) } as u64;
     let sign_u64 = if sign > 0 { 1u64 } else { 0u64 };
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
+}
+
+impl<T: Float + Bounded> Bounded for NotNaN<T> {
+    fn min_value() -> Self {
+        NotNaN(Bounded::min_value())
+    }
+
+    fn max_value() -> Self {
+        NotNaN(Bounded::max_value())
+    }
 }
 
 #[cfg(feature = "serde")]
