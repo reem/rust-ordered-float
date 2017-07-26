@@ -5,7 +5,7 @@ extern crate ordered_float;
 extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num_traits::{Bounded, Float};
+pub use num_traits::{Bounded, Float, One, Zero};
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
@@ -105,6 +105,15 @@ describe! not_nan32 {
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f32); tmp %= f32::NAN;}).is_err());
     }
 
+    it "should implement Zero" {
+        assert_eq!(NotNaN::<f32>::zero(), NotNaN::from(0.0f32));
+        assert!(NotNaN::<f32>::zero().is_zero());
+    }
+
+    it "should implement One" {
+        assert_eq!(NotNaN::<f32>::one(), NotNaN::from(1.0f32))
+    }
+
     it "should implement Bounded" {
         assert_eq!(NotNaN::<f32>::min_value(), NotNaN::from(<f32 as Bounded>::min_value()));
         assert_eq!(NotNaN::<f32>::max_value(), NotNaN::from(<f32 as Bounded>::max_value()));
@@ -171,6 +180,15 @@ describe! not_nan64 {
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f64); tmp *= f64::NAN;}).is_err());
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f64); tmp /= f64::NAN;}).is_err());
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f64); tmp %= f64::NAN;}).is_err());
+    }
+
+    it "should implement Zero" {
+        assert_eq!(NotNaN::<f64>::zero(), NotNaN::from(0.0f64));
+        assert!(NotNaN::<f64>::zero().is_zero());
+    }
+
+    it "should implement One" {
+        assert_eq!(NotNaN::<f64>::one(), NotNaN::from(1.0f64))
     }
 
     it "should implement Bounded" {
