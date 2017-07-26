@@ -15,7 +15,8 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::Float;
+use num_traits::{Bounded, Float, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive,
+                 Zero};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -557,6 +558,107 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
     let exp_u64 = unsafe { mem::transmute::<i16, u16>(exp) } as u64;
     let sign_u64 = if sign > 0 { 1u64 } else { 0u64 };
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
+}
+
+impl<T: Float + Zero> Zero for NotNaN<T> {
+    fn zero() -> Self { NotNaN(T::zero()) }
+
+    fn is_zero(&self) -> bool { self.0.is_zero() }
+}
+
+impl<T: Float + One> One for NotNaN<T> {
+    fn one() -> Self { NotNaN(T::one()) }
+}
+
+impl<T: Float + Bounded> Bounded for NotNaN<T> {
+    fn min_value() -> Self {
+        NotNaN(Bounded::min_value())
+    }
+
+    fn max_value() -> Self {
+        NotNaN(Bounded::max_value())
+    }
+}
+
+impl<T: Float + FromPrimitive> FromPrimitive for NotNaN<T> {
+    fn from_i64(n: i64) -> Option<Self> { T::from_i64(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_u64(n: u64) -> Option<Self> { T::from_u64(n).and_then(|n| NotNaN::new(n).ok()) }
+
+    fn from_isize(n: isize) -> Option<Self> { T::from_isize(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_i8(n: i8) -> Option<Self> { T::from_i8(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_i16(n: i16) -> Option<Self> { T::from_i16(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_i32(n: i32) -> Option<Self> { T::from_i32(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_usize(n: usize) -> Option<Self> { T::from_usize(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_u8(n: u8) -> Option<Self> { T::from_u8(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_u16(n: u16) -> Option<Self> { T::from_u16(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).and_then(|n| NotNaN::new(n).ok()) }
+}
+
+impl<T: Float + ToPrimitive> ToPrimitive for NotNaN<T> {
+    fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
+    fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
+
+    fn to_isize(&self) -> Option<isize> { self.0.to_isize() }
+    fn to_i8(&self) -> Option<i8> { self.0.to_i8() }
+    fn to_i16(&self) -> Option<i16> { self.0.to_i16() }
+    fn to_i32(&self) -> Option<i32> { self.0.to_i32() }
+    fn to_usize(&self) -> Option<usize> { self.0.to_usize() }
+    fn to_u8(&self) -> Option<u8> { self.0.to_u8() }
+    fn to_u16(&self) -> Option<u16> { self.0.to_u16() }
+    fn to_u32(&self) -> Option<u32> { self.0.to_u32() }
+    fn to_f32(&self) -> Option<f32> { self.0.to_f32() }
+    fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
+}
+
+/// An error indicating a parse error from a string for `NotNaN`.
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum ParseNotNaNError<E> {
+    /// A plain parse error from the underlying float type.
+    ParseFloatError(E),
+    /// The parsed float value resulted in a NaN.
+    IsNaN,
+}
+
+impl<E: fmt::Debug> Error for ParseNotNaNError<E> {
+    fn description(&self) -> &str {
+        return "Error parsing a not-NaN floating point value";
+    }
+}
+
+impl<E: fmt::Debug> fmt::Display for ParseNotNaNError<E> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as fmt::Debug>::fmt(self, f)
+    }
+}
+
+impl<T: Float + Num> Num for NotNaN<T> {
+    type FromStrRadixErr = ParseNotNaNError<T::FromStrRadixErr>;
+
+    fn from_str_radix(src: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        T::from_str_radix(src, radix)
+            .map_err(|err| ParseNotNaNError::ParseFloatError(err))
+            .and_then(|n| NotNaN::new(n).map_err(|_| ParseNotNaNError::IsNaN))
+    }
+}
+
+impl<T: Float + Signed> Signed for NotNaN<T> {
+    fn abs(&self) -> Self { NotNaN(self.0.abs()) }
+
+    fn abs_sub(&self, other: &Self) -> Self {
+        NotNaN::new(self.0.abs_sub(other.0)).expect("Subtraction resulted in NaN")
+    }
+
+    fn signum(&self) -> Self { NotNaN(self.0.signum()) }
+    fn is_positive(&self) -> bool { self.0.is_positive() }
+    fn is_negative(&self) -> bool { self.0.is_negative() }
+}
+
+impl<T: Float + NumCast> NumCast for NotNaN<T> {
+    fn from<F: ToPrimitive>(n: F) -> Option<Self> {
+        T::from(n).and_then(|n| NotNaN::new(n).ok())
+    }
 }
 
 #[cfg(feature = "serde")]

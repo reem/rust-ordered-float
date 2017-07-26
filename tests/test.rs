@@ -5,7 +5,7 @@ extern crate ordered_float;
 extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num_traits::Float;
+pub use num_traits::{Bounded, Float, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
@@ -104,6 +104,75 @@ describe! not_nan32 {
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f32); tmp /= f32::NAN;}).is_err());
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f32); tmp %= f32::NAN;}).is_err());
     }
+
+    it "should implement Zero" {
+        assert_eq!(NotNaN::<f32>::zero(), NotNaN::from(0.0f32));
+        assert!(NotNaN::<f32>::zero().is_zero());
+    }
+
+    it "should implement One" {
+        assert_eq!(NotNaN::<f32>::one(), NotNaN::from(1.0f32))
+    }
+
+    it "should implement Bounded" {
+        assert_eq!(NotNaN::<f32>::min_value(), NotNaN::from(<f32 as Bounded>::min_value()));
+        assert_eq!(NotNaN::<f32>::max_value(), NotNaN::from(<f32 as Bounded>::max_value()));
+    }
+
+    it "should implement FromPrimitive" {
+        assert_eq!(NotNaN::<f32>::from_i8(42i8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u8(42u8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_i16(42i16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u16(42u16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_i32(42i32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u32(42u32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_i64(42i64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_u64(42u64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_isize(42isize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_usize(42usize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f32>::from_f32(Float::nan()), None);
+        assert_eq!(NotNaN::<f32>::from_f64(Float::nan()), None);
+    }
+
+    it "should implement ToPrimitive" {
+        let x = NotNaN::from(42.0f32);
+        assert_eq!(x.to_u8(), Some(42u8));
+        assert_eq!(x.to_i8(), Some(42i8));
+        assert_eq!(x.to_u16(), Some(42u16));
+        assert_eq!(x.to_i16(), Some(42i16));
+        assert_eq!(x.to_u32(), Some(42u32));
+        assert_eq!(x.to_i32(), Some(42i32));
+        assert_eq!(x.to_u64(), Some(42u64));
+        assert_eq!(x.to_i64(), Some(42i64));
+        assert_eq!(x.to_usize(), Some(42usize));
+        assert_eq!(x.to_isize(), Some(42isize));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f64(), Some(42f64));
+        assert_eq!(x.to_f64(), Some(42f64));
+    }
+
+    it "should implement Num" {
+        assert_eq!(NotNaN::<f32>::from_str_radix("42.0", 10).unwrap(), NotNaN::from(42.0f32));
+        assert!(NotNaN::<f32>::from_str_radix("NaN", 10).is_err());
+    }
+
+    it "should implement Signed" {
+        assert_eq!(NotNaN::from(42f32).abs(), NotNaN::from(42f32));
+        assert_eq!(NotNaN::from(-42f32).abs(), NotNaN::from(42f32));
+
+        assert_eq!(NotNaN::from(50f32).abs_sub(&NotNaN::from(8f32)), NotNaN::from(42f32));
+        assert_eq!(NotNaN::from(8f32).abs_sub(&NotNaN::from(50f32)), NotNaN::from(0f32));
+    }
+
+    it "should implement NumCast" {
+        assert_eq!(<NotNaN<f32> as num_traits::NumCast>::from(42), Some(NotNaN::from(42f32)));
+        assert_eq!(<NotNaN<f32> as num_traits::NumCast>::from(f32::nan()), None);
+    }
 }
 
 describe! not_nan64 {
@@ -166,6 +235,75 @@ describe! not_nan64 {
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f64); tmp *= f64::NAN;}).is_err());
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f64); tmp /= f64::NAN;}).is_err());
         assert!(panic::catch_unwind(|| {let mut tmp = NotNaN::from(0.0f64); tmp %= f64::NAN;}).is_err());
+    }
+
+    it "should implement Zero" {
+        assert_eq!(NotNaN::<f64>::zero(), NotNaN::from(0.0f64));
+        assert!(NotNaN::<f64>::zero().is_zero());
+    }
+
+    it "should implement One" {
+        assert_eq!(NotNaN::<f64>::one(), NotNaN::from(1.0f64))
+    }
+
+    it "should implement Bounded" {
+        assert_eq!(NotNaN::<f64>::min_value(), NotNaN::from(<f64 as Bounded>::min_value()));
+        assert_eq!(NotNaN::<f64>::max_value(), NotNaN::from(<f64 as Bounded>::max_value()));
+    }
+
+    it "should implement FromPrimitive" {
+        assert_eq!(NotNaN::<f64>::from_i8(42i8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u8(42u8), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_i16(42i16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u16(42u16), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_i32(42i32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u32(42u32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_i64(42i64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_u64(42u64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_isize(42isize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_usize(42usize), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f32(42f32), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f64(42f64), Some(NotNaN::from(42.0)));
+        assert_eq!(NotNaN::<f64>::from_f32(Float::nan()), None);
+        assert_eq!(NotNaN::<f64>::from_f64(Float::nan()), None);
+    }
+
+    it "should implement ToPrimitive" {
+        let x = NotNaN::from(42.0f64);
+        assert_eq!(x.to_u8(), Some(42u8));
+        assert_eq!(x.to_i8(), Some(42i8));
+        assert_eq!(x.to_u16(), Some(42u16));
+        assert_eq!(x.to_i16(), Some(42i16));
+        assert_eq!(x.to_u32(), Some(42u32));
+        assert_eq!(x.to_i32(), Some(42i32));
+        assert_eq!(x.to_u64(), Some(42u64));
+        assert_eq!(x.to_i64(), Some(42i64));
+        assert_eq!(x.to_usize(), Some(42usize));
+        assert_eq!(x.to_isize(), Some(42isize));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f32(), Some(42f32));
+        assert_eq!(x.to_f64(), Some(42f64));
+        assert_eq!(x.to_f64(), Some(42f64));
+    }
+
+    it "should implement Num" {
+        assert_eq!(NotNaN::<f64>::from_str_radix("42.0", 10).unwrap(), NotNaN::from(42.0f64));
+        assert!(NotNaN::<f64>::from_str_radix("NaN", 10).is_err());
+    }
+
+    it "should implement Signed" {
+        assert_eq!(NotNaN::from(42f64).abs(), NotNaN::from(42f64));
+        assert_eq!(NotNaN::from(-42f64).abs(), NotNaN::from(42f64));
+
+        assert_eq!(NotNaN::from(50f64).abs_sub(&NotNaN::from(8f64)), NotNaN::from(42f64));
+        assert_eq!(NotNaN::from(8f64).abs_sub(&NotNaN::from(50f64)), NotNaN::from(0f64));
+    }
+
+    it "should implement NumCast" {
+        assert_eq!(<NotNaN<f64> as num_traits::NumCast>::from(42), Some(NotNaN::from(42f64)));
+        assert_eq!(<NotNaN<f64> as num_traits::NumCast>::from(f64::nan()), None);
     }
 }
 
