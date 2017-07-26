@@ -15,7 +15,7 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::{Bounded, Float, FromPrimitive, One, ToPrimitive, Zero};
+use num_traits::{Bounded, Float, FromPrimitive, Num, One, ToPrimitive, Zero};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -609,6 +609,37 @@ impl<T: Float + ToPrimitive> ToPrimitive for NotNaN<T> {
     fn to_u32(&self) -> Option<u32> { self.0.to_u32() }
     fn to_f32(&self) -> Option<f32> { self.0.to_f32() }
     fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
+}
+
+/// An error indicating a parse error from a string for `NotNaN`.
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum ParseNotNaNError<E> {
+    /// A plain parse error from the underlying float type.
+    ParseFloatError(E),
+    /// The parsed float value resulted in a NaN.
+    IsNaN,
+}
+
+impl<E: fmt::Debug> Error for ParseNotNaNError<E> {
+    fn description(&self) -> &str {
+        return "Error parsing a not-NaN floating point value";
+    }
+}
+
+impl<E: fmt::Debug> fmt::Display for ParseNotNaNError<E> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as fmt::Debug>::fmt(self, f)
+    }
+}
+
+impl<T: Float + Num> Num for NotNaN<T> {
+    type FromStrRadixErr = ParseNotNaNError<T::FromStrRadixErr>;
+
+    fn from_str_radix(src: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        T::from_str_radix(src, radix)
+            .map_err(|err| ParseNotNaNError::ParseFloatError(err))
+            .and_then(|n| NotNaN::new(n).map_err(|_| ParseNotNaNError::IsNaN))
+    }
 }
 
 #[cfg(feature = "serde")]

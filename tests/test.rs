@@ -5,7 +5,7 @@ extern crate ordered_float;
 extern crate num_traits;
 
 pub use ordered_float::*;
-pub use num_traits::{Bounded, Float, FromPrimitive, One, ToPrimitive, Zero};
+pub use num_traits::{Bounded, Float, FromPrimitive, Num, One, ToPrimitive, Zero};
 pub use std::cmp::Ordering::*;
 pub use std::{f32, f64, panic};
 
@@ -155,6 +155,11 @@ describe! not_nan32 {
         assert_eq!(x.to_f64(), Some(42f64));
         assert_eq!(x.to_f64(), Some(42f64));
     }
+
+    it "should implement Num" {
+        assert_eq!(NotNaN::<f32>::from_str_radix("42.0", 10).unwrap(), NotNaN::from(42.0f32));
+        assert!(NotNaN::<f32>::from_str_radix("NaN", 10).is_err());
+    }
 }
 
 describe! not_nan64 {
@@ -268,6 +273,11 @@ describe! not_nan64 {
         assert_eq!(x.to_f32(), Some(42f32));
         assert_eq!(x.to_f64(), Some(42f64));
         assert_eq!(x.to_f64(), Some(42f64));
+    }
+
+    it "should implement Num" {
+        assert_eq!(NotNaN::<f64>::from_str_radix("42.0", 10).unwrap(), NotNaN::from(42.0f64));
+        assert!(NotNaN::<f64>::from_str_radix("NaN", 10).is_err());
     }
 }
 
