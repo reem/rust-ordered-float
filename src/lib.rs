@@ -15,7 +15,7 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::{Bounded, Float};
+use num_traits::{Bounded, Float, One, Zero};
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -567,6 +567,16 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
     let exp_u64 = unsafe { mem::transmute::<i16, u16>(exp) } as u64;
     let sign_u64 = if sign > 0 { 1u64 } else { 0u64 };
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
+}
+
+impl<T: Float + Zero> Zero for NotNaN<T> {
+    fn zero() -> Self { NotNaN(T::zero()) }
+
+    fn is_zero(&self) -> bool { self.0.is_zero() }
+}
+
+impl<T: Float + One> One for NotNaN<T> {
+    fn one() -> Self { NotNaN(T::one()) }
 }
 
 impl<T: Float + Bounded> Bounded for NotNaN<T> {
