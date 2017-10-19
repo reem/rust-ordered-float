@@ -26,6 +26,31 @@ describe! ordered_float32 {
         assert_eq!(OrderedFloat(f32_nan).cmp(&OrderedFloat(-100000.0f32)), Greater);
         assert_eq!(OrderedFloat(-100.0f32).cmp(&OrderedFloat(Float::nan())), Less);
     }
+
+    it "should compare regular floats with comparison operators" {
+        assert!(OrderedFloat(7.0f32) == OrderedFloat(7.0));
+        assert!(OrderedFloat(7.0f32) <= OrderedFloat(7.0));
+        assert!(OrderedFloat(7.0f32) >= OrderedFloat(7.0));
+        assert!(OrderedFloat(8.0f32) > OrderedFloat(7.0));
+        assert!(OrderedFloat(8.0f32) >= OrderedFloat(7.0));
+        assert!(OrderedFloat(4.0f32) < OrderedFloat(7.0));
+        assert!(OrderedFloat(4.0f32) <= OrderedFloat(7.0));
+    }
+
+    it "should compare NaN with comparison operators" {
+        let f32_nan: OrderedFloat<f32> = OrderedFloat(Float::nan());
+        assert!(f32_nan == f32_nan);
+        assert!(f32_nan <= f32_nan);
+        assert!(f32_nan >= f32_nan);
+        assert!(f32_nan > OrderedFloat(-100000.0f32));
+        assert!(f32_nan >= OrderedFloat(-100000.0f32));
+        assert!(OrderedFloat(-100.0f32) < f32_nan);
+        assert!(OrderedFloat(-100.0f32) <= f32_nan);
+        assert!(f32_nan > OrderedFloat(Float::infinity()));
+        assert!(f32_nan >= OrderedFloat(Float::infinity()));
+        assert!(f32_nan > OrderedFloat(Float::neg_infinity()));
+        assert!(f32_nan >= OrderedFloat(Float::neg_infinity()));
+    }
 }
 
 describe! ordered_float64 {
@@ -40,6 +65,31 @@ describe! ordered_float64 {
         assert_eq!(OrderedFloat(f64_nan).cmp(&OrderedFloat(Float::nan())), Equal);
         assert_eq!(OrderedFloat(f64_nan).cmp(&OrderedFloat(-100000.0f64)), Greater);
         assert_eq!(OrderedFloat(-100.0f64).cmp(&OrderedFloat(Float::nan())), Less);
+    }
+
+    it "should compare regular floats with comparison operators" {
+        assert!(OrderedFloat(7.0) == OrderedFloat(7.0));
+        assert!(OrderedFloat(7.0) <= OrderedFloat(7.0));
+        assert!(OrderedFloat(7.0) >= OrderedFloat(7.0));
+        assert!(OrderedFloat(8.0) > OrderedFloat(7.0));
+        assert!(OrderedFloat(8.0) >= OrderedFloat(7.0));
+        assert!(OrderedFloat(4.0) < OrderedFloat(7.0));
+        assert!(OrderedFloat(4.0) <= OrderedFloat(7.0));
+    }
+
+    it "should compare NaN with comparison operators" {
+        let f64_nan: OrderedFloat<f64> = OrderedFloat(Float::nan());
+        assert!(f64_nan == f64_nan);
+        assert!(f64_nan <= f64_nan);
+        assert!(f64_nan >= f64_nan);
+        assert!(f64_nan > OrderedFloat(-100000.0));
+        assert!(f64_nan >= OrderedFloat(-100000.0));
+        assert!(OrderedFloat(-100.0) < f64_nan);
+        assert!(OrderedFloat(-100.0) <= f64_nan);
+        assert!(f64_nan > OrderedFloat(Float::infinity()));
+        assert!(f64_nan >= OrderedFloat(Float::infinity()));
+        assert!(f64_nan > OrderedFloat(Float::neg_infinity()));
+        assert!(f64_nan >= OrderedFloat(Float::neg_infinity()));
     }
 }
 
