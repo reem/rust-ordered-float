@@ -30,7 +30,7 @@ const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 ///
 /// NaN is sorted as *greater* than all other values and *equal*
 /// to itself, in contradiction with the IEEE standard.
-#[derive(PartialOrd, Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct OrderedFloat<T: Float>(pub T);
 
 impl<T: Float> OrderedFloat<T> {
@@ -55,13 +55,21 @@ impl<T: Float> AsMut<T> for OrderedFloat<T> {
     }
 }
 
+impl<T: Float + PartialOrd> PartialOrd for OrderedFloat<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
-    fn cmp(&self, other: &OrderedFloat<T>) -> Ordering {
-        match self.partial_cmp(&other) {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let lhs = self.as_ref();
+        let rhs = other.as_ref();
+        match lhs.partial_cmp(&rhs) {
             Some(ordering) => ordering,
             None => {
-                if self.as_ref().is_nan() {
-                    if other.as_ref().is_nan() {
+                if lhs.is_nan() {
+                    if rhs.is_nan() {
                         Ordering::Equal
                     } else {
                         Ordering::Greater
