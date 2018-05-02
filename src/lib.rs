@@ -15,7 +15,7 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::Float;
+use num_traits::{Bounded, Float};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -136,6 +136,16 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
 }
 
 impl<T: Float + PartialEq> Eq for OrderedFloat<T> {}
+
+impl<T: Float> Bounded for OrderedFloat<T> {
+    fn min_value() -> Self {
+        OrderedFloat(T::min_value())
+    }
+
+    fn max_value() -> Self {
+        OrderedFloat(T::max_value())
+    }
+}
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -513,6 +523,16 @@ impl<T: Float> Neg for NotNaN<T> {
 
     fn neg(self) -> Self {
         NotNaN::new(-self.0).expect("Negation resulted in NaN")
+    }
+}
+
+impl<T: Float> Bounded for NotNaN<T> {
+    fn min_value() -> Self {
+        NotNaN(T::min_value())
+    }
+
+    fn max_value() -> Self {
+        NotNaN(T::max_value())
     }
 }
 
