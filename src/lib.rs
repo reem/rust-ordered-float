@@ -55,7 +55,7 @@ impl<T: Float> AsMut<T> for OrderedFloat<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
+impl<T: Float> Ord for OrderedFloat<T> {
     fn cmp(&self, other: &OrderedFloat<T>) -> Ordering {
         match self.partial_cmp(&other) {
             Some(ordering) => ordering,
@@ -77,7 +77,7 @@ impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
 impl<T: Float + PartialEq> PartialEq for OrderedFloat<T> {
     fn eq(&self, other: &OrderedFloat<T>) -> bool {
         if self.as_ref().is_nan() {
-            if other.as_ref().is_nan() { true } else { false }
+            other.as_ref().is_nan()
         } else if other.as_ref().is_nan() {
             false
         } else {
@@ -176,7 +176,7 @@ impl<T: Float> AsRef<T> for NotNaN<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Ord for NotNaN<T> {
+impl<T: Float> Ord for NotNaN<T> {
     fn cmp(&self, other: &NotNaN<T>) -> Ordering {
         match self.partial_cmp(&other) {
             Some(ord) => ord,
@@ -522,7 +522,7 @@ pub struct FloatIsNaN;
 
 impl Error for FloatIsNaN {
     fn description(&self) -> &str {
-        return "NotNaN constructed with NaN";
+        "NotNaN constructed with NaN"
     }
 }
 
