@@ -66,13 +66,13 @@ impl<T: Float> AsMut<T> for OrderedFloat<T> {
     }
 }
 
-impl<T: Float + PartialOrd> PartialOrd for OrderedFloat<T> {
+impl<T: Float> PartialOrd for OrderedFloat<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
+impl<T: Float> Ord for OrderedFloat<T> {
     fn cmp(&self, other: &Self) -> Ordering {
         let lhs = self.as_ref();
         let rhs = other.as_ref();
@@ -96,7 +96,7 @@ impl<T: Float + PartialOrd> Ord for OrderedFloat<T> {
 impl<T: Float + PartialEq> PartialEq for OrderedFloat<T> {
     fn eq(&self, other: &OrderedFloat<T>) -> bool {
         if self.as_ref().is_nan() {
-            if other.as_ref().is_nan() { true } else { false }
+            other.as_ref().is_nan()
         } else if other.as_ref().is_nan() {
             false
         } else {
@@ -195,7 +195,7 @@ impl<T: Float> AsRef<T> for NotNan<T> {
     }
 }
 
-impl<T: Float + PartialOrd> Ord for NotNan<T> {
+impl<T: Float> Ord for NotNan<T> {
     fn cmp(&self, other: &NotNan<T>) -> Ordering {
         match self.partial_cmp(&other) {
             Some(ord) => ord,
@@ -541,7 +541,7 @@ pub struct FloatIsNan;
 
 impl Error for FloatIsNan {
     fn description(&self) -> &str {
-        return "NotNan constructed with NaN";
+        "NotNan constructed with NaN"
     }
 }
 
@@ -578,43 +578,43 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
 }
 
-impl<T: Float + Zero> Zero for NotNaN<T> {
-    fn zero() -> Self { NotNaN(T::zero()) }
+impl<T: Float + Zero> Zero for NotNan<T> {
+    fn zero() -> Self { NotNan(T::zero()) }
 
     fn is_zero(&self) -> bool { self.0.is_zero() }
 }
 
-impl<T: Float + One> One for NotNaN<T> {
-    fn one() -> Self { NotNaN(T::one()) }
+impl<T: Float + One> One for NotNan<T> {
+    fn one() -> Self { NotNan(T::one()) }
 }
 
-impl<T: Float + Bounded> Bounded for NotNaN<T> {
+impl<T: Float + Bounded> Bounded for NotNan<T> {
     fn min_value() -> Self {
-        NotNaN(Bounded::min_value())
+        NotNan(Bounded::min_value())
     }
 
     fn max_value() -> Self {
-        NotNaN(Bounded::max_value())
+        NotNan(Bounded::max_value())
     }
 }
 
-impl<T: Float + FromPrimitive> FromPrimitive for NotNaN<T> {
-    fn from_i64(n: i64) -> Option<Self> { T::from_i64(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_u64(n: u64) -> Option<Self> { T::from_u64(n).and_then(|n| NotNaN::new(n).ok()) }
+impl<T: Float + FromPrimitive> FromPrimitive for NotNan<T> {
+    fn from_i64(n: i64) -> Option<Self> { T::from_i64(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_u64(n: u64) -> Option<Self> { T::from_u64(n).and_then(|n| NotNan::new(n).ok()) }
 
-    fn from_isize(n: isize) -> Option<Self> { T::from_isize(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_i8(n: i8) -> Option<Self> { T::from_i8(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_i16(n: i16) -> Option<Self> { T::from_i16(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_i32(n: i32) -> Option<Self> { T::from_i32(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_usize(n: usize) -> Option<Self> { T::from_usize(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_u8(n: u8) -> Option<Self> { T::from_u8(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_u16(n: u16) -> Option<Self> { T::from_u16(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).and_then(|n| NotNaN::new(n).ok()) }
-    fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).and_then(|n| NotNaN::new(n).ok()) }
+    fn from_isize(n: isize) -> Option<Self> { T::from_isize(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_i8(n: i8) -> Option<Self> { T::from_i8(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_i16(n: i16) -> Option<Self> { T::from_i16(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_i32(n: i32) -> Option<Self> { T::from_i32(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_usize(n: usize) -> Option<Self> { T::from_usize(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_u8(n: u8) -> Option<Self> { T::from_u8(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_u16(n: u16) -> Option<Self> { T::from_u16(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).and_then(|n| NotNan::new(n).ok()) }
 }
 
-impl<T: Float + ToPrimitive> ToPrimitive for NotNaN<T> {
+impl<T: Float + ToPrimitive> ToPrimitive for NotNan<T> {
     fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
     fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
 
@@ -630,52 +630,52 @@ impl<T: Float + ToPrimitive> ToPrimitive for NotNaN<T> {
     fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
 }
 
-/// An error indicating a parse error from a string for `NotNaN`.
+/// An error indicating a parse error from a string for `NotNan`.
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum ParseNotNaNError<E> {
+pub enum ParseNotNanError<E> {
     /// A plain parse error from the underlying float type.
     ParseFloatError(E),
     /// The parsed float value resulted in a NaN.
     IsNaN,
 }
 
-impl<E: fmt::Debug> Error for ParseNotNaNError<E> {
+impl<E: fmt::Debug> Error for ParseNotNanError<E> {
     fn description(&self) -> &str {
         return "Error parsing a not-NaN floating point value";
     }
 }
 
-impl<E: fmt::Debug> fmt::Display for ParseNotNaNError<E> {
+impl<E: fmt::Debug> fmt::Display for ParseNotNanError<E> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         <Self as fmt::Debug>::fmt(self, f)
     }
 }
 
-impl<T: Float + Num> Num for NotNaN<T> {
-    type FromStrRadixErr = ParseNotNaNError<T::FromStrRadixErr>;
+impl<T: Float + Num> Num for NotNan<T> {
+    type FromStrRadixErr = ParseNotNanError<T::FromStrRadixErr>;
 
     fn from_str_radix(src: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
         T::from_str_radix(src, radix)
-            .map_err(|err| ParseNotNaNError::ParseFloatError(err))
-            .and_then(|n| NotNaN::new(n).map_err(|_| ParseNotNaNError::IsNaN))
+            .map_err(|err| ParseNotNanError::ParseFloatError(err))
+            .and_then(|n| NotNan::new(n).map_err(|_| ParseNotNanError::IsNaN))
     }
 }
 
-impl<T: Float + Signed> Signed for NotNaN<T> {
-    fn abs(&self) -> Self { NotNaN(self.0.abs()) }
+impl<T: Float + Signed> Signed for NotNan<T> {
+    fn abs(&self) -> Self { NotNan(self.0.abs()) }
 
     fn abs_sub(&self, other: &Self) -> Self {
-        NotNaN::new(self.0.abs_sub(other.0)).expect("Subtraction resulted in NaN")
+        NotNan::new(self.0.abs_sub(other.0)).expect("Subtraction resulted in NaN")
     }
 
-    fn signum(&self) -> Self { NotNaN(self.0.signum()) }
+    fn signum(&self) -> Self { NotNan(self.0.signum()) }
     fn is_positive(&self) -> bool { self.0.is_positive() }
     fn is_negative(&self) -> bool { self.0.is_negative() }
 }
 
-impl<T: Float + NumCast> NumCast for NotNaN<T> {
+impl<T: Float + NumCast> NumCast for NotNan<T> {
     fn from<F: ToPrimitive>(n: F) -> Option<Self> {
-        T::from(n).and_then(|n| NotNaN::new(n).ok())
+        T::from(n).and_then(|n| NotNan::new(n).ok())
     }
 }
 
