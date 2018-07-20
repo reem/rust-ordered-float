@@ -15,7 +15,7 @@ use std::fmt;
 use std::io;
 use std::mem;
 use unreachable::unreachable;
-use num_traits::Float;
+use num_traits::{Float, Zero};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -513,6 +513,16 @@ impl<T: Float> Neg for NotNaN<T> {
 
     fn neg(self) -> Self {
         NotNaN::new(-self.0).expect("Negation resulted in NaN")
+    }
+}
+
+impl<T: Float + Zero> Zero for NotNaN<T> {
+    fn zero() -> Self {
+        NotNaN(T::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        *self == Self::zero()
     }
 }
 
