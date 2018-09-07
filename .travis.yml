@@ -1,5 +1,9 @@
 language: rust
-rust: nightly
+rust:
+  - 1.28.0
+  - nightly
+  - beta
+  - stable
 sudo: false
 env:
     matrix:
