@@ -156,6 +156,16 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
 
 impl<T: Float + PartialEq> Eq for OrderedFloat<T> {}
 
+impl<T: Float> Bounded for OrderedFloat<T> {
+    fn min_value() -> Self {
+        OrderedFloat(T::min_value())
+    }
+
+    fn max_value() -> Self {
+        OrderedFloat(T::max_value())
+    }
+}
+
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
 /// A NaN value cannot be stored in this type.
