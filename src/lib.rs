@@ -42,6 +42,7 @@ const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 /// NaN is sorted as *greater* than all other values and *equal*
 /// to itself, in contradiction with the IEEE standard.
 #[derive(Debug, Default, Clone, Copy)]
+#[repr(transparent)]
 pub struct OrderedFloat<T: Float>(pub T);
 
 impl<T: Float> OrderedFloat<T> {
@@ -170,6 +171,7 @@ impl<T: Float> Bounded for OrderedFloat<T> {
 ///
 /// A NaN value cannot be stored in this type.
 #[derive(PartialOrd, PartialEq, Debug, Default, Clone, Copy)]
+#[repr(transparent)]
 pub struct NotNan<T: Float>(T);
 
 impl<T: Float> NotNan<T> {
