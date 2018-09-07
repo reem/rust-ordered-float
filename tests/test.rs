@@ -522,3 +522,11 @@ fn hash_is_good_for_fractional_numbers() {
     let pct_unique = set.len() as f64 / limit as f64;
     assert!(0.99f64 < pct_unique, "percent-unique={}", pct_unique);
 }
+
+#[test]
+#[should_panic]
+fn test_add_fails_on_nan() {
+    let a = NotNan::new(std::f32::INFINITY).unwrap();
+    let b = NotNan::new(std::f32::NEG_INFINITY).unwrap();
+    let _c = a + b;
+}
