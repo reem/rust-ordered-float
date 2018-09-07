@@ -258,11 +258,14 @@ impl<T: Float> Deref for NotNan<T> {
 
 impl<T: Float + PartialEq> Eq for NotNan<T> {}
 
+/// Adds two NotNans.
+///
+/// Panics if the computation results in NaN
 impl<T: Float> Add for NotNan<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        NotNan(self.0 + other.0)
+        NotNan::new(self.0 + other.0).expect("Addition resulted in NaN")
     }
 }
 
