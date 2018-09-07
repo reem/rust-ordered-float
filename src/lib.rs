@@ -93,7 +93,7 @@ impl<T: Float> Ord for OrderedFloat<T> {
     }
 }
 
-impl<T: Float + PartialEq> PartialEq for OrderedFloat<T> {
+impl<T: Float> PartialEq for OrderedFloat<T> {
     fn eq(&self, other: &OrderedFloat<T>) -> bool {
         if self.as_ref().is_nan() {
             other.as_ref().is_nan()
@@ -154,7 +154,7 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
     }
 }
 
-impl<T: Float + PartialEq> Eq for OrderedFloat<T> {}
+impl<T: Float> Eq for OrderedFloat<T> {}
 
 impl<T: Float> Bounded for OrderedFloat<T> {
     fn min_value() -> Self {
@@ -588,23 +588,23 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
 }
 
-impl<T: Float + Zero> Zero for NotNan<T> {
+impl<T: Float> Zero for NotNan<T> {
     fn zero() -> Self { NotNan(T::zero()) }
 
     fn is_zero(&self) -> bool { self.0.is_zero() }
 }
 
-impl<T: Float + One> One for NotNan<T> {
+impl<T: Float> One for NotNan<T> {
     fn one() -> Self { NotNan(T::one()) }
 }
 
-impl<T: Float + Bounded> Bounded for NotNan<T> {
+impl<T: Float> Bounded for NotNan<T> {
     fn min_value() -> Self {
-        NotNan(Bounded::min_value())
+        NotNan(T::min_value())
     }
 
     fn max_value() -> Self {
-        NotNan(Bounded::max_value())
+        NotNan(T::max_value())
     }
 }
 
@@ -624,7 +624,7 @@ impl<T: Float + FromPrimitive> FromPrimitive for NotNan<T> {
     fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).and_then(|n| NotNan::new(n).ok()) }
 }
 
-impl<T: Float + ToPrimitive> ToPrimitive for NotNan<T> {
+impl<T: Float> ToPrimitive for NotNan<T> {
     fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
     fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
 
@@ -661,7 +661,7 @@ impl<E: fmt::Debug> fmt::Display for ParseNotNanError<E> {
     }
 }
 
-impl<T: Float + Num> Num for NotNan<T> {
+impl<T: Float> Num for NotNan<T> {
     type FromStrRadixErr = ParseNotNanError<T::FromStrRadixErr>;
 
     fn from_str_radix(src: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
@@ -683,7 +683,7 @@ impl<T: Float + Signed> Signed for NotNan<T> {
     fn is_negative(&self) -> bool { self.0.is_negative() }
 }
 
-impl<T: Float + NumCast> NumCast for NotNan<T> {
+impl<T: Float> NumCast for NotNan<T> {
     fn from<F: ToPrimitive>(n: F) -> Option<Self> {
         T::from(n).and_then(|n| NotNan::new(n).ok())
     }
