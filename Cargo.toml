@@ -1,14 +1,11 @@
 [package]
-name = "new-ordered-float"
-version = "1.0.1"
+name = "ordered-float"
+version = "1.0.0"
 authors = ["Jonathan Reem <jonathan.reem@gmail.com>", "Matt Brubeck <mbrubeck@limpet.net>"]
 license = "MIT"
-description = "Wrappers for total ordering on floats (fork of ordered-float)"
-repository = "https://github.com/mbrubeck/rust-ordered-float"
+description = "Wrappers for total ordering on floats"
+repository = "https://github.com/reem/rust-ordered-float"
 readme = "README.md"
-
-[lib]
-name = "ordered_float"
 
 [dependencies]
 num-traits = "0.2"
