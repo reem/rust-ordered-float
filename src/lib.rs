@@ -562,7 +562,7 @@ impl Error for FloatIsNan {
 
 impl fmt::Display for FloatIsNan {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as fmt::Debug>::fmt(self, f)
+        write!(f, "NotNan constructed with NaN")
     }
 }
 
