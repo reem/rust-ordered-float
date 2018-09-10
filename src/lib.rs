@@ -233,7 +233,7 @@ impl<T: Float> Add for NotNaN<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        NotNaN(self.0 + other.0)
+        NotNaN::new(self.0 + other.0).expect("Adds resulted in NaN")
     }
 }
 
