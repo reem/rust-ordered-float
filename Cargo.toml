@@ -1,6 +1,6 @@
 [package]
 name = "ordered-float"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Jonathan Reem <jonathan.reem@gmail.com>", "Matt Brubeck <mbrubeck@limpet.net>"]
 license = "MIT"
 description = "Wrappers for total ordering on floats"
