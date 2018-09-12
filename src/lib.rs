@@ -4,7 +4,6 @@
 //! Wrappers for total order on Floats.
 
 extern crate num_traits;
-extern crate unreachable;
 
 use std::cmp::Ordering;
 use std::error::Error;
@@ -14,7 +13,7 @@ use std::hash::{Hash, Hasher};
 use std::fmt;
 use std::io;
 use std::mem;
-use unreachable::unreachable;
+use std::hint::unreachable_unchecked;
 use num_traits::{Bounded, Float, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive,
                  Zero};
 
@@ -211,7 +210,7 @@ impl<T: Float> Ord for NotNan<T> {
     fn cmp(&self, other: &NotNan<T>) -> Ordering {
         match self.partial_cmp(&other) {
             Some(ord) => ord,
-            None => unsafe { unreachable() },
+            None => unsafe { unreachable_unchecked() },
         }
     }
 }
