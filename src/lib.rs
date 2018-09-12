@@ -1,19 +1,19 @@
+#![no_std]
 #![cfg_attr(test, deny(warnings))]
 #![deny(missing_docs)]
 
 //! Wrappers for total order on Floats.
 
 extern crate num_traits;
+#[cfg(feature = "std")] extern crate std;
 
-use std::cmp::Ordering;
-use std::error::Error;
-use std::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem,
+use core::cmp::Ordering;
+use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem,
                RemAssign, Sub, SubAssign};
-use std::hash::{Hash, Hasher};
-use std::fmt;
-use std::io;
-use std::mem;
-use std::hint::unreachable_unchecked;
+use core::hash::{Hash, Hasher};
+use core::fmt;
+use core::mem;
+use core::hint::unreachable_unchecked;
 use num_traits::{Bounded, Float, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive,
                  Zero};
 
@@ -553,7 +553,8 @@ impl<T: Float> Neg for NotNan<T> {
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct FloatIsNan;
 
-impl Error for FloatIsNan {
+#[cfg(feature = "std")]
+impl std::error::Error for FloatIsNan {
     fn description(&self) -> &str {
         "NotNan constructed with NaN"
     }
@@ -565,9 +566,10 @@ impl fmt::Display for FloatIsNan {
     }
 }
 
-impl Into<io::Error> for FloatIsNan {
-    fn into(self) -> io::Error {
-        io::Error::new(io::ErrorKind::InvalidInput, self)
+#[cfg(feature = "std")]
+impl Into<std::io::Error> for FloatIsNan {
+    fn into(self) -> std::io::Error {
+        std::io::Error::new(std::io::ErrorKind::InvalidInput, self)
     }
 }
 
@@ -653,7 +655,8 @@ pub enum ParseNotNanError<E> {
     IsNaN,
 }
 
-impl<E: fmt::Debug> Error for ParseNotNanError<E> {
+#[cfg(feature = "std")]
+impl<E: fmt::Debug> std::error::Error for ParseNotNanError<E> {
     fn description(&self) -> &str {
         return "Error parsing a not-NaN floating point value";
     }
@@ -700,7 +703,7 @@ mod impl_serde {
     use self::serde::de::{Error, Unexpected};
     use super::{OrderedFloat, NotNan};
     use num_traits::Float;
-    use std::f64;
+    use core::f64;
 
     #[cfg(test)]
     extern crate serde_test;

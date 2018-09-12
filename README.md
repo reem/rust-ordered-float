@@ -14,6 +14,16 @@ ordered-float = "1.0"
 
 See the [API documentation](https://docs.rs/ordered-float) for further details.
 
+## no_std
+
+To use `ordered_float` without requiring the Rust standard library, disable
+the default `std` feature:
+
+```toml
+[dependencies]
+ordered-float = { version = "1.0", default-features = false }
+```
+
 ## License
 
 MIT

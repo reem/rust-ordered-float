@@ -7,7 +7,9 @@ rust:
 sudo: false
 env:
     matrix:
-        - FEATURES=
+        - FEATURES=""
+        - FEATURES="std"
         - FEATURES="serde"
+        - FEATURES="std,serde"
 script:
-    - cargo test -v --features "$FEATURES"
+    - cargo test -v --no-default-features --features "$FEATURES"
