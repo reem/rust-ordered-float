@@ -14,6 +14,8 @@ use core::hash::{Hash, Hasher};
 use core::fmt;
 use core::mem;
 use core::hint::unreachable_unchecked;
+use core::str::FromStr;
+
 use num_traits::{Bounded, Float, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive,
                  Zero};
 
@@ -163,6 +165,23 @@ impl<T: Float> Bounded for OrderedFloat<T> {
 
     fn max_value() -> Self {
         OrderedFloat(T::max_value())
+    }
+}
+
+impl<T: Float + FromStr> FromStr for OrderedFloat<T> {
+    type Err = T::Err;
+
+    /// Convert a &str to `OrderedFloat`. Returns an error if the string fails to parse.
+    ///
+    /// ```
+    /// use ordered_float::OrderedFloat;
+    ///
+    /// assert!("-10".parse::<OrderedFloat<f32>>().is_ok());
+    /// assert!("abc".parse::<OrderedFloat<f32>>().is_err());
+    /// assert!("NaN".parse::<OrderedFloat<f32>>().is_ok());
+    /// ```
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        T::from_str(s).map(OrderedFloat)
     }
 }
 
@@ -611,6 +630,26 @@ impl<T: Float> Bounded for NotNan<T> {
 
     fn max_value() -> Self {
         NotNan(T::max_value())
+    }
+}
+
+impl<T: Float + FromStr> FromStr for NotNan<T> {
+    type Err = ParseNotNanError<T::Err>;
+
+    /// Convert a &str to `NotNan`. Returns an error if the string fails to parse,
+    /// or if the resulting value is NaN
+    ///
+    /// ```
+    /// use ordered_float::NotNan;
+    ///
+    /// assert!("-10".parse::<NotNan<f32>>().is_ok());
+    /// assert!("abc".parse::<NotNan<f32>>().is_err());
+    /// assert!("NaN".parse::<NotNan<f32>>().is_err());
+    /// ```
+    fn from_str(src: &str) -> Result<Self, Self::Err> {
+        src.parse()
+            .map_err(ParseNotNanError::ParseFloatError)
+            .and_then(|f| NotNan::new(f).map_err(|_| ParseNotNanError::IsNaN))
     }
 }
 
