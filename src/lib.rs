@@ -16,8 +16,11 @@ use core::mem;
 use core::hint::unreachable_unchecked;
 use core::str::FromStr;
 
-use num_traits::{Bounded, Float, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive,
-                 Zero};
+use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
+#[cfg(feature = "std")]
+use num_traits::Float;
+#[cfg(not(feature = "std"))]
+use num_traits::float::FloatCore as Float;
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
@@ -615,7 +618,7 @@ impl<T: Float + Signed> Signed for NotNan<T> {
     fn abs(&self) -> Self { NotNan(self.0.abs()) }
 
     fn abs_sub(&self, other: &Self) -> Self {
-        NotNan::new(self.0.abs_sub(other.0)).expect("Subtraction resulted in NaN")
+        NotNan::new(Signed::abs_sub(&self.0, &other.0)).expect("Subtraction resulted in NaN")
     }
 
     fn signum(&self) -> Self { NotNan(self.0.signum()) }
@@ -635,7 +638,10 @@ mod impl_serde {
     use self::serde::{Serialize, Serializer, Deserialize, Deserializer};
     use self::serde::de::{Error, Unexpected};
     use super::{OrderedFloat, NotNan};
+    #[cfg(feature = "std")]
     use num_traits::Float;
+    #[cfg(not(feature = "std"))]
+    use num_traits::float::FloatCore as Float;
     use core::f64;
 
     #[cfg(test)]
