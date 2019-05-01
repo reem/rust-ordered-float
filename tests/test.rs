@@ -535,3 +535,13 @@ fn test_add_fails_on_nan() {
     let b = NotNan::new(std::f32::NEG_INFINITY).unwrap();
     let _c = a + b;
 }
+
+#[test]
+fn ordered_f32_neg() {
+    assert_eq!(OrderedFloat(-7.0f32), -OrderedFloat(7.0f32));
+}
+
+#[test]
+fn ordered_f64_neg() {
+    assert_eq!(OrderedFloat(-7.0f64), -OrderedFloat(7.0f64));
+}

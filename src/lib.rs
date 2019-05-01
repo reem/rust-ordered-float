@@ -186,6 +186,14 @@ impl<T: Float + FromStr> FromStr for OrderedFloat<T> {
     }
 }
 
+impl<T: Float> Neg for OrderedFloat<T> {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        OrderedFloat(-self.0)
+    }
+}
+
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
 /// A NaN value cannot be stored in this type.
