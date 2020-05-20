@@ -545,3 +545,37 @@ fn ordered_f32_neg() {
 fn ordered_f64_neg() {
     assert_eq!(OrderedFloat(-7.0f64), -OrderedFloat(7.0f64));
 }
+
+#[test]
+#[should_panic]
+fn test_sum_fails_on_nan() {
+    let a = NotNan::new(std::f32::INFINITY).unwrap();
+    let b = NotNan::new(std::f32::NEG_INFINITY).unwrap();
+    let _c: NotNan<_> = [a,b].iter().sum();
+}
+
+#[test]
+#[should_panic]
+fn test_product_fails_on_nan() {
+    let a = NotNan::new(std::f32::INFINITY).unwrap();
+    let b = NotNan::new(0f32).unwrap();
+    let _c: NotNan<_> = [a,b].iter().product();
+}
+
+#[test]
+fn not_nan64_sum_product() {
+    let a = NotNan::new(2138.1237).unwrap();
+    let b = NotNan::new(132f64).unwrap();
+    let c = NotNan::new(5.1).unwrap();
+
+    assert_eq!(std::iter::empty::<NotNan<f64>>().sum::<NotNan<_>>(), NotNan::new(0f64).unwrap());
+    assert_eq!([a].iter().sum::<NotNan<_>>(), a);
+    assert_eq!([a,b].iter().sum::<NotNan<_>>(), a + b);
+    assert_eq!([a,b,c].iter().sum::<NotNan<_>>(), a + b + c);
+
+    assert_eq!(std::iter::empty::<NotNan<f64>>().product::<NotNan<_>>(), NotNan::new(1f64).unwrap());
+    assert_eq!([a].iter().product::<NotNan<_>>(), a);
+    assert_eq!([a,b].iter().product::<NotNan<_>>(), a * b);
+    assert_eq!([a,b,c].iter().product::<NotNan<_>>(), a * b * c);
+
+}

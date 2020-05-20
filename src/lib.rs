@@ -14,6 +14,7 @@ use core::hash::{Hash, Hasher};
 use core::fmt;
 use core::mem;
 use core::hint::unreachable_unchecked;
+use core::iter::{Sum, Product};
 use core::str::FromStr;
 
 use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
@@ -322,6 +323,19 @@ impl<T: Float + AddAssign> AddAssign<T> for NotNan<T> {
     }
 }
 
+
+impl<T: Float + Sum> Sum for NotNan<T> {
+    fn sum<I: Iterator<Item = NotNan<T>>>(iter: I) -> Self {
+        NotNan::new(iter.map(|v| v.0).sum()).expect("Sum resulted in NaN")
+    }
+}
+
+impl<'a, T: Float + Sum> Sum<&'a NotNan<T>> for NotNan<T> {
+    fn sum<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
+        iter.map(|v| *v).sum()
+    }
+}
+
 impl<T: Float> Sub for NotNan<T> {
     type Output = Self;
 
@@ -389,6 +403,18 @@ impl<T: Float + MulAssign> MulAssign<T> for NotNan<T> {
     fn mul_assign(&mut self, other: T) {
         self.0 *= other;
         assert!(!self.0.is_nan(), "Multiplication resulted in NaN");
+    }
+}
+
+impl<T: Float + Product> Product for NotNan<T> {
+    fn product<I: Iterator<Item = NotNan<T>>>(iter: I) -> Self {
+        NotNan::new(iter.map(|v| v.0).product()).expect("Product resulted in NaN")
+    }
+}
+
+impl<'a, T: Float + Product> Product<&'a NotNan<T>> for NotNan<T> {
+    fn product<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
+        iter.map(|v| *v).product()
     }
 }
 
