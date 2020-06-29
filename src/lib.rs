@@ -195,6 +195,12 @@ impl<T: Float> Neg for OrderedFloat<T> {
     }
 }
 
+impl<T: Float> Zero for OrderedFloat<T> {
+    fn zero() -> Self { OrderedFloat(T::zero()) }
+
+    fn is_zero(&self) -> bool { self.0.is_zero() }
+}
+
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
 /// A NaN value cannot be stored in this type.
