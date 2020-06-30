@@ -160,6 +160,38 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
 
 impl<T: Float> Eq for OrderedFloat<T> {}
 
+impl<T: Float> Add for OrderedFloat<T> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        OrderedFloat(self.0 + other.0)
+    }
+}
+
+impl<T: Float> Sub for OrderedFloat<T> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        OrderedFloat(self.0 - other.0)
+    }
+}
+
+impl<T: Float> Mul for OrderedFloat<T> {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        OrderedFloat(self.0 * other.0)
+    }
+}
+
+impl<T: Float> Div for OrderedFloat<T> {
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+        OrderedFloat(self.0 / other.0)
+    }
+}
+
 impl<T: Float> Bounded for OrderedFloat<T> {
     fn min_value() -> Self {
         OrderedFloat(T::min_value())
