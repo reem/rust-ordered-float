@@ -315,6 +315,14 @@ impl TryFrom<f64> for NotNan<f64> {
     }
 }
 
+impl From<NotNan<f32>> for NotNan<f64> {
+    fn from(v: NotNan<f32>) -> NotNan<f64> {
+        unsafe {
+            NotNan::unchecked_new(v.0 as f64)
+        }
+    }
+}
+
 impl<T: Float> Deref for NotNan<T> {
     type Target = T;
 
