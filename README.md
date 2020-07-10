@@ -9,7 +9,7 @@ with the rest of your dependencies:
 
 ```toml
 [dependencies]
-ordered-float = "1.0"
+ordered-float = "2.0"
 ```
 
 See the [API documentation](https://docs.rs/ordered-float) for further details.
