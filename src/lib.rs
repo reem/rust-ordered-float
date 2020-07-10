@@ -6,6 +6,7 @@
 
 extern crate num_traits;
 #[cfg(feature = "std")] extern crate std;
+#[cfg(feature = "std")] use std::error::Error;
 
 use core::cmp::Ordering;
 use core::convert::TryFrom;
@@ -39,7 +40,7 @@ const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 /// to itself, in contradiction with the IEEE standard.
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(transparent)]
-pub struct OrderedFloat<T: Float>(pub T);
+pub struct OrderedFloat<T>(pub T);
 
 impl<T: Float> OrderedFloat<T> {
     /// Get the value out.
@@ -240,6 +241,8 @@ pub struct NotNan<T>(T);
 impl<T> NotNan<T> {
     /// Create a NotNan value from a value that is guaranteed to not be NaN
     ///
+    /// # Safety
+    ///
     /// Behaviour is undefined if `val` is NaN
     pub const unsafe fn unchecked_new(val: T) -> Self {
         NotNan(val)
@@ -278,6 +281,7 @@ impl<T: Float> Ord for NotNan<T> {
     }
 }
 
+#[allow(clippy::derive_hash_xor_eq)]
 impl<T: Float> Hash for NotNan<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         hash_float(self.as_ref(), state)
@@ -385,9 +389,9 @@ impl<T: Float + Sum> Sum for NotNan<T> {
     }
 }
 
-impl<'a, T: Float + Sum> Sum<&'a NotNan<T>> for NotNan<T> {
+impl<'a, T: Float + Sum + 'a> Sum<&'a NotNan<T>> for NotNan<T> {
     fn sum<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
-        iter.map(|v| *v).sum()
+        iter.cloned().sum()
     }
 }
 
@@ -467,9 +471,9 @@ impl<T: Float + Product> Product for NotNan<T> {
     }
 }
 
-impl<'a, T: Float + Product> Product<&'a NotNan<T>> for NotNan<T> {
+impl<'a, T: Float + Product + 'a> Product<&'a NotNan<T>> for NotNan<T> {
     fn product<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
-        iter.map(|v| *v).product()
+        iter.cloned().product()
     }
 }
 
@@ -556,7 +560,7 @@ impl<T: Float> Neg for NotNan<T> {
 pub struct FloatIsNan;
 
 #[cfg(feature = "std")]
-impl std::error::Error for FloatIsNan {
+impl Error for FloatIsNan {
     fn description(&self) -> &str {
         "NotNan constructed with NaN"
     }
@@ -678,18 +682,25 @@ pub enum ParseNotNanError<E> {
 }
 
 #[cfg(feature = "std")]
-impl<E: fmt::Debug> std::error::Error for ParseNotNanError<E> {
+impl<E: fmt::Debug + Error + 'static> Error for ParseNotNanError<E> {
     fn description(&self) -> &str {
-        return "Error parsing a not-NaN floating point value";
+        "Error parsing a not-NaN floating point value"
     }
 
-    // TODO: add an implementation of cause(). This will be breaking because it requires E: Error.
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            ParseNotNanError::ParseFloatError(e) => Some(e),
+            ParseNotNanError::IsNaN => None,
+        }
+    }
 }
 
-impl<E: fmt::Debug> fmt::Display for ParseNotNanError<E> {
+impl<E: fmt::Display> fmt::Display for ParseNotNanError<E> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO: replace this with a human readable fmt. Will require E: Display.
-        <Self as fmt::Debug>::fmt(self, f)
+        match self {
+            ParseNotNanError::ParseFloatError(e) => write!(f, "Parse error: {}", e),
+            ParseNotNanError::IsNaN => write!(f, "NotNan parser encounter a NaN"),
+        }
     }
 }
 
@@ -698,7 +709,7 @@ impl<T: Float> Num for NotNan<T> {
 
     fn from_str_radix(src: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
         T::from_str_radix(src, radix)
-            .map_err(|err| ParseNotNanError::ParseFloatError(err))
+            .map_err(ParseNotNanError::ParseFloatError)
             .and_then(|n| NotNan::new(n).map_err(|_| ParseNotNanError::IsNaN))
     }
 }
