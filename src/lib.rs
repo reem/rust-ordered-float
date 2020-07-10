@@ -99,6 +99,12 @@ impl<T: Float> PartialEq for OrderedFloat<T> {
     }
 }
 
+impl<T: Float> PartialEq<T> for OrderedFloat<T> {
+    fn eq(&self, other: &T) -> bool {
+        self.0 == *other
+    }
+}
+
 impl<T: Float> Hash for OrderedFloat<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         if self.is_nan() {
@@ -312,6 +318,12 @@ impl<T: Float> Deref for NotNan<T> {
 }
 
 impl<T: Float + PartialEq> Eq for NotNan<T> {}
+
+impl<T: Float> PartialEq<T> for NotNan<T> {
+    fn eq(&self, other: &T) -> bool {
+        self.0 == *other
+    }
+}
 
 /// Adds two NotNans.
 ///
