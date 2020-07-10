@@ -238,7 +238,16 @@ impl<T: Float> Zero for OrderedFloat<T> {
 /// A NaN value cannot be stored in this type.
 #[derive(PartialOrd, PartialEq, Debug, Default, Clone, Copy)]
 #[repr(transparent)]
-pub struct NotNan<T: Float>(T);
+pub struct NotNan<T>(T);
+
+impl<T> NotNan<T> {
+    /// Create a NotNan value from a value that is guaranteed to not be NaN
+    ///
+    /// Behaviour is undefined if `val` is NaN
+    pub const unsafe fn unchecked_new(val: T) -> Self {
+        NotNan(val)
+    }
+}
 
 impl<T: Float> NotNan<T> {
     /// Create a NotNan value.
@@ -249,14 +258,6 @@ impl<T: Float> NotNan<T> {
             ref val if val.is_nan() => Err(FloatIsNan),
             val => Ok(NotNan(val)),
         }
-    }
-
-    /// Create a NotNan value from a value that is guaranteed to not be NaN
-    ///
-    /// Behaviour is undefined if `val` is NaN
-    pub unsafe fn unchecked_new(val: T) -> Self {
-        debug_assert!(!val.is_nan());
-        NotNan(val)
     }
 
     /// Get the value out.

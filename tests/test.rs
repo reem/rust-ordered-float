@@ -579,3 +579,10 @@ fn not_nan64_sum_product() {
     assert_eq!([a,b,c].iter().product::<NotNan<_>>(), a * b * c);
 
 }
+
+#[test]
+fn not_nan_usage_in_const_context() {
+    const A: NotNan<f32> = unsafe { NotNan::unchecked_new(111f32) };
+ 
+    assert_eq!(A, NotNan::new(111f32).unwrap());
+}
