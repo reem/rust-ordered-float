@@ -8,6 +8,7 @@ extern crate num_traits;
 #[cfg(feature = "std")] extern crate std;
 
 use core::cmp::Ordering;
+use core::convert::TryFrom;
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem,
                RemAssign, Sub, SubAssign};
 use core::hash::{Hash, Hasher};
@@ -300,12 +301,17 @@ impl From<NotNan<f64>> for f64 {
     }
 }
 
-/// Creates a NotNan value from a Float.
-///
-/// Panics if the provided value is NaN or the computation results in NaN
-impl<T: Float> From<T> for NotNan<T> {
-    fn from(v: T) -> Self {
-        NotNan::new(v).expect("Tried to create a NotNan from a NaN")
+impl TryFrom<f32> for NotNan<f32> {
+    type Error = FloatIsNan;
+    fn try_from(v: f32) -> Result<Self, Self::Error> {
+        NotNan::new(v)
+    }
+}
+
+impl TryFrom<f64> for NotNan<f64> {
+    type Error = FloatIsNan;
+    fn try_from(v: f64) -> Result<Self, Self::Error> {
+        NotNan::new(v)
     }
 }
 
