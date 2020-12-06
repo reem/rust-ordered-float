@@ -590,3 +590,18 @@ fn not_nan_usage_in_const_context() {
     const A: NotNan<f32> = unsafe { NotNan::unchecked_new(111f32) };
     assert_eq!(A, NotNan::new(111f32).unwrap());
 }
+
+#[test]
+fn not_nan_panic_safety() {
+    let catch_op = |mut num, op: fn(&mut NotNan<_>)| {
+        let mut num_ref = panic::AssertUnwindSafe(&mut num);
+        let _ = panic::catch_unwind(move || op(*num_ref));
+        num
+    };
+
+    assert!(!catch_op(not_nan(f32::INFINITY), |a| *a += f32::NEG_INFINITY).is_nan());
+    assert!(!catch_op(not_nan(f32::INFINITY), |a| *a -= f32::INFINITY).is_nan());
+    assert!(!catch_op(not_nan(0.0), |a| *a *= f32::INFINITY).is_nan());
+    assert!(!catch_op(not_nan(0.0), |a| *a /= 0.0).is_nan());
+    assert!(!catch_op(not_nan(0.0), |a| *a %= 0.0).is_nan());
+}
