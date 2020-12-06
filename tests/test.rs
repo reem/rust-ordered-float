@@ -579,3 +579,18 @@ fn not_nan64_sum_product() {
     assert_eq!([a,b,c].iter().product::<NotNan<_>>(), a * b * c);
 
 }
+
+#[test]
+fn not_nan_panic_safety() {
+    let catch_op = |mut num, op: fn(&mut NotNan<_>)| {
+        let mut num_ref = panic::AssertUnwindSafe(&mut num);
+        let _ = panic::catch_unwind(move || op(*num_ref));
+        num
+    };
+
+    assert!(!catch_op(NotNan::from(f32::INFINITY), |a| *a += f32::NEG_INFINITY).is_nan());
+    assert!(!catch_op(NotNan::from(f32::INFINITY), |a| *a -= f32::INFINITY).is_nan());
+    assert!(!catch_op(NotNan::from(0.0), |a| *a *= f32::INFINITY).is_nan());
+    assert!(!catch_op(NotNan::from(0.0), |a| *a /= 0.0).is_nan());
+    assert!(!catch_op(NotNan::from(0.0), |a| *a %= 0.0).is_nan());
+}
