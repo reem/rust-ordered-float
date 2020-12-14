@@ -605,3 +605,20 @@ fn not_nan_panic_safety() {
     assert!(!catch_op(not_nan(0.0), |a| *a /= 0.0).is_nan());
     assert!(!catch_op(not_nan(0.0), |a| *a %= 0.0).is_nan());
 }
+
+#[test]
+fn from_ref() {
+    let f = 1.0f32;
+    let o: &OrderedFloat<f32> = (&f).into();
+    assert_eq!(*o, 1.0f32);
+
+    let mut f = 1.0f64;
+    let o: &OrderedFloat<f64> = (&f).into();
+    assert_eq!(*o, 1.0f64);
+
+    let o: &mut OrderedFloat<f64> = (&mut f).into();
+    assert_eq!(*o, 1.0f64);
+    *o = OrderedFloat(2.0);
+    assert_eq!(*o, 2.0f64);
+    assert_eq!(f, 2.0f64);
+}

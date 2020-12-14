@@ -61,6 +61,24 @@ impl<T: Float> AsMut<T> for OrderedFloat<T> {
     }
 }
 
+impl<'a, T: Float> From<&'a T> for &'a OrderedFloat<T> {
+    fn from(t: &'a T) -> &'a OrderedFloat<T> {
+        // Safety: OrderedFloat is #[repr(transparent)] and has no invalid values.
+        unsafe {
+            &*(t as *const T as *const OrderedFloat<T>)
+        }
+    }
+}
+
+impl<'a, T: Float> From<&'a mut T> for &'a mut OrderedFloat<T> {
+    fn from(t: &'a mut T) -> &'a mut OrderedFloat<T> {
+        // Safety: OrderedFloat is #[repr(transparent)] and has no invalid values.
+        unsafe {
+            &mut *(t as *mut T as *mut OrderedFloat<T>)
+        }
+    }
+}
+
 impl<T: Float> PartialOrd for OrderedFloat<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
