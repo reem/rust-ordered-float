@@ -45,22 +45,19 @@ pub struct OrderedFloat<T>(pub T);
 impl<T: Float> OrderedFloat<T> {
     /// Get the value out.
     pub fn into_inner(self) -> T {
-        let OrderedFloat(val) = self;
-        val
+        self.0
     }
 }
 
 impl<T: Float> AsRef<T> for OrderedFloat<T> {
     fn as_ref(&self) -> &T {
-        let OrderedFloat(ref val) = *self;
-        val
+        &self.0
     }
 }
 
 impl<T: Float> AsMut<T> for OrderedFloat<T> {
     fn as_mut(&mut self) -> &mut T {
-        let OrderedFloat(ref mut val) = *self;
-        val
+        &mut self.0
     }
 }
 
