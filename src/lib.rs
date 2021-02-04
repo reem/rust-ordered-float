@@ -173,39 +173,87 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
 
 impl<T: Float> Eq for OrderedFloat<T> {}
 
-impl<T: Float> Add for OrderedFloat<T> {
-    type Output = Self;
+impl<T: Add> Add for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
 
-    fn add(self, other: Self) -> Self {
+    fn add(self, other: Self) -> Self::Output {
         OrderedFloat(self.0 + other.0)
     }
 }
 
-impl<T: Float> Sub for OrderedFloat<T> {
-    type Output = Self;
+impl<T: Add> Add<T> for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
 
-    fn sub(self, other: Self) -> Self {
+    fn add(self, other: T) -> Self::Output {
+        OrderedFloat(self.0 + other)
+    }
+}
+
+impl<T: Sub> Sub for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
+
+    fn sub(self, other: Self) -> Self::Output {
         OrderedFloat(self.0 - other.0)
     }
 }
 
-impl<T: Float> Mul for OrderedFloat<T> {
-    type Output = Self;
+impl<T: Sub> Sub<T> for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
 
-    fn mul(self, other: Self) -> Self {
+    fn sub(self, other: T) -> Self::Output {
+        OrderedFloat(self.0 - other)
+    }
+}
+
+impl<T: Mul> Mul for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
+
+    fn mul(self, other: Self) -> Self::Output {
         OrderedFloat(self.0 * other.0)
     }
 }
 
-impl<T: Float> Div for OrderedFloat<T> {
-    type Output = Self;
+impl<T: Mul> Mul<T> for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
 
-    fn div(self, other: Self) -> Self {
+    fn mul(self, other: T) -> Self::Output {
+        OrderedFloat(self.0 * other)
+    }
+}
+
+impl<T: Div> Div for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
+
+    fn div(self, other: Self) -> Self::Output {
         OrderedFloat(self.0 / other.0)
     }
 }
 
-impl<T: Float> Bounded for OrderedFloat<T> {
+impl<T: Div> Div<T> for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
+
+    fn div(self, other: T) -> Self::Output {
+        OrderedFloat(self.0 / other)
+    }
+}
+
+impl<T: Rem> Rem for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
+
+    fn rem(self, other: Self) -> Self::Output {
+        OrderedFloat(self.0 % other.0)
+    }
+}
+
+impl<T: Rem> Rem<T> for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
+
+    fn rem(self, other: T) -> Self::Output {
+        OrderedFloat(self.0 % other)
+    }
+}
+
+impl<T: Bounded> Bounded for OrderedFloat<T> {
     fn min_value() -> Self {
         OrderedFloat(T::min_value())
     }
@@ -215,7 +263,7 @@ impl<T: Float> Bounded for OrderedFloat<T> {
     }
 }
 
-impl<T: Float + FromStr> FromStr for OrderedFloat<T> {
+impl<T: FromStr> FromStr for OrderedFloat<T> {
     type Err = T::Err;
 
     /// Convert a &str to `OrderedFloat`. Returns an error if the string fails to parse.
@@ -232,18 +280,126 @@ impl<T: Float + FromStr> FromStr for OrderedFloat<T> {
     }
 }
 
-impl<T: Float> Neg for OrderedFloat<T> {
-    type Output = Self;
+impl<T: Neg> Neg for OrderedFloat<T> {
+    type Output = OrderedFloat<T::Output>;
 
-    fn neg(self) -> Self {
+    fn neg(self) -> Self::Output {
         OrderedFloat(-self.0)
     }
 }
 
-impl<T: Float> Zero for OrderedFloat<T> {
+impl<T: Zero> Zero for OrderedFloat<T> {
     fn zero() -> Self { OrderedFloat(T::zero()) }
 
     fn is_zero(&self) -> bool { self.0.is_zero() }
+}
+
+impl<T: One> One for OrderedFloat<T> {
+    fn one() -> Self { OrderedFloat(T::one()) }
+}
+
+impl<T: NumCast> NumCast for OrderedFloat<T> {
+    fn from<F: ToPrimitive>(n: F) -> Option<Self> {
+        T::from(n).map(OrderedFloat)
+    }
+}
+
+impl<T: FromPrimitive> FromPrimitive for OrderedFloat<T> {
+    fn from_i64(n: i64) -> Option<Self> { T::from_i64(n).map(OrderedFloat) }
+    fn from_u64(n: u64) -> Option<Self> { T::from_u64(n).map(OrderedFloat) }
+    fn from_isize(n: isize) -> Option<Self> { T::from_isize(n).map(OrderedFloat) }
+    fn from_i8(n: i8) -> Option<Self> { T::from_i8(n).map(OrderedFloat) }
+    fn from_i16(n: i16) -> Option<Self> { T::from_i16(n).map(OrderedFloat) }
+    fn from_i32(n: i32) -> Option<Self> { T::from_i32(n).map(OrderedFloat) }
+    fn from_usize(n: usize) -> Option<Self> { T::from_usize(n).map(OrderedFloat) }
+    fn from_u8(n: u8) -> Option<Self> { T::from_u8(n).map(OrderedFloat) }
+    fn from_u16(n: u16) -> Option<Self> { T::from_u16(n).map(OrderedFloat) }
+    fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).map(OrderedFloat) }
+    fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).map(OrderedFloat) }
+    fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).map(OrderedFloat) }
+}
+
+impl<T: ToPrimitive> ToPrimitive for OrderedFloat<T> {
+    fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
+    fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
+    fn to_isize(&self) -> Option<isize> { self.0.to_isize() }
+    fn to_i8(&self) -> Option<i8> { self.0.to_i8() }
+    fn to_i16(&self) -> Option<i16> { self.0.to_i16() }
+    fn to_i32(&self) -> Option<i32> { self.0.to_i32() }
+    fn to_usize(&self) -> Option<usize> { self.0.to_usize() }
+    fn to_u8(&self) -> Option<u8> { self.0.to_u8() }
+    fn to_u16(&self) -> Option<u16> { self.0.to_u16() }
+    fn to_u32(&self) -> Option<u32> { self.0.to_u32() }
+    fn to_f32(&self) -> Option<f32> { self.0.to_f32() }
+    fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
+}
+
+impl<T: Float> Float for OrderedFloat<T> {
+    fn nan() -> Self { OrderedFloat(T::nan()) }
+    fn infinity() -> Self { OrderedFloat(T::infinity()) }
+    fn neg_infinity() -> Self { OrderedFloat(T::neg_infinity()) }
+    fn neg_zero() -> Self { OrderedFloat(T::neg_zero()) }
+    fn min_value() -> Self { OrderedFloat(T::min_value()) }
+    fn min_positive_value() -> Self { OrderedFloat(T::min_positive_value()) }
+    fn max_value() -> Self { OrderedFloat(T::max_value()) }
+    fn is_nan(self) -> bool { self.0.is_nan() }
+    fn is_infinite(self) -> bool { self.0.is_infinite() }
+    fn is_finite(self) -> bool { self.0.is_finite() }
+    fn is_normal(self) -> bool { self.0.is_normal() }
+    fn classify(self) -> std::num::FpCategory { self.0.classify() }
+    fn floor(self) -> Self { OrderedFloat(self.0.floor()) }
+    fn ceil(self) -> Self { OrderedFloat(self.0.ceil()) }
+    fn round(self) -> Self { OrderedFloat(self.0.round()) }
+    fn trunc(self) -> Self { OrderedFloat(self.0.trunc()) }
+    fn fract(self) -> Self { OrderedFloat(self.0.fract()) }
+    fn abs(self) -> Self { OrderedFloat(self.0.abs()) }
+    fn signum(self) -> Self { OrderedFloat(self.0.signum()) }
+    fn is_sign_positive(self) -> bool { self.0.is_sign_positive() }
+    fn is_sign_negative(self) -> bool { self.0.is_sign_negative() }
+    fn mul_add(self, a: Self, b: Self) -> Self { OrderedFloat(self.0.mul_add(a.0, b.0)) }
+    fn recip(self) -> Self { OrderedFloat(self.0.recip()) }
+    fn powi(self, n: i32) -> Self { OrderedFloat(self.0.powi(n)) }
+    fn powf(self, n: Self) -> Self { OrderedFloat(self.0.powf(n.0)) }
+    fn sqrt(self) -> Self { OrderedFloat(self.0.sqrt()) }
+    fn exp(self) -> Self { OrderedFloat(self.0.exp()) }
+    fn exp2(self) -> Self { OrderedFloat(self.0.exp2()) }
+    fn ln(self) -> Self { OrderedFloat(self.0.ln()) }
+    fn log(self, base: Self) -> Self { OrderedFloat(self.0.log(base.0)) }
+    fn log2(self) -> Self { OrderedFloat(self.0.log2()) }
+    fn log10(self) -> Self { OrderedFloat(self.0.log10()) }
+    fn max(self, other: Self) -> Self { OrderedFloat(self.0.max(other.0)) }
+    fn min(self, other: Self) -> Self { OrderedFloat(self.0.min(other.0)) }
+    fn abs_sub(self, other: Self) -> Self { OrderedFloat(self.0.abs_sub(other.0)) }
+    fn cbrt(self) -> Self { OrderedFloat(self.0.cbrt()) }
+    fn hypot(self, other: Self) -> Self { OrderedFloat(self.0.hypot(other.0)) }
+    fn sin(self) -> Self { OrderedFloat(self.0.sin()) }
+    fn cos(self) -> Self { OrderedFloat(self.0.cos()) }
+    fn tan(self) -> Self { OrderedFloat(self.0.tan()) }
+    fn asin(self) -> Self { OrderedFloat(self.0.asin()) }
+    fn acos(self) -> Self { OrderedFloat(self.0.acos()) }
+    fn atan(self) -> Self { OrderedFloat(self.0.atan()) }
+    fn atan2(self, other: Self) -> Self { OrderedFloat(self.0.atan2(other.0)) }
+    fn sin_cos(self) -> (Self, Self) {
+        let (a, b) = self.0.sin_cos();
+        (OrderedFloat(a), OrderedFloat(b))
+    }
+    fn exp_m1(self) -> Self { OrderedFloat(self.0.exp_m1()) }
+    fn ln_1p(self) -> Self { OrderedFloat(self.0.ln_1p()) }
+    fn sinh(self) -> Self { OrderedFloat(self.0.sinh()) }
+    fn cosh(self) -> Self { OrderedFloat(self.0.cosh()) }
+    fn tanh(self) -> Self { OrderedFloat(self.0.tanh()) }
+    fn asinh(self) -> Self { OrderedFloat(self.0.asinh()) }
+    fn acosh(self) -> Self { OrderedFloat(self.0.acosh()) }
+    fn atanh(self) -> Self { OrderedFloat(self.0.atanh()) }
+    fn integer_decode(self) -> (u64, i16, i8) { self.0.integer_decode() }
+}
+
+
+impl<T: Float + Num> Num for OrderedFloat<T> {
+    type FromStrRadixErr = T::FromStrRadixErr;
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        T::from_str_radix(str, radix).map(OrderedFloat)
+    }
 }
 
 /// A wrapper around Floats providing an implementation of Ord and Hash.
