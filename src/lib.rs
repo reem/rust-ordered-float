@@ -346,7 +346,7 @@ impl<T: Float> Float for OrderedFloat<T> {
     fn is_infinite(self) -> bool { self.0.is_infinite() }
     fn is_finite(self) -> bool { self.0.is_finite() }
     fn is_normal(self) -> bool { self.0.is_normal() }
-    fn classify(self) -> std::num::FpCategory { self.0.classify() }
+    fn classify(self) -> core::num::FpCategory { self.0.classify() }
     fn floor(self) -> Self { OrderedFloat(self.0.floor()) }
     fn ceil(self) -> Self { OrderedFloat(self.0.ceil()) }
     fn round(self) -> Self { OrderedFloat(self.0.round()) }
@@ -356,42 +356,74 @@ impl<T: Float> Float for OrderedFloat<T> {
     fn signum(self) -> Self { OrderedFloat(self.0.signum()) }
     fn is_sign_positive(self) -> bool { self.0.is_sign_positive() }
     fn is_sign_negative(self) -> bool { self.0.is_sign_negative() }
+    #[cfg(feature = "std")]
     fn mul_add(self, a: Self, b: Self) -> Self { OrderedFloat(self.0.mul_add(a.0, b.0)) }
     fn recip(self) -> Self { OrderedFloat(self.0.recip()) }
     fn powi(self, n: i32) -> Self { OrderedFloat(self.0.powi(n)) }
+    #[cfg(feature = "std")]
     fn powf(self, n: Self) -> Self { OrderedFloat(self.0.powf(n.0)) }
+    #[cfg(feature = "std")]
     fn sqrt(self) -> Self { OrderedFloat(self.0.sqrt()) }
+    #[cfg(feature = "std")]
     fn exp(self) -> Self { OrderedFloat(self.0.exp()) }
+    #[cfg(feature = "std")]
     fn exp2(self) -> Self { OrderedFloat(self.0.exp2()) }
+    #[cfg(feature = "std")]
     fn ln(self) -> Self { OrderedFloat(self.0.ln()) }
+    #[cfg(feature = "std")]
     fn log(self, base: Self) -> Self { OrderedFloat(self.0.log(base.0)) }
+    #[cfg(feature = "std")]
     fn log2(self) -> Self { OrderedFloat(self.0.log2()) }
+    #[cfg(feature = "std")]
     fn log10(self) -> Self { OrderedFloat(self.0.log10()) }
     fn max(self, other: Self) -> Self { OrderedFloat(self.0.max(other.0)) }
     fn min(self, other: Self) -> Self { OrderedFloat(self.0.min(other.0)) }
+    #[cfg(feature = "std")]
     fn abs_sub(self, other: Self) -> Self { OrderedFloat(self.0.abs_sub(other.0)) }
+    #[cfg(feature = "std")]
     fn cbrt(self) -> Self { OrderedFloat(self.0.cbrt()) }
+    #[cfg(feature = "std")]
     fn hypot(self, other: Self) -> Self { OrderedFloat(self.0.hypot(other.0)) }
+    #[cfg(feature = "std")]
     fn sin(self) -> Self { OrderedFloat(self.0.sin()) }
+    #[cfg(feature = "std")]
     fn cos(self) -> Self { OrderedFloat(self.0.cos()) }
+    #[cfg(feature = "std")]
     fn tan(self) -> Self { OrderedFloat(self.0.tan()) }
+    #[cfg(feature = "std")]
     fn asin(self) -> Self { OrderedFloat(self.0.asin()) }
+    #[cfg(feature = "std")]
     fn acos(self) -> Self { OrderedFloat(self.0.acos()) }
+    #[cfg(feature = "std")]
     fn atan(self) -> Self { OrderedFloat(self.0.atan()) }
+    #[cfg(feature = "std")]
     fn atan2(self, other: Self) -> Self { OrderedFloat(self.0.atan2(other.0)) }
+    #[cfg(feature = "std")]
     fn sin_cos(self) -> (Self, Self) {
         let (a, b) = self.0.sin_cos();
         (OrderedFloat(a), OrderedFloat(b))
     }
+    #[cfg(feature = "std")]
     fn exp_m1(self) -> Self { OrderedFloat(self.0.exp_m1()) }
+    #[cfg(feature = "std")]
     fn ln_1p(self) -> Self { OrderedFloat(self.0.ln_1p()) }
+    #[cfg(feature = "std")]
     fn sinh(self) -> Self { OrderedFloat(self.0.sinh()) }
+    #[cfg(feature = "std")]
     fn cosh(self) -> Self { OrderedFloat(self.0.cosh()) }
+    #[cfg(feature = "std")]
     fn tanh(self) -> Self { OrderedFloat(self.0.tanh()) }
+    #[cfg(feature = "std")]
     fn asinh(self) -> Self { OrderedFloat(self.0.asinh()) }
+    #[cfg(feature = "std")]
     fn acosh(self) -> Self { OrderedFloat(self.0.acosh()) }
+    #[cfg(feature = "std")]
     fn atanh(self) -> Self { OrderedFloat(self.0.atanh()) }
     fn integer_decode(self) -> (u64, i16, i8) { self.0.integer_decode() }
+
+    fn epsilon() -> Self { OrderedFloat(T::epsilon()) }
+    fn to_degrees(self) -> Self { OrderedFloat(self.0.to_degrees()) }
+    fn to_radians(self) -> Self { OrderedFloat(self.0.to_radians()) }
 }
 
 
@@ -405,7 +437,7 @@ impl<T: Float + Num> Num for OrderedFloat<T> {
 /// A wrapper around Floats providing an implementation of Ord and Hash.
 ///
 /// A NaN value cannot be stored in this type.
-#[derive(PartialOrd, PartialEq, Debug, Default, Clone, Copy)]
+#[derive(PartialEq, Debug, Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct NotNan<T>(T);
 
@@ -440,6 +472,12 @@ impl<T: Float> NotNan<T> {
 impl<T: Float> AsRef<T> for NotNan<T> {
     fn as_ref(&self) -> &T {
         &self.0
+    }
+}
+
+impl<T: Float> PartialOrd for NotNan<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
     }
 }
 
