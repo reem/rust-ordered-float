@@ -10,6 +10,7 @@ extern crate num_traits;
 
 use core::cmp::Ordering;
 use core::convert::TryFrom;
+use core::num::FpCategory;
 use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem,
                RemAssign, Sub, SubAssign};
 use core::hash::{Hash, Hasher};
@@ -334,6 +335,37 @@ impl<T: ToPrimitive> ToPrimitive for OrderedFloat<T> {
     fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
 }
 
+impl<T: Float> num_traits::float::FloatCore for OrderedFloat<T> {
+    fn nan() -> Self { OrderedFloat(T::nan()) }
+    fn infinity() -> Self { OrderedFloat(T::infinity()) }
+    fn neg_infinity() -> Self { OrderedFloat(T::neg_infinity()) }
+    fn neg_zero() -> Self { OrderedFloat(T::neg_zero()) }
+    fn min_value() -> Self { OrderedFloat(T::min_value()) }
+    fn min_positive_value() -> Self { OrderedFloat(T::min_positive_value()) }
+    fn max_value() -> Self { OrderedFloat(T::max_value()) }
+    fn is_nan(self) -> bool { self.0.is_nan() }
+    fn is_infinite(self) -> bool { self.0.is_infinite() }
+    fn is_finite(self) -> bool { self.0.is_finite() }
+    fn is_normal(self) -> bool { self.0.is_normal() }
+    fn classify(self) -> FpCategory { self.0.classify() }
+    fn floor(self) -> Self { OrderedFloat(self.0.floor()) }
+    fn ceil(self) -> Self { OrderedFloat(self.0.ceil()) }
+    fn round(self) -> Self { OrderedFloat(self.0.round()) }
+    fn trunc(self) -> Self { OrderedFloat(self.0.trunc()) }
+    fn fract(self) -> Self { OrderedFloat(self.0.fract()) }
+    fn abs(self) -> Self { OrderedFloat(self.0.abs()) }
+    fn signum(self) -> Self { OrderedFloat(self.0.signum()) }
+    fn is_sign_positive(self) -> bool { self.0.is_sign_positive() }
+    fn is_sign_negative(self) -> bool { self.0.is_sign_negative() }
+    fn recip(self) -> Self { OrderedFloat(self.0.recip()) }
+    fn powi(self, n: i32) -> Self { OrderedFloat(self.0.powi(n)) }
+    fn integer_decode(self) -> (u64, i16, i8) { self.0.integer_decode() }
+    fn epsilon() -> Self { OrderedFloat(T::epsilon()) }
+    fn to_degrees(self) -> Self { OrderedFloat(self.0.to_degrees()) }
+    fn to_radians(self) -> Self { OrderedFloat(self.0.to_radians()) }
+}
+
+#[cfg(feature = "std")]
 impl<T: Float> Float for OrderedFloat<T> {
     fn nan() -> Self { OrderedFloat(T::nan()) }
     fn infinity() -> Self { OrderedFloat(T::infinity()) }
@@ -346,7 +378,7 @@ impl<T: Float> Float for OrderedFloat<T> {
     fn is_infinite(self) -> bool { self.0.is_infinite() }
     fn is_finite(self) -> bool { self.0.is_finite() }
     fn is_normal(self) -> bool { self.0.is_normal() }
-    fn classify(self) -> std::num::FpCategory { self.0.classify() }
+    fn classify(self) -> FpCategory { self.0.classify() }
     fn floor(self) -> Self { OrderedFloat(self.0.floor()) }
     fn ceil(self) -> Self { OrderedFloat(self.0.ceil()) }
     fn round(self) -> Self { OrderedFloat(self.0.round()) }
@@ -392,6 +424,9 @@ impl<T: Float> Float for OrderedFloat<T> {
     fn acosh(self) -> Self { OrderedFloat(self.0.acosh()) }
     fn atanh(self) -> Self { OrderedFloat(self.0.atanh()) }
     fn integer_decode(self) -> (u64, i16, i8) { self.0.integer_decode() }
+    fn epsilon() -> Self { OrderedFloat(T::epsilon()) }
+    fn to_degrees(self) -> Self { OrderedFloat(self.0.to_degrees()) }
+    fn to_radians(self) -> Self { OrderedFloat(self.0.to_radians()) }
 }
 
 
