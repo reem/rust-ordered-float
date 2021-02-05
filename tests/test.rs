@@ -595,7 +595,7 @@ fn not_nan_usage_in_const_context() {
 fn not_nan_panic_safety() {
     let catch_op = |mut num, op: fn(&mut NotNan<_>)| {
         let mut num_ref = panic::AssertUnwindSafe(&mut num);
-        let _ = panic::catch_unwind(move || op(*num_ref));
+        let _ = panic::catch_unwind(move || op(&mut *num_ref));
         num
     };
 
