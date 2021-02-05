@@ -8,6 +8,7 @@ repository = "https://github.com/reem/rust-ordered-float"
 readme = "README.md"
 keywords = ["no_std", "ord", "f64", "f32", "sort"]
 categories = ["science", "rust-patterns", "no-std"]
+edition = "2018"
 
 [dependencies]
 num-traits = { version = "0.2.1", default-features = false }

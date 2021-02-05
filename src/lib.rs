@@ -4,7 +4,6 @@
 
 //! Wrappers for total order on Floats.
 
-extern crate num_traits;
 #[cfg(feature = "std")] extern crate std;
 #[cfg(feature = "std")] use std::error::Error;
 
