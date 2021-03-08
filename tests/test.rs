@@ -82,8 +82,8 @@ fn not_nan32_one() {
 
 #[test]
 fn not_nan32_bounded() {
-    assert_eq!(NotNan::<f32>::min_value(), <f32 as Bounded>::min_value());
-    assert_eq!(NotNan::<f32>::max_value(), <f32 as Bounded>::max_value());
+    assert_eq!(<NotNan::<f32> as Bounded>::min_value(), <f32 as Bounded>::min_value());
+    assert_eq!(<NotNan::<f32> as Bounded>::max_value(), <f32 as Bounded>::max_value());
 }
 
 #[test]
@@ -411,8 +411,8 @@ fn not_nan64_one() {
 
 #[test]
 fn not_nan64_bounded() {
-    assert_eq!(NotNan::<f64>::min_value(), <f64 as Bounded>::min_value());
-    assert_eq!(NotNan::<f64>::max_value(), <f64 as Bounded>::max_value());
+    assert_eq!(<NotNan::<f64> as Bounded>::min_value(), <f64 as Bounded>::min_value());
+    assert_eq!(<NotNan::<f64> as Bounded>::max_value(), <f64 as Bounded>::max_value());
 }
 
 #[test]
