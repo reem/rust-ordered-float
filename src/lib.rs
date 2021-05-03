@@ -21,7 +21,7 @@ use core::str::FromStr;
 
 use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
 #[cfg(feature = "std")]
-use num_traits::Float;
+pub use num_traits::Float;
 #[cfg(not(feature = "std"))]
 use num_traits::float::FloatCore as Float;
 
