@@ -553,6 +553,7 @@ impl<T: Float> AsRef<T> for NotNan<T> {
     }
 }
 
+#[allow(clippy::derive_ord_xor_partial_ord)]
 impl<T: Float> Ord for NotNan<T> {
     fn cmp(&self, other: &NotNan<T>) -> Ordering {
         match self.partial_cmp(&other) {
