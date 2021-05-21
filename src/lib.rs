@@ -2,7 +2,7 @@
 #![cfg_attr(test, deny(warnings))]
 #![deny(missing_docs)]
 
-//! Wrappers for total order on Floats.
+//! Wrappers for total order on Floats.  See the [`OrderedFloat`] and [`NotNan`] docs for details.
 
 #[cfg(feature = "std")] extern crate std;
 #[cfg(feature = "std")] use std::error::Error;
@@ -34,10 +34,32 @@ const MAN_MASK: u64 = 0x000fffffffffffffu64;
 const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000u64;
 const CANONICAL_ZERO_BITS: u64 = 0x0u64;
 
-/// A wrapper around Floats providing an implementation of Ord and Hash.
+/// A wrapper around floats providing implementations of `Eq`, `Ord`, and `Hash`.
 ///
 /// NaN is sorted as *greater* than all other values and *equal*
 /// to itself, in contradiction with the IEEE standard.
+///
+/// ```
+/// use ordered_float::OrderedFloat;
+/// use std::f32::NAN;
+///
+/// let mut v = [OrderedFloat(NAN), OrderedFloat(2.0), OrderedFloat(1.0)];
+/// v.sort();
+/// assert_eq!(v, [OrderedFloat(1.0), OrderedFloat(2.0), OrderedFloat(NAN)]);
+/// ```
+///
+/// Because `OrderedFloat` implements `Ord` and `Eq`, it can be used as a key in a `HashSet`,
+/// `HashMap`, `BTreeMap`, or `BTreeSet` (unlike the primitive `f32` or `f64` types):
+///
+/// ```
+/// # use ordered_float::OrderedFloat;
+/// # use std::collections::HashSet;
+/// # use std::f32::NAN;
+///
+/// let mut s: HashSet<OrderedFloat<f32>> = HashSet::new();
+/// s.insert(OrderedFloat(NAN));
+/// assert!(s.contains(&OrderedFloat(NAN)));
+/// ```
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct OrderedFloat<T>(pub T);
@@ -455,9 +477,44 @@ impl<T: Float + Num> Num for OrderedFloat<T> {
     }
 }
 
-/// A wrapper around Floats providing an implementation of Ord and Hash.
+/// A wrapper around floats providing an implementation of `Eq`, `Ord` and `Hash`.
 ///
 /// A NaN value cannot be stored in this type.
+///
+/// ```
+/// use ordered_float::NotNan;
+///
+/// let mut v = [
+///     NotNan::new(2.0).unwrap(), 
+///     NotNan::new(1.0).unwrap(), 
+/// ];
+/// v.sort();
+/// assert_eq!(v, [1.0, 2.0]);
+/// ```
+///
+/// Because `NotNan` implements `Ord` and `Eq`, it can be used as a key in a `HashSet`,
+/// `HashMap`, `BTreeMap`, or `BTreeSet` (unlike the primitive `f32` or `f64` types):
+///
+/// ```
+/// # use ordered_float::NotNan;
+/// # use std::collections::HashSet;
+///
+/// let mut s: HashSet<NotNan<f32>> = HashSet::new();
+/// let key = NotNan::new(1.0).unwrap();
+/// s.insert(key);
+/// assert!(s.contains(&key));
+/// ```
+///
+/// Arithmetic on NotNan values will panic if it produces a NaN value:
+///
+/// ```should_panic
+/// # use ordered_float::NotNan;
+/// let a = NotNan::new(std::f32::INFINITY).unwrap();
+/// let b = NotNan::new(std::f32::NEG_INFINITY).unwrap();
+///
+/// // This will panic:
+/// let c = a + b;
+/// ```
 #[derive(PartialOrd, PartialEq, Debug, Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct NotNan<T>(T);
