@@ -66,24 +66,28 @@ pub struct OrderedFloat<T>(pub T);
 
 impl<T: Float> OrderedFloat<T> {
     /// Get the value out.
+    #[inline]
     pub fn into_inner(self) -> T {
         self.0
     }
 }
 
 impl<T: Float> AsRef<T> for OrderedFloat<T> {
+    #[inline]
     fn as_ref(&self) -> &T {
         &self.0
     }
 }
 
 impl<T: Float> AsMut<T> for OrderedFloat<T> {
+    #[inline]
     fn as_mut(&mut self) -> &mut T {
         &mut self.0
     }
 }
 
 impl<'a, T: Float> From<&'a T> for &'a OrderedFloat<T> {
+    #[inline]
     fn from(t: &'a T) -> &'a OrderedFloat<T> {
         // Safety: OrderedFloat is #[repr(transparent)] and has no invalid values.
         unsafe {
@@ -93,6 +97,7 @@ impl<'a, T: Float> From<&'a T> for &'a OrderedFloat<T> {
 }
 
 impl<'a, T: Float> From<&'a mut T> for &'a mut OrderedFloat<T> {
+    #[inline]
     fn from(t: &'a mut T) -> &'a mut OrderedFloat<T> {
         // Safety: OrderedFloat is #[repr(transparent)] and has no invalid values.
         unsafe {
@@ -102,6 +107,7 @@ impl<'a, T: Float> From<&'a mut T> for &'a mut OrderedFloat<T> {
 }
 
 impl<T: Float> PartialOrd for OrderedFloat<T> {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
@@ -109,9 +115,9 @@ impl<T: Float> PartialOrd for OrderedFloat<T> {
 
 impl<T: Float> Ord for OrderedFloat<T> {
     fn cmp(&self, other: &Self) -> Ordering {
-        let lhs = self.as_ref();
-        let rhs = other.as_ref();
-        match lhs.partial_cmp(&rhs) {
+        let lhs = &self.0;
+        let rhs = &other.0;
+        match lhs.partial_cmp(rhs) {
             Some(ordering) => ordering,
             None => {
                 if lhs.is_nan() {
@@ -129,16 +135,18 @@ impl<T: Float> Ord for OrderedFloat<T> {
 }
 
 impl<T: Float> PartialEq for OrderedFloat<T> {
+    #[inline]
     fn eq(&self, other: &OrderedFloat<T>) -> bool {
-        if self.as_ref().is_nan() {
-            other.as_ref().is_nan()
+        if self.0.is_nan() {
+            other.0.is_nan()
         } else {
-            self.as_ref() == other.as_ref()
+            self.0 == other.0
         }
     }
 }
 
 impl<T: Float> PartialEq<T> for OrderedFloat<T> {
+    #[inline]
     fn eq(&self, other: &T) -> bool {
         self.0 == *other
     }
@@ -150,30 +158,34 @@ impl<T: Float> Hash for OrderedFloat<T> {
             // normalize to one representation of NaN
             hash_float(&T::nan(), state)
         } else {
-            hash_float(self.as_ref(), state)
+            hash_float(&self.0, state)
         }
     }
 }
 
 impl<T: Float + fmt::Display> fmt::Display for OrderedFloat<T> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_ref().fmt(f)
+        self.0.fmt(f)
     }
 }
 
 impl From<OrderedFloat<f32>> for f32 {
+    #[inline]
     fn from(f: OrderedFloat<f32>) -> f32 {
         f.0
     }
 }
 
 impl From<OrderedFloat<f64>> for f64 {
+    #[inline]
     fn from(f: OrderedFloat<f64>) -> f64 {
         f.0
     }
 }
 
 impl<T: Float> From<T> for OrderedFloat<T> {
+    #[inline]
     fn from(val: T) -> Self {
         OrderedFloat(val)
     }
@@ -182,14 +194,16 @@ impl<T: Float> From<T> for OrderedFloat<T> {
 impl<T: Float> Deref for OrderedFloat<T> {
     type Target = T;
 
+    #[inline]
     fn deref(&self) -> &Self::Target {
-        self.as_ref()
+        &self.0
     }
 }
 
 impl<T: Float> DerefMut for OrderedFloat<T> {
+    #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.as_mut()
+        &mut self.0
     }
 }
 
@@ -287,10 +301,12 @@ impl_ordered_float_binop!{Div, div}
 impl_ordered_float_binop!{Rem, rem}
 
 impl<T: Bounded> Bounded for OrderedFloat<T> {
+    #[inline]
     fn min_value() -> Self {
         OrderedFloat(T::min_value())
     }
 
+    #[inline]
     fn max_value() -> Self {
         OrderedFloat(T::max_value())
     }
@@ -316,6 +332,7 @@ impl<T: FromStr> FromStr for OrderedFloat<T> {
 impl<T: Neg> Neg for OrderedFloat<T> {
     type Output = OrderedFloat<T::Output>;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         OrderedFloat(-self.0)
     }
@@ -324,22 +341,27 @@ impl<T: Neg> Neg for OrderedFloat<T> {
 impl<'a, T> Neg for &'a OrderedFloat<T> where &'a T: Neg {
     type Output = OrderedFloat<<&'a T as Neg>::Output>;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         OrderedFloat(-(&self.0))
     }
 }
 
 impl<T: Zero> Zero for OrderedFloat<T> {
+    #[inline]
     fn zero() -> Self { OrderedFloat(T::zero()) }
 
+    #[inline]
     fn is_zero(&self) -> bool { self.0.is_zero() }
 }
 
 impl<T: One> One for OrderedFloat<T> {
+    #[inline]
     fn one() -> Self { OrderedFloat(T::one()) }
 }
 
 impl<T: NumCast> NumCast for OrderedFloat<T> {
+    #[inline]
     fn from<F: ToPrimitive>(n: F) -> Option<Self> {
         T::from(n).map(OrderedFloat)
     }
@@ -533,6 +555,7 @@ impl<T: Float> NotNan<T> {
 
 impl<T> NotNan<T> {
     /// Get the value out.
+    #[inline]
     pub fn into_inner(self) -> T {
         self.0
     }
@@ -542,12 +565,14 @@ impl<T> NotNan<T> {
     /// # Safety
     ///
     /// Behaviour is undefined if `val` is NaN
+    #[inline]
     pub const unsafe fn unchecked_new(val: T) -> Self {
         NotNan(val)
     }
 }
 
 impl<T: Float> AsRef<T> for NotNan<T> {
+    #[inline]
     fn as_ref(&self) -> &T {
         &self.0
     }
@@ -565,31 +590,36 @@ impl<T: Float> Ord for NotNan<T> {
 
 #[allow(clippy::derive_hash_xor_eq)]
 impl<T: Float> Hash for NotNan<T> {
+    #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
-        hash_float(self.as_ref(), state)
+        hash_float(&self.0, state)
     }
 }
 
 impl<T: Float + fmt::Display> fmt::Display for NotNan<T> {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.as_ref().fmt(f)
+        self.0.fmt(f)
     }
 }
 
 impl From<NotNan<f32>> for f32 {
+    #[inline]
     fn from(value: NotNan<f32>) -> Self {
-        value.into_inner()
+        value.0
     }
 }
 
 impl From<NotNan<f64>> for f64 {
+    #[inline]
     fn from(value: NotNan<f64>) -> Self {
-        value.into_inner()
+        value.0
     }
 }
 
 impl TryFrom<f32> for NotNan<f32> {
     type Error = FloatIsNan;
+    #[inline]
     fn try_from(v: f32) -> Result<Self, Self::Error> {
         NotNan::new(v)
     }
@@ -597,12 +627,14 @@ impl TryFrom<f32> for NotNan<f32> {
 
 impl TryFrom<f64> for NotNan<f64> {
     type Error = FloatIsNan;
+    #[inline]
     fn try_from(v: f64) -> Result<Self, Self::Error> {
         NotNan::new(v)
     }
 }
 
 impl From<NotNan<f32>> for NotNan<f64> {
+    #[inline]
     fn from(v: NotNan<f32>) -> NotNan<f64> {
         unsafe {
             NotNan::unchecked_new(v.0 as f64)
@@ -613,14 +645,16 @@ impl From<NotNan<f32>> for NotNan<f64> {
 impl<T: Float> Deref for NotNan<T> {
     type Target = T;
 
+    #[inline]
     fn deref(&self) -> &Self::Target {
-        self.as_ref()
+        &self.0
     }
 }
 
 impl<T: Float + PartialEq> Eq for NotNan<T> {}
 
 impl<T: Float> PartialEq<T> for NotNan<T> {
+    #[inline]
     fn eq(&self, other: &T) -> bool {
         self.0 == *other
     }
@@ -632,6 +666,7 @@ impl<T: Float> PartialEq<T> for NotNan<T> {
 impl<T: Float> Add<T> for NotNan<T> {
     type Output = Self;
 
+    #[inline]
     fn add(self, other: T) -> Self {
         NotNan::new(self.0 + other).expect("Addition resulted in NaN")
     }
@@ -647,6 +682,7 @@ impl<T: Float + Sum> Sum for NotNan<T> {
 }
 
 impl<'a, T: Float + Sum + 'a> Sum<&'a NotNan<T>> for NotNan<T> {
+    #[inline]
     fn sum<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
         iter.cloned().sum()
     }
@@ -658,6 +694,7 @@ impl<'a, T: Float + Sum + 'a> Sum<&'a NotNan<T>> for NotNan<T> {
 impl<T: Float> Sub<T> for NotNan<T> {
     type Output = Self;
 
+    #[inline]
     fn sub(self, other: T) -> Self {
         NotNan::new(self.0 - other).expect("Subtraction resulted in NaN")
     }
@@ -669,6 +706,7 @@ impl<T: Float> Sub<T> for NotNan<T> {
 impl<T: Float> Mul<T> for NotNan<T> {
     type Output = Self;
 
+    #[inline]
     fn mul(self, other: T) -> Self {
         NotNan::new(self.0 * other).expect("Multiplication resulted in NaN")
     }
@@ -681,6 +719,7 @@ impl<T: Float + Product> Product for NotNan<T> {
 }
 
 impl<'a, T: Float + Product + 'a> Product<&'a NotNan<T>> for NotNan<T> {
+    #[inline]
     fn product<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
         iter.cloned().product()
     }
@@ -692,6 +731,7 @@ impl<'a, T: Float + Product + 'a> Product<&'a NotNan<T>> for NotNan<T> {
 impl<T: Float> Div<T> for NotNan<T> {
     type Output = Self;
 
+    #[inline]
     fn div(self, other: T) -> Self {
         NotNan::new(self.0 / other).expect("Division resulted in NaN")
     }
@@ -703,6 +743,7 @@ impl<T: Float> Div<T> for NotNan<T> {
 impl<T: Float> Rem<T> for NotNan<T> {
     type Output = Self;
 
+    #[inline]
     fn rem(self, other: T) -> Self {
         NotNan::new(self.0 % other).expect("Rem resulted in NaN")
     }
@@ -713,6 +754,7 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float> $imp for NotNan<T> {
             type Output = Self;
 
+            #[inline]
             fn $method(self, other: Self) -> Self {
                 self.$method(other.0)
             }
@@ -721,6 +763,7 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float + Copy> $imp<&T> for NotNan<T> {
             type Output = NotNan<T>;
 
+            #[inline]
             fn $method(self, other: &T) -> Self::Output {
                 self.$method(*other)
             }
@@ -729,6 +772,7 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float + Copy> $imp<&Self> for NotNan<T> {
             type Output = NotNan<T>;
 
+            #[inline]
             fn $method(self, other: &Self) -> Self::Output {
                 self.$method(other.0)
             }
@@ -737,6 +781,7 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float + Copy> $imp for &NotNan<T> {
             type Output = NotNan<T>;
 
+            #[inline]
             fn $method(self, other: Self) -> Self::Output {
                 (*self).$method(other.0)
             }
@@ -745,6 +790,7 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float + Copy> $imp<NotNan<T>> for &NotNan<T> {
             type Output = NotNan<T>;
 
+            #[inline]
             fn $method(self, other: NotNan<T>) -> Self::Output {
                 (*self).$method(other.0)
             }
@@ -753,6 +799,7 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float + Copy> $imp<T> for &NotNan<T> {
             type Output = NotNan<T>;
 
+            #[inline]
             fn $method(self, other: T) -> Self::Output {
                 (*self).$method(other)
             }
@@ -761,30 +808,35 @@ macro_rules! impl_not_nan_binop {
         impl<T: Float + Copy> $imp<&T> for &NotNan<T> {
             type Output = NotNan<T>;
 
+            #[inline]
             fn $method(self, other: &T) -> Self::Output {
                 (*self).$method(*other)
             }
         }
 
         impl<T: Float + $assign_imp> $assign_imp<T> for NotNan<T> {
+            #[inline]
             fn $assign_method(&mut self, other: T) {
                 *self = (*self).$method(other);
             }
         }
 
         impl<T: Float + $assign_imp> $assign_imp<&T> for NotNan<T> {
+            #[inline]
             fn $assign_method(&mut self, other: &T) {
                 *self = (*self).$method(*other);
             }
         }
 
         impl<T: Float + $assign_imp> $assign_imp for NotNan<T> {
+            #[inline]
             fn $assign_method(&mut self, other: Self) {
                 (*self).$assign_method(other.0);
             }
         }
 
         impl<T: Float + $assign_imp> $assign_imp<&Self> for NotNan<T> {
+            #[inline]
             fn $assign_method(&mut self, other: &Self) {
                 (*self).$assign_method(other.0);
             }
@@ -801,6 +853,7 @@ impl_not_nan_binop!{Rem, rem, RemAssign, rem_assign}
 impl<T: Float> Neg for NotNan<T> {
     type Output = Self;
 
+    #[inline]
     fn neg(self) -> Self {
         NotNan(-self.0)
     }
@@ -809,6 +862,7 @@ impl<T: Float> Neg for NotNan<T> {
 impl<T: Float> Neg for &NotNan<T> {
     type Output = NotNan<T>;
 
+    #[inline]
     fn neg(self) -> Self::Output {
         NotNan(-self.0)
     }
@@ -833,6 +887,7 @@ impl fmt::Display for FloatIsNan {
 
 #[cfg(feature = "std")]
 impl From<FloatIsNan> for std::io::Error {
+    #[inline]
     fn from(e: FloatIsNan) -> std::io::Error {
         std::io::Error::new(std::io::ErrorKind::InvalidInput, e)
     }
@@ -860,20 +915,25 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
 }
 
 impl<T: Float> Zero for NotNan<T> {
+    #[inline]
     fn zero() -> Self { NotNan(T::zero()) }
 
+    #[inline]
     fn is_zero(&self) -> bool { self.0.is_zero() }
 }
 
 impl<T: Float> One for NotNan<T> {
+    #[inline]
     fn one() -> Self { NotNan(T::one()) }
 }
 
 impl<T: Float> Bounded for NotNan<T> {
+    #[inline]
     fn min_value() -> Self {
         NotNan(T::min_value())
     }
 
+    #[inline]
     fn max_value() -> Self {
         NotNan(T::max_value())
     }
@@ -974,14 +1034,18 @@ impl<T: Float> Num for NotNan<T> {
 }
 
 impl<T: Float + Signed> Signed for NotNan<T> {
+    #[inline]
     fn abs(&self) -> Self { NotNan(self.0.abs()) }
 
     fn abs_sub(&self, other: &Self) -> Self {
         NotNan::new(Signed::abs_sub(&self.0, &other.0)).expect("Subtraction resulted in NaN")
     }
 
+    #[inline]
     fn signum(&self) -> Self { NotNan(self.0.signum()) }
+    #[inline]
     fn is_positive(&self) -> bool { self.0.is_positive() }
+    #[inline]
     fn is_negative(&self) -> bool { self.0.is_negative() }
 }
 
@@ -1009,18 +1073,21 @@ mod impl_serde {
     use self::serde_test::{Token, assert_tokens, assert_de_tokens_error};
 
     impl<T: Float + Serialize> Serialize for OrderedFloat<T> {
+        #[inline]
         fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
             self.0.serialize(s)
         }
     }
 
     impl<'de, T: Float + Deserialize<'de>> Deserialize<'de> for OrderedFloat<T> {
+        #[inline]
         fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             T::deserialize(d).map(OrderedFloat)
         }
     }
 
     impl<T: Float + Serialize> Serialize for NotNan<T> {
+        #[inline]
         fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
             self.0.serialize(s)
         }
