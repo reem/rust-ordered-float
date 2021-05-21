@@ -283,6 +283,7 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
+        #[doc(hidden)] // Added accidentally; remove in next major version
         impl<'a, T> $imp<&'a Self> for &'a OrderedFloat<T> where &'a T: $imp {
             type Output = OrderedFloat<<&'a T as $imp>::Output>;
 
