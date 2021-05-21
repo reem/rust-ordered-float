@@ -161,15 +161,15 @@ impl<T: Float + fmt::Display> fmt::Display for OrderedFloat<T> {
     }
 }
 
-impl Into<f32> for OrderedFloat<f32> {
-    fn into(self) -> f32 {
-        self.into_inner()
+impl From<OrderedFloat<f32>> for f32 {
+    fn from(f: OrderedFloat<f32>) -> f32 {
+        f.0
     }
 }
 
-impl Into<f64> for OrderedFloat<f64> {
-    fn into(self) -> f64 {
-        self.into_inner()
+impl From<OrderedFloat<f64>> for f64 {
+    fn from(f: OrderedFloat<f64>) -> f64 {
+        f.0
     }
 }
 
@@ -519,31 +519,31 @@ impl<T: Float + Num> Num for OrderedFloat<T> {
 #[repr(transparent)]
 pub struct NotNan<T>(T);
 
-impl<T> NotNan<T> {
-    /// Create a NotNan value from a value that is guaranteed to not be NaN
-    ///
-    /// # Safety
-    ///
-    /// Behaviour is undefined if `val` is NaN
-    pub const unsafe fn unchecked_new(val: T) -> Self {
-        NotNan(val)
-    }
-}
-
 impl<T: Float> NotNan<T> {
-    /// Create a NotNan value.
+    /// Create a `NotNan` value.
     ///
-    /// Returns Err if val is NaN
+    /// Returns `Err` if `val` is NaN
     pub fn new(val: T) -> Result<Self, FloatIsNan> {
         match val {
             ref val if val.is_nan() => Err(FloatIsNan),
             val => Ok(NotNan(val)),
         }
     }
+}
 
+impl<T> NotNan<T> {
     /// Get the value out.
     pub fn into_inner(self) -> T {
         self.0
+    }
+
+    /// Create a `NotNan` value from a value that is guaranteed to not be NaN
+    ///
+    /// # Safety
+    ///
+    /// Behaviour is undefined if `val` is NaN
+    pub const unsafe fn unchecked_new(val: T) -> Self {
+        NotNan(val)
     }
 }
 
@@ -831,9 +831,9 @@ impl fmt::Display for FloatIsNan {
 }
 
 #[cfg(feature = "std")]
-impl Into<std::io::Error> for FloatIsNan {
-    fn into(self) -> std::io::Error {
-        std::io::Error::new(std::io::ErrorKind::InvalidInput, self)
+impl From<FloatIsNan> for std::io::Error {
+    fn from(e: FloatIsNan) -> std::io::Error {
+        std::io::Error::new(std::io::ErrorKind::InvalidInput, e)
     }
 }
 
