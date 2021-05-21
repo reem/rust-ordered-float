@@ -542,6 +542,91 @@ fn test_add_fails_on_nan() {
 }
 
 #[test]
+#[should_panic]
+fn test_add_fails_on_nan_ref() {
+    let a = not_nan(std::f32::INFINITY);
+    let b = not_nan(std::f32::NEG_INFINITY);
+    let _c = a + &b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_fails_on_nan_ref_ref() {
+    let a = not_nan(std::f32::INFINITY);
+    let b = not_nan(std::f32::NEG_INFINITY);
+    let _c = &a + &b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_fails_on_nan_t_ref() {
+    let a = not_nan(std::f32::INFINITY);
+    let b = std::f32::NEG_INFINITY;
+    let _c = a + &b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_fails_on_nan_ref_t_ref() {
+    let a = not_nan(std::f32::INFINITY);
+    let b = std::f32::NEG_INFINITY;
+    let _c = &a + &b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_fails_on_nan_ref_t() {
+    let a = not_nan(std::f32::INFINITY);
+    let b = std::f32::NEG_INFINITY;
+    let _c = &a + b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_assign_fails_on_nan_ref() {
+    let mut a = not_nan(std::f32::INFINITY);
+    let b = not_nan(std::f32::NEG_INFINITY);
+    a += &b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_assign_fails_on_nan_t_ref() {
+    let mut a = not_nan(std::f32::INFINITY);
+    let b = std::f32::NEG_INFINITY;
+    a += &b;
+}
+
+#[test]
+#[should_panic]
+fn test_add_assign_fails_on_nan_t() {
+    let mut a = not_nan(std::f32::INFINITY);
+    let b = std::f32::NEG_INFINITY;
+    a += b;
+}
+
+#[test]
+fn add() {
+    assert_eq!(not_nan(0.0) + not_nan(0.0), 0.0);
+    assert_eq!(not_nan(0.0) + &not_nan(0.0), 0.0);
+    assert_eq!(&not_nan(0.0) + not_nan(0.0), 0.0);
+    assert_eq!(&not_nan(0.0) + &not_nan(0.0), 0.0);
+    assert_eq!(not_nan(0.0) + 0.0, 0.0);
+    assert_eq!(not_nan(0.0) + &0.0, 0.0);
+    assert_eq!(&not_nan(0.0) + 0.0, 0.0);
+    assert_eq!(&not_nan(0.0) + &0.0, 0.0);
+
+    assert_eq!(OrderedFloat(0.0) + OrderedFloat(0.0), 0.0);
+    assert_eq!(OrderedFloat(0.0) + &OrderedFloat(0.0), 0.0);
+    assert_eq!(&OrderedFloat(0.0) + OrderedFloat(0.0), 0.0);
+    assert_eq!(&OrderedFloat(0.0) + &OrderedFloat(0.0), 0.0);
+    assert_eq!(OrderedFloat(0.0) + 0.0, 0.0);
+    assert_eq!(OrderedFloat(0.0) + &0.0, 0.0);
+    assert_eq!(&OrderedFloat(0.0) + 0.0, 0.0);
+    assert_eq!(&OrderedFloat(0.0) + &0.0, 0.0);
+}
+
+#[test]
 fn ordered_f32_neg() {
     assert_eq!(OrderedFloat(-7.0f32), -OrderedFloat(7.0f32));
 }

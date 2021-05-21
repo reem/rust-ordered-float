@@ -173,85 +173,96 @@ impl<T: Float> DerefMut for OrderedFloat<T> {
 
 impl<T: Float> Eq for OrderedFloat<T> {}
 
-impl<T: Add> Add for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
+macro_rules! impl_ordered_float_binop {
+    ($imp:ident, $method:ident) => {
+        impl<T: $imp> $imp for OrderedFloat<T> {
+            type Output = OrderedFloat<T::Output>;
 
-    fn add(self, other: Self) -> Self::Output {
-        OrderedFloat(self.0 + other.0)
+            #[inline]
+            fn $method(self, other: Self) -> Self::Output {
+                OrderedFloat((self.0).$method(other.0))
+            }
+        }
+
+        impl<T: $imp> $imp<T> for OrderedFloat<T> {
+            type Output = OrderedFloat<T::Output>;
+
+            #[inline]
+            fn $method(self, other: T) -> Self::Output {
+                OrderedFloat((self.0).$method(other))
+            }
+        }
+
+        impl<'a, T> $imp<&'a T> for OrderedFloat<T> where T: $imp<&'a T> {
+            type Output = OrderedFloat<<T as $imp<&'a T>>::Output>;
+
+            #[inline]
+            fn $method(self, other: &'a T) -> Self::Output {
+                OrderedFloat((self.0).$method(other))
+            }
+        }
+
+        impl<'a, T> $imp<&'a Self> for OrderedFloat<T> where T: $imp<&'a T> {
+            type Output = OrderedFloat<<T as $imp<&'a T>>::Output>;
+
+            #[inline]
+            fn $method(self, other: &'a Self) -> Self::Output {
+                OrderedFloat((self.0).$method(&other.0))
+            }
+        }
+
+        impl<'a, T> $imp for &'a OrderedFloat<T> where &'a T: $imp {
+            type Output = OrderedFloat<<&'a T as $imp>::Output>;
+
+            #[inline]
+            fn $method(self, other: Self) -> Self::Output {
+                OrderedFloat((self.0).$method(&other.0))
+            }
+        }
+
+        impl<'a, T> $imp<OrderedFloat<T>> for &'a OrderedFloat<T> where &'a T: $imp<T> {
+            type Output = OrderedFloat<<&'a T as $imp<T>>::Output>;
+
+            #[inline]
+            fn $method(self, other: OrderedFloat<T>) -> Self::Output {
+                OrderedFloat((self.0).$method(other.0))
+            }
+        }
+
+        impl<'a, T> $imp<T> for &'a OrderedFloat<T> where &'a T: $imp<T> {
+            type Output = OrderedFloat<<&'a T as $imp<T>>::Output>;
+
+            #[inline]
+            fn $method(self, other: T) -> Self::Output {
+                OrderedFloat((self.0).$method(other))
+            }
+        }
+
+        impl<'a, T> $imp<&'a T> for &'a OrderedFloat<T> where &'a T: $imp {
+            type Output = OrderedFloat<<&'a T as $imp>::Output>;
+
+            #[inline]
+            fn $method(self, other: &'a T) -> Self::Output {
+                OrderedFloat((self.0).$method(other))
+            }
+        }
+
+        impl<'a, T> $imp<&'a Self> for &'a OrderedFloat<T> where &'a T: $imp {
+            type Output = OrderedFloat<<&'a T as $imp>::Output>;
+
+            #[inline]
+            fn $method(self, other: &'a Self) -> Self::Output {
+                OrderedFloat((self.0).$method(&other.0))
+            }
+        }
     }
 }
 
-impl<T: Add> Add<T> for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn add(self, other: T) -> Self::Output {
-        OrderedFloat(self.0 + other)
-    }
-}
-
-impl<T: Sub> Sub for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn sub(self, other: Self) -> Self::Output {
-        OrderedFloat(self.0 - other.0)
-    }
-}
-
-impl<T: Sub> Sub<T> for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn sub(self, other: T) -> Self::Output {
-        OrderedFloat(self.0 - other)
-    }
-}
-
-impl<T: Mul> Mul for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn mul(self, other: Self) -> Self::Output {
-        OrderedFloat(self.0 * other.0)
-    }
-}
-
-impl<T: Mul> Mul<T> for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn mul(self, other: T) -> Self::Output {
-        OrderedFloat(self.0 * other)
-    }
-}
-
-impl<T: Div> Div for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn div(self, other: Self) -> Self::Output {
-        OrderedFloat(self.0 / other.0)
-    }
-}
-
-impl<T: Div> Div<T> for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn div(self, other: T) -> Self::Output {
-        OrderedFloat(self.0 / other)
-    }
-}
-
-impl<T: Rem> Rem for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn rem(self, other: Self) -> Self::Output {
-        OrderedFloat(self.0 % other.0)
-    }
-}
-
-impl<T: Rem> Rem<T> for OrderedFloat<T> {
-    type Output = OrderedFloat<T::Output>;
-
-    fn rem(self, other: T) -> Self::Output {
-        OrderedFloat(self.0 % other)
-    }
-}
+impl_ordered_float_binop!{Add, add}
+impl_ordered_float_binop!{Sub, sub}
+impl_ordered_float_binop!{Mul, mul}
+impl_ordered_float_binop!{Div, div}
+impl_ordered_float_binop!{Rem, rem}
 
 impl<T: Bounded> Bounded for OrderedFloat<T> {
     fn min_value() -> Self {
@@ -285,6 +296,14 @@ impl<T: Neg> Neg for OrderedFloat<T> {
 
     fn neg(self) -> Self::Output {
         OrderedFloat(-self.0)
+    }
+}
+
+impl<'a, T> Neg for &'a OrderedFloat<T> where &'a T: Neg {
+    type Output = OrderedFloat<<&'a T as Neg>::Output>;
+
+    fn neg(self) -> Self::Output {
+        OrderedFloat(-(&self.0))
     }
 }
 
@@ -549,17 +568,6 @@ impl<T: Float> PartialEq<T> for NotNan<T> {
     }
 }
 
-/// Adds two NotNans.
-///
-/// Panics if the computation results in NaN
-impl<T: Float> Add for NotNan<T> {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        self + other.0
-    }
-}
-
 /// Adds a float directly.
 ///
 /// Panics if the provided value is NaN or the computation results in NaN
@@ -571,22 +579,9 @@ impl<T: Float> Add<T> for NotNan<T> {
     }
 }
 
-impl<T: Float + AddAssign> AddAssign for NotNan<T> {
-    fn add_assign(&mut self, other: Self) {
-        *self += other.0;
-    }
-}
-
 /// Adds a float directly.
 ///
 /// Panics if the provided value is NaN.
-impl<T: Float + AddAssign> AddAssign<T> for NotNan<T> {
-    fn add_assign(&mut self, other: T) {
-        *self = *self + other;
-    }
-}
-
-
 impl<T: Float + Sum> Sum for NotNan<T> {
     fn sum<I: Iterator<Item = NotNan<T>>>(iter: I) -> Self {
         NotNan::new(iter.map(|v| v.0).sum()).expect("Sum resulted in NaN")
@@ -596,14 +591,6 @@ impl<T: Float + Sum> Sum for NotNan<T> {
 impl<'a, T: Float + Sum + 'a> Sum<&'a NotNan<T>> for NotNan<T> {
     fn sum<I: Iterator<Item = &'a NotNan<T>>>(iter: I) -> Self {
         iter.cloned().sum()
-    }
-}
-
-impl<T: Float> Sub for NotNan<T> {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self {
-        self - other.0
     }
 }
 
@@ -618,29 +605,6 @@ impl<T: Float> Sub<T> for NotNan<T> {
     }
 }
 
-impl<T: Float + SubAssign> SubAssign for NotNan<T> {
-    fn sub_assign(&mut self, other: Self) {
-        *self -= other.0
-    }
-}
-
-/// Subtracts a float directly.
-///
-/// Panics if the provided value is NaN or the computation results in NaN
-impl<T: Float + SubAssign> SubAssign<T> for NotNan<T> {
-    fn sub_assign(&mut self, other: T) {
-        *self = *self - other;
-    }
-}
-
-impl<T: Float> Mul for NotNan<T> {
-    type Output = Self;
-
-    fn mul(self, other: Self) -> Self {
-        self * other.0
-    }
-}
-
 /// Multiplies a float directly.
 ///
 /// Panics if the provided value is NaN or the computation results in NaN
@@ -649,21 +613,6 @@ impl<T: Float> Mul<T> for NotNan<T> {
 
     fn mul(self, other: T) -> Self {
         NotNan::new(self.0 * other).expect("Multiplication resulted in NaN")
-    }
-}
-
-impl<T: Float + MulAssign> MulAssign for NotNan<T> {
-    fn mul_assign(&mut self, other: Self) {
-        *self *= other.0
-    }
-}
-
-/// Multiplies a float directly.
-///
-/// Panics if the provided value is NaN.
-impl<T: Float + MulAssign> MulAssign<T> for NotNan<T> {
-    fn mul_assign(&mut self, other: T) {
-        *self = *self * other;
     }
 }
 
@@ -679,14 +628,6 @@ impl<'a, T: Float + Product + 'a> Product<&'a NotNan<T>> for NotNan<T> {
     }
 }
 
-impl<T: Float> Div for NotNan<T> {
-    type Output = Self;
-
-    fn div(self, other: Self) -> Self {
-        self / other.0
-    }
-}
-
 /// Divides a float directly.
 ///
 /// Panics if the provided value is NaN or the computation results in NaN
@@ -695,29 +636,6 @@ impl<T: Float> Div<T> for NotNan<T> {
 
     fn div(self, other: T) -> Self {
         NotNan::new(self.0 / other).expect("Division resulted in NaN")
-    }
-}
-
-impl<T: Float + DivAssign> DivAssign for NotNan<T> {
-    fn div_assign(&mut self, other: Self) {
-        *self /= other.0;
-    }
-}
-
-/// Divides a float directly.
-///
-/// Panics if the provided value is NaN or the computation results in NaN
-impl<T: Float + DivAssign> DivAssign<T> for NotNan<T> {
-    fn div_assign(&mut self, other: T) {
-        *self = *self / other;
-    }
-}
-
-impl<T: Float> Rem for NotNan<T> {
-    type Output = Self;
-
-    fn rem(self, other: Self) -> Self {
-        self % other.0
     }
 }
 
@@ -732,25 +650,108 @@ impl<T: Float> Rem<T> for NotNan<T> {
     }
 }
 
-impl<T: Float + RemAssign> RemAssign for NotNan<T> {
-    fn rem_assign(&mut self, other: Self) {
-        *self %= other.0
+macro_rules! impl_not_nan_binop {
+    ($imp:ident, $method:ident, $assign_imp:ident, $assign_method:ident) => {
+        impl<T: Float> $imp for NotNan<T> {
+            type Output = Self;
+
+            fn $method(self, other: Self) -> Self {
+                self.$method(other.0)
+            }
+        }
+
+        impl<T: Float + Copy> $imp<&T> for NotNan<T> {
+            type Output = NotNan<T>;
+
+            fn $method(self, other: &T) -> Self::Output {
+                self.$method(*other)
+            }
+        }
+
+        impl<T: Float + Copy> $imp<&Self> for NotNan<T> {
+            type Output = NotNan<T>;
+
+            fn $method(self, other: &Self) -> Self::Output {
+                self.$method(other.0)
+            }
+        }
+
+        impl<T: Float + Copy> $imp for &NotNan<T> {
+            type Output = NotNan<T>;
+
+            fn $method(self, other: Self) -> Self::Output {
+                (*self).$method(other.0)
+            }
+        }
+
+        impl<T: Float + Copy> $imp<NotNan<T>> for &NotNan<T> {
+            type Output = NotNan<T>;
+
+            fn $method(self, other: NotNan<T>) -> Self::Output {
+                (*self).$method(other.0)
+            }
+        }
+
+        impl<T: Float + Copy> $imp<T> for &NotNan<T> {
+            type Output = NotNan<T>;
+
+            fn $method(self, other: T) -> Self::Output {
+                (*self).$method(other)
+            }
+        }
+
+        impl<T: Float + Copy> $imp<&T> for &NotNan<T> {
+            type Output = NotNan<T>;
+
+            fn $method(self, other: &T) -> Self::Output {
+                (*self).$method(*other)
+            }
+        }
+
+        impl<T: Float + $assign_imp> $assign_imp<T> for NotNan<T> {
+            fn $assign_method(&mut self, other: T) {
+                *self = (*self).$method(other);
+            }
+        }
+
+        impl<T: Float + $assign_imp> $assign_imp<&T> for NotNan<T> {
+            fn $assign_method(&mut self, other: &T) {
+                *self = (*self).$method(*other);
+            }
+        }
+
+        impl<T: Float + $assign_imp> $assign_imp for NotNan<T> {
+            fn $assign_method(&mut self, other: Self) {
+                (*self).$assign_method(other.0);
+            }
+        }
+
+        impl<T: Float + $assign_imp> $assign_imp<&Self> for NotNan<T> {
+            fn $assign_method(&mut self, other: &Self) {
+                (*self).$assign_method(other.0);
+            }
+        }
     }
 }
 
-/// Calculates `%=` with a float directly.
-///
-/// Panics if the provided value is NaN or the computation results in NaN
-impl<T: Float + RemAssign> RemAssign<T> for NotNan<T> {
-    fn rem_assign(&mut self, other: T) {
-        *self = *self % other;
-    }
-}
+impl_not_nan_binop!{Add, add, AddAssign, add_assign}
+impl_not_nan_binop!{Sub, sub, SubAssign, sub_assign}
+impl_not_nan_binop!{Mul, mul, MulAssign, mul_assign}
+impl_not_nan_binop!{Div, div, DivAssign, div_assign}
+impl_not_nan_binop!{Rem, rem, RemAssign, rem_assign}
 
 impl<T: Float> Neg for NotNan<T> {
     type Output = Self;
 
     fn neg(self) -> Self {
+        NotNan(-self.0)
+    }
+}
+
+impl<T: Float> Neg for &NotNan<T> {
+    type Output = NotNan<T>;
+
+    fn neg(self) -> Self::Output {
         NotNan(-self.0)
     }
 }
