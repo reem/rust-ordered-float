@@ -760,7 +760,7 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: Float + Copy> $imp<&T> for NotNan<T> {
+        impl<T: Float> $imp<&T> for NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
@@ -769,7 +769,7 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: Float + Copy> $imp<&Self> for NotNan<T> {
+        impl<T: Float> $imp<&Self> for NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
@@ -778,7 +778,7 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: Float + Copy> $imp for &NotNan<T> {
+        impl<T: Float> $imp for &NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
@@ -787,7 +787,7 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: Float + Copy> $imp<NotNan<T>> for &NotNan<T> {
+        impl<T: Float> $imp<NotNan<T>> for &NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
@@ -796,7 +796,7 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: Float + Copy> $imp<T> for &NotNan<T> {
+        impl<T: Float> $imp<T> for &NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
@@ -805,7 +805,7 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: Float + Copy> $imp<&T> for &NotNan<T> {
+        impl<T: Float> $imp<&T> for &NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
