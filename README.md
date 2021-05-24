@@ -24,6 +24,14 @@ the default `std` feature:
 ordered-float = { version = "2.0", default-features = false }
 ```
 
+## Optional features
+
+The following optional features can be enabled in `Cargo.toml`:
+
+* `rand`: Adds implementations for various distribution types provided by the `rand` crate.
+* `serde`: Implements the `serde::Serialize` and `serde::Deserialize` traits.
+* `schemars`: Implents the `schemars::JsonSchema` trait.
+
 ## License
 
 MIT
