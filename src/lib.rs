@@ -1126,7 +1126,7 @@ mod impl_serde {
         fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let float = T::deserialize(d)?;
             NotNan::new(float).map_err(|_| {
-                Error::invalid_value(Unexpected::Float(f64::NAN), &"float (but not NaN)")
+                Error::invalid_value(Unexpected::Float(std::f64::NAN), &"float (but not NaN)")
             })
         }
     }
@@ -1146,7 +1146,7 @@ mod impl_serde {
     #[test]
     fn test_fail_on_nan() {
         assert_de_tokens_error::<NotNan<f64>>(
-            &[Token::F64(f64::NAN)],
+            &[Token::F64(std::f64::NAN)],
             "invalid value: floating point `NaN`, expected float (but not NaN)");
     }
 }
@@ -1363,7 +1363,7 @@ mod impl_rand {
     #[test]
     #[should_panic]
     fn uniform_sampling_panic_on_infinity_notnan() {
-        let (low, high) = (NotNan::new(0f64).unwrap(), NotNan::new(f64::INFINITY).unwrap());
+        let (low, high) = (NotNan::new(0f64).unwrap(), NotNan::new(std::f64::INFINITY).unwrap());
         let uniform = Uniform::new(low,high);
         let _ = uniform.sample(&mut rand::thread_rng());
     }
@@ -1371,7 +1371,7 @@ mod impl_rand {
     #[test]
     #[should_panic]
     fn uniform_sampling_panic_on_infinity_ordered() {
-        let (low, high) = (OrderedFloat(0f64), OrderedFloat(f64::INFINITY));
+        let (low, high) = (OrderedFloat(0f64), OrderedFloat(std::f64::INFINITY));
         let uniform = Uniform::new(low,high);
         let _ = uniform.sample(&mut rand::thread_rng());
     }
@@ -1379,7 +1379,7 @@ mod impl_rand {
     #[test]
     #[should_panic]
     fn uniform_sampling_panic_on_nan_ordered() {
-        let (low, high) = (OrderedFloat(0f64), OrderedFloat(f64::NAN));
+        let (low, high) = (OrderedFloat(0f64), OrderedFloat(std::f64::NAN));
         let uniform = Uniform::new(low,high);
         let _ = uniform.sample(&mut rand::thread_rng());
     }
