@@ -1126,7 +1126,7 @@ mod impl_serde {
         fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let float = T::deserialize(d)?;
             NotNan::new(float).map_err(|_| {
-                Error::invalid_value(Unexpected::Float(std::f64::NAN), &"float (but not NaN)")
+                Error::invalid_value(Unexpected::Float(f64::NAN), &"float (but not NaN)")
             })
         }
     }
@@ -1146,7 +1146,7 @@ mod impl_serde {
     #[test]
     fn test_fail_on_nan() {
         assert_de_tokens_error::<NotNan<f64>>(
-            &[Token::F64(std::f64::NAN)],
+            &[Token::F64(f64::NAN)],
             "invalid value: floating point `NaN`, expected float (but not NaN)");
     }
 }
