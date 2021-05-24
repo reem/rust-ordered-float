@@ -1298,6 +1298,7 @@ mod impl_rand {
                     UniformSampler::new(low, high)
                 }
                 fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Self::X {
+                    // UniformFloat.sample() will never return NaN.
                     unsafe { NotNan::unchecked_new(self.0.sample(rng)) }
                 }
             }
