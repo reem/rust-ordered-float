@@ -1232,3 +1232,154 @@ mod impl_schemars {
         }
     }
 }
+
+#[cfg(all(feature = "std", feature = "rand"))]
+mod impl_rand {
+    use super::{NotNan, OrderedFloat};
+    use rand::distributions::{Distribution, Open01, OpenClosed01, Standard};
+    use rand::distributions::uniform::*;
+    use rand::Rng;
+
+    macro_rules! impl_distribution {
+        ($dist:ident, $($f:ty),+) => {
+            $(
+            impl Distribution<NotNan<$f>> for $dist {
+                fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> NotNan<$f> {
+                    // 'rand' never generates NaN values in the Standard, Open01, or
+                    // OpenClosed01 distributions. Using 'unchecked_new' is therefore
+                    // safe.
+                    unsafe { NotNan::unchecked_new(self.sample(rng)) }
+                }
+            }
+
+            impl Distribution<OrderedFloat<$f>> for $dist {
+                fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> OrderedFloat<$f> {
+                    OrderedFloat(self.sample(rng))
+                }
+            }
+            )*
+        }
+    }
+
+    impl_distribution! { Standard, f32, f64 }
+    impl_distribution! { Open01, f32, f64 }
+    impl_distribution! { OpenClosed01, f32, f64 }
+
+    pub struct UniformNotNan<T>(UniformFloat<T>);
+    impl SampleUniform for NotNan<f32> {
+        type Sampler = UniformNotNan<f32>;
+    }
+    impl SampleUniform for NotNan<f64> {
+        type Sampler = UniformNotNan<f64>;
+    }
+
+    pub struct UniformOrdered<T>(UniformFloat<T>);
+    impl SampleUniform for OrderedFloat<f32> {
+        type Sampler = UniformOrdered<f32>;
+    }
+    impl SampleUniform for OrderedFloat<f64> {
+        type Sampler = UniformOrdered<f64>;
+    }
+
+    macro_rules! impl_uniform_sampler {
+        ($f:ty) => {
+            impl UniformSampler for UniformNotNan<$f> {
+                type X = NotNan<$f>;
+                fn new<B1, B2>(low: B1, high: B2) -> Self
+                    where B1: SampleBorrow<Self::X> + Sized,
+                        B2: SampleBorrow<Self::X> + Sized
+                {
+                    UniformNotNan(UniformFloat::<$f>::new(low.borrow().0, high.borrow().0))
+                }
+                fn new_inclusive<B1, B2>(low: B1, high: B2) -> Self
+                    where B1: SampleBorrow<Self::X> + Sized,
+                        B2: SampleBorrow<Self::X> + Sized
+                {
+                    UniformSampler::new(low, high)
+                }
+                fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Self::X {
+                    unsafe { NotNan::unchecked_new(self.0.sample(rng)) }
+                }
+            }
+
+            impl UniformSampler for UniformOrdered<$f> {
+                type X = OrderedFloat<$f>;
+                fn new<B1, B2>(low: B1, high: B2) -> Self
+                    where B1: SampleBorrow<Self::X> + Sized,
+                        B2: SampleBorrow<Self::X> + Sized
+                {
+                    UniformOrdered(UniformFloat::<$f>::new(low.borrow().0, high.borrow().0))
+                }
+                fn new_inclusive<B1, B2>(low: B1, high: B2) -> Self
+                    where B1: SampleBorrow<Self::X> + Sized,
+                        B2: SampleBorrow<Self::X> + Sized
+                {
+                    UniformSampler::new(low, high)
+                }
+                fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Self::X {
+                    OrderedFloat(self.0.sample(rng))
+                }
+            }
+        }
+    }
+
+    impl_uniform_sampler!{ f32 }
+    impl_uniform_sampler!{ f64 }
+
+    #[cfg(test)]
+    fn sample_fuzz<T>()
+    where
+        Standard: Distribution<NotNan<T>>,
+        Open01: Distribution<NotNan<T>>,
+        OpenClosed01: Distribution<NotNan<T>>,
+        Standard: Distribution<OrderedFloat<T>>,
+        Open01: Distribution<OrderedFloat<T>>,
+        OpenClosed01: Distribution<OrderedFloat<T>>,
+        T: super::Float,
+    {
+        let mut rng = rand::thread_rng();
+        let f1: NotNan<T> = rng.sample(Standard);
+        let f2: NotNan<T> = rng.sample(Open01);
+        let f3: NotNan<T> = rng.sample(OpenClosed01);
+        let _: OrderedFloat<T> = rng.sample(Standard);
+        let _: OrderedFloat<T> = rng.sample(Open01);
+        let _: OrderedFloat<T> = rng.sample(OpenClosed01);
+        assert!(!f1.into_inner().is_nan());
+        assert!(!f2.into_inner().is_nan());
+        assert!(!f3.into_inner().is_nan());
+    }
+
+    #[test]
+    fn sampling_f32_does_not_panic() {
+        sample_fuzz::<f32>();
+    }
+
+    #[test]
+    fn sampling_f64_does_not_panic() {
+        sample_fuzz::<f64>();
+    }
+
+    #[test]
+    #[should_panic]
+    fn uniform_sampling_panic_on_infinity_notnan() {
+        let (low, high) = (NotNan::new(0f64).unwrap(), NotNan::new(f64::INFINITY).unwrap());
+        let uniform = Uniform::new(low,high);
+        let _ = uniform.sample(&mut rand::thread_rng());
+    }
+
+    #[test]
+    #[should_panic]
+    fn uniform_sampling_panic_on_infinity_ordered() {
+        let (low, high) = (OrderedFloat(0f64), OrderedFloat(f64::INFINITY));
+        let uniform = Uniform::new(low,high);
+        let _ = uniform.sample(&mut rand::thread_rng());
+    }
+
+    #[test]
+    #[should_panic]
+    fn uniform_sampling_panic_on_nan_ordered() {
+        let (low, high) = (OrderedFloat(0f64), OrderedFloat(f64::NAN));
+        let uniform = Uniform::new(low,high);
+        let _ = uniform.sample(&mut rand::thread_rng());
+    }
+}
