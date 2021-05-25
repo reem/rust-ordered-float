@@ -1,3 +1,5 @@
+#![allow(clippy::float_cmp, clippy::eq_op, clippy::op_ref)]
+
 extern crate num_traits;
 extern crate ordered_float;
 
