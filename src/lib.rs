@@ -594,8 +594,22 @@ impl<T> NotNan<T> {
     /// # Safety
     ///
     /// Behaviour is undefined if `val` is NaN
+    #[deprecated(
+        since = "2.5.0",
+        note = "Please use the new_unchecked function instead."
+    )]
     #[inline]
     pub const unsafe fn unchecked_new(val: T) -> Self {
+        Self::new_unchecked(val)
+    }
+
+    /// Create a `NotNan` value from a value that is guaranteed to not be NaN
+    ///
+    /// # Safety
+    ///
+    /// Behaviour is undefined if `val` is NaN
+    #[inline]
+    pub const unsafe fn new_unchecked(val: T) -> Self {
         NotNan(val)
     }
 }
@@ -666,7 +680,7 @@ impl From<NotNan<f32>> for NotNan<f64> {
     #[inline]
     fn from(v: NotNan<f32>) -> NotNan<f64> {
         unsafe {
-            NotNan::unchecked_new(v.0 as f64)
+            NotNan::new_unchecked(v.0 as f64)
         }
     }
 }
@@ -1246,9 +1260,9 @@ mod impl_rand {
             impl Distribution<NotNan<$f>> for $dist {
                 fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> NotNan<$f> {
                     // 'rand' never generates NaN values in the Standard, Open01, or
-                    // OpenClosed01 distributions. Using 'unchecked_new' is therefore
+                    // OpenClosed01 distributions. Using 'new_unchecked' is therefore
                     // safe.
-                    unsafe { NotNan::unchecked_new(self.sample(rng)) }
+                    unsafe { NotNan::new_unchecked(self.sample(rng)) }
                 }
             }
 
@@ -1299,7 +1313,7 @@ mod impl_rand {
                 }
                 fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Self::X {
                     // UniformFloat.sample() will never return NaN.
-                    unsafe { NotNan::unchecked_new(self.0.sample(rng)) }
+                    unsafe { NotNan::new_unchecked(self.0.sample(rng)) }
                 }
             }
 
