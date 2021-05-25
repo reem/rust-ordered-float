@@ -594,13 +594,9 @@ impl<T> NotNan<T> {
     /// # Safety
     ///
     /// Behaviour is undefined if `val` is NaN
-    #[deprecated(
-        since = "2.5.0",
-        note = "Please use the new_unchecked function instead."
-    )]
     #[inline]
-    pub const unsafe fn unchecked_new(val: T) -> Self {
-        Self::new_unchecked(val)
+    pub const unsafe fn new_unchecked(val: T) -> Self {
+        NotNan(val)
     }
 
     /// Create a `NotNan` value from a value that is guaranteed to not be NaN
@@ -608,9 +604,13 @@ impl<T> NotNan<T> {
     /// # Safety
     ///
     /// Behaviour is undefined if `val` is NaN
+    #[deprecated(
+        since = "2.5.0",
+        note = "Please use the new_unchecked function instead."
+    )]
     #[inline]
-    pub const unsafe fn new_unchecked(val: T) -> Self {
-        NotNan(val)
+    pub const unsafe fn unchecked_new(val: T) -> Self {
+        Self::new_unchecked(val)
     }
 }
 
