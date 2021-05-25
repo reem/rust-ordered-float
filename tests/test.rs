@@ -672,7 +672,7 @@ fn not_nan64_sum_product() {
 
 #[test]
 fn not_nan_usage_in_const_context() {
-    const A: NotNan<f32> = unsafe { NotNan::unchecked_new(111f32) };
+    const A: NotNan<f32> = unsafe { NotNan::new_unchecked(111f32) };
     assert_eq!(A, NotNan::new(111f32).unwrap());
 }
 
