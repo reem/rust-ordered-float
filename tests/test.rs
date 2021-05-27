@@ -3,12 +3,12 @@
 extern crate num_traits;
 extern crate ordered_float;
 
-pub use ordered_float::*;
-pub use num_traits::{Bounded, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
-#[cfg(feature = "std")]
-pub use num_traits::Float;
 #[cfg(not(feature = "std"))]
 pub use num_traits::float::FloatCore as Float;
+#[cfg(feature = "std")]
+pub use num_traits::Float;
+pub use num_traits::{Bounded, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
+pub use ordered_float::*;
 
 pub use std::cmp::Ordering::*;
 pub use std::convert::TryFrom;
@@ -43,9 +43,18 @@ fn ordered_f32_compare_regular_floats_op() {
 #[test]
 fn ordered_f32_compare_nan() {
     let f32_nan: f32 = Float::nan();
-    assert_eq!(OrderedFloat(f32_nan).cmp(&OrderedFloat(Float::nan())), Equal);
-    assert_eq!(OrderedFloat(f32_nan).cmp(&OrderedFloat(-100000.0f32)), Greater);
-    assert_eq!(OrderedFloat(-100.0f32).cmp(&OrderedFloat(Float::nan())), Less);
+    assert_eq!(
+        OrderedFloat(f32_nan).cmp(&OrderedFloat(Float::nan())),
+        Equal
+    );
+    assert_eq!(
+        OrderedFloat(f32_nan).cmp(&OrderedFloat(-100000.0f32)),
+        Greater
+    );
+    assert_eq!(
+        OrderedFloat(-100.0f32).cmp(&OrderedFloat(Float::nan())),
+        Less
+    );
 }
 
 #[test]
@@ -144,7 +153,10 @@ fn not_nan32_signed() {
 
 #[test]
 fn not_nan32_num_cast() {
-    assert_eq!(<NotNan<f32> as num_traits::NumCast>::from(42).unwrap(), 42f32);
+    assert_eq!(
+        <NotNan<f32> as num_traits::NumCast>::from(42).unwrap(),
+        42f32
+    );
     assert_eq!(<NotNan<f32> as num_traits::NumCast>::from(f32::nan()), None);
 }
 
@@ -207,30 +219,15 @@ fn not_nan32_fail_when_constructing_with_nan() {
 
 #[test]
 fn not_nan32_calculate_correctly() {
-    assert_eq!(
-        *(not_nan(5.0f32) + not_nan(4.0f32)),
-        5.0f32 + 4.0f32
-    );
+    assert_eq!(*(not_nan(5.0f32) + not_nan(4.0f32)), 5.0f32 + 4.0f32);
     assert_eq!(*(not_nan(5.0f32) + 4.0f32), 5.0f32 + 4.0f32);
-    assert_eq!(
-        *(not_nan(5.0f32) - not_nan(4.0f32)),
-        5.0f32 - 4.0f32
-    );
+    assert_eq!(*(not_nan(5.0f32) - not_nan(4.0f32)), 5.0f32 - 4.0f32);
     assert_eq!(*(not_nan(5.0f32) - 4.0f32), 5.0f32 - 4.0f32);
-    assert_eq!(
-        *(not_nan(5.0f32) * not_nan(4.0f32)),
-        5.0f32 * 4.0f32
-    );
+    assert_eq!(*(not_nan(5.0f32) * not_nan(4.0f32)), 5.0f32 * 4.0f32);
     assert_eq!(*(not_nan(5.0f32) * 4.0f32), 5.0f32 * 4.0f32);
-    assert_eq!(
-        *(not_nan(8.0f32) / not_nan(4.0f32)),
-        8.0f32 / 4.0f32
-    );
+    assert_eq!(*(not_nan(8.0f32) / not_nan(4.0f32)), 8.0f32 / 4.0f32);
     assert_eq!(*(not_nan(8.0f32) / 4.0f32), 8.0f32 / 4.0f32);
-    assert_eq!(
-        *(not_nan(8.0f32) % not_nan(4.0f32)),
-        8.0f32 % 4.0f32
-    );
+    assert_eq!(*(not_nan(8.0f32) % not_nan(4.0f32)), 8.0f32 % 4.0f32);
     assert_eq!(*(not_nan(8.0f32) % 4.0f32), 8.0f32 % 4.0f32);
     assert_eq!(*(-not_nan(1.0f32)), -1.0f32);
 
@@ -264,36 +261,31 @@ fn not_nan32_calculate_correctly() {
     number %= 4.0f32;
     assert_eq!(*number, 1.0f32);
 
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f32);
-            tmp += f32::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f32);
-            tmp -= f32::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f32);
-            tmp *= f32::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f32);
-            tmp /= f32::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f32);
-            tmp %= f32::NAN;
-        }).is_err()
-    );
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f32);
+        tmp += f32::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f32);
+        tmp -= f32::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f32);
+        tmp *= f32::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f32);
+        tmp /= f32::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f32);
+        tmp %= f32::NAN;
+    })
+    .is_err());
 }
 
 #[test]
@@ -311,30 +303,15 @@ fn not_nan64_fail_when_constructing_with_nan() {
 
 #[test]
 fn not_nan64_calculate_correctly() {
-    assert_eq!(
-        *(not_nan(5.0f64) + not_nan(4.0f64)),
-        5.0f64 + 4.0f64
-    );
+    assert_eq!(*(not_nan(5.0f64) + not_nan(4.0f64)), 5.0f64 + 4.0f64);
     assert_eq!(*(not_nan(5.0f64) + 4.0f64), 5.0f64 + 4.0f64);
-    assert_eq!(
-        *(not_nan(5.0f64) - not_nan(4.0f64)),
-        5.0f64 - 4.0f64
-    );
+    assert_eq!(*(not_nan(5.0f64) - not_nan(4.0f64)), 5.0f64 - 4.0f64);
     assert_eq!(*(not_nan(5.0f64) - 4.0f64), 5.0f64 - 4.0f64);
-    assert_eq!(
-        *(not_nan(5.0f64) * not_nan(4.0f64)),
-        5.0f64 * 4.0f64
-    );
+    assert_eq!(*(not_nan(5.0f64) * not_nan(4.0f64)), 5.0f64 * 4.0f64);
     assert_eq!(*(not_nan(5.0f64) * 4.0f64), 5.0f64 * 4.0f64);
-    assert_eq!(
-        *(not_nan(8.0f64) / not_nan(4.0f64)),
-        8.0f64 / 4.0f64
-    );
+    assert_eq!(*(not_nan(8.0f64) / not_nan(4.0f64)), 8.0f64 / 4.0f64);
     assert_eq!(*(not_nan(8.0f64) / 4.0f64), 8.0f64 / 4.0f64);
-    assert_eq!(
-        *(not_nan(8.0f64) % not_nan(4.0f64)),
-        8.0f64 % 4.0f64
-    );
+    assert_eq!(*(not_nan(8.0f64) % not_nan(4.0f64)), 8.0f64 % 4.0f64);
     assert_eq!(*(not_nan(8.0f64) % 4.0f64), 8.0f64 % 4.0f64);
     assert_eq!(*(-not_nan(1.0f64)), -1.0f64);
 
@@ -368,36 +345,31 @@ fn not_nan64_calculate_correctly() {
     number %= 4.0f64;
     assert_eq!(*number, 1.0f64);
 
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f64);
-            tmp += f64::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f64);
-            tmp -= f64::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f64);
-            tmp *= f64::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f64);
-            tmp /= f64::NAN;
-        }).is_err()
-    );
-    assert!(
-        panic::catch_unwind(|| {
-            let mut tmp = not_nan(0.0f64);
-            tmp %= f64::NAN;
-        }).is_err()
-    );
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f64);
+        tmp += f64::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f64);
+        tmp -= f64::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f64);
+        tmp *= f64::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f64);
+        tmp /= f64::NAN;
+    })
+    .is_err());
+    assert!(panic::catch_unwind(|| {
+        let mut tmp = not_nan(0.0f64);
+        tmp %= f64::NAN;
+    })
+    .is_err());
 }
 
 #[test]
@@ -458,7 +430,10 @@ fn not_nan64_to_primitive() {
 
 #[test]
 fn not_nan64_num() {
-    assert_eq!(NotNan::<f64>::from_str_radix("42.0", 10).unwrap(), not_nan(42.0f64));
+    assert_eq!(
+        NotNan::<f64>::from_str_radix("42.0", 10).unwrap(),
+        not_nan(42.0f64)
+    );
     assert!(NotNan::<f64>::from_str_radix("NaN", 10).is_err());
 }
 
@@ -473,7 +448,10 @@ fn not_nan64_signed() {
 
 #[test]
 fn not_nan64_num_cast() {
-    assert_eq!(<NotNan<f64> as num_traits::NumCast>::from(42), Some(not_nan(42f64)));
+    assert_eq!(
+        <NotNan<f64> as num_traits::NumCast>::from(42),
+        Some(not_nan(42f64))
+    );
     assert_eq!(<NotNan<f64> as num_traits::NumCast>::from(f64::nan()), None);
 }
 
@@ -643,7 +621,7 @@ fn ordered_f64_neg() {
 fn test_sum_fails_on_nan() {
     let a = not_nan(std::f32::INFINITY);
     let b = not_nan(std::f32::NEG_INFINITY);
-    let _c: NotNan<_> = [a,b].iter().sum();
+    let _c: NotNan<_> = [a, b].iter().sum();
 }
 
 #[test]
@@ -651,7 +629,7 @@ fn test_sum_fails_on_nan() {
 fn test_product_fails_on_nan() {
     let a = not_nan(std::f32::INFINITY);
     let b = not_nan(0f32);
-    let _c: NotNan<_> = [a,b].iter().product();
+    let _c: NotNan<_> = [a, b].iter().product();
 }
 
 #[test]
@@ -660,16 +638,21 @@ fn not_nan64_sum_product() {
     let b = not_nan(132f64);
     let c = not_nan(5.1);
 
-    assert_eq!(std::iter::empty::<NotNan<f64>>().sum::<NotNan<_>>(), NotNan::new(0f64).unwrap());
+    assert_eq!(
+        std::iter::empty::<NotNan<f64>>().sum::<NotNan<_>>(),
+        NotNan::new(0f64).unwrap()
+    );
     assert_eq!([a].iter().sum::<NotNan<_>>(), a);
-    assert_eq!([a,b].iter().sum::<NotNan<_>>(), a + b);
-    assert_eq!([a,b,c].iter().sum::<NotNan<_>>(), a + b + c);
+    assert_eq!([a, b].iter().sum::<NotNan<_>>(), a + b);
+    assert_eq!([a, b, c].iter().sum::<NotNan<_>>(), a + b + c);
 
-    assert_eq!(std::iter::empty::<NotNan<f64>>().product::<NotNan<_>>(), NotNan::new(1f64).unwrap());
+    assert_eq!(
+        std::iter::empty::<NotNan<f64>>().product::<NotNan<_>>(),
+        NotNan::new(1f64).unwrap()
+    );
     assert_eq!([a].iter().product::<NotNan<_>>(), a);
-    assert_eq!([a,b].iter().product::<NotNan<_>>(), a * b);
-    assert_eq!([a,b,c].iter().product::<NotNan<_>>(), a * b * c);
-
+    assert_eq!([a, b].iter().product::<NotNan<_>>(), a * b);
+    assert_eq!([a, b, c].iter().product::<NotNan<_>>(), a * b * c);
 }
 
 #[test]

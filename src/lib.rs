@@ -4,26 +4,30 @@
 
 //! Wrappers for total order on Floats.  See the [`OrderedFloat`] and [`NotNan`] docs for details.
 
-#[cfg(feature = "std")] extern crate std;
-#[cfg(feature = "std")] use std::error::Error;
+#[cfg(feature = "std")]
+extern crate std;
+#[cfg(feature = "std")]
+use std::error::Error;
 
 use core::cmp::Ordering;
 use core::convert::TryFrom;
-use core::num::FpCategory;
-use core::ops::{Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem,
-               RemAssign, Sub, SubAssign};
-use core::hash::{Hash, Hasher};
 use core::fmt;
-use core::mem;
+use core::hash::{Hash, Hasher};
 use core::hint::unreachable_unchecked;
-use core::iter::{Sum, Product};
+use core::iter::{Product, Sum};
+use core::mem;
+use core::num::FpCategory;
+use core::ops::{
+    Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub,
+    SubAssign,
+};
 use core::str::FromStr;
 
-use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
-#[cfg(feature = "std")]
-pub use num_traits::Float;
 #[cfg(not(feature = "std"))]
 use num_traits::float::FloatCore as Float;
+#[cfg(feature = "std")]
+pub use num_traits::Float;
+use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -90,9 +94,7 @@ impl<'a, T: Float> From<&'a T> for &'a OrderedFloat<T> {
     #[inline]
     fn from(t: &'a T) -> &'a OrderedFloat<T> {
         // Safety: OrderedFloat is #[repr(transparent)] and has no invalid values.
-        unsafe {
-            &*(t as *const T as *const OrderedFloat<T>)
-        }
+        unsafe { &*(t as *const T as *const OrderedFloat<T>) }
     }
 }
 
@@ -100,9 +102,7 @@ impl<'a, T: Float> From<&'a mut T> for &'a mut OrderedFloat<T> {
     #[inline]
     fn from(t: &'a mut T) -> &'a mut OrderedFloat<T> {
         // Safety: OrderedFloat is #[repr(transparent)] and has no invalid values.
-        unsafe {
-            &mut *(t as *mut T as *mut OrderedFloat<T>)
-        }
+        unsafe { &mut *(t as *mut T as *mut OrderedFloat<T>) }
     }
 }
 
@@ -229,7 +229,10 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp<&'a T> for OrderedFloat<T> where T: $imp<&'a T> {
+        impl<'a, T> $imp<&'a T> for OrderedFloat<T>
+        where
+            T: $imp<&'a T>,
+        {
             type Output = OrderedFloat<<T as $imp<&'a T>>::Output>;
 
             #[inline]
@@ -238,7 +241,10 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp<&'a Self> for OrderedFloat<T> where T: $imp<&'a T> {
+        impl<'a, T> $imp<&'a Self> for OrderedFloat<T>
+        where
+            T: $imp<&'a T>,
+        {
             type Output = OrderedFloat<<T as $imp<&'a T>>::Output>;
 
             #[inline]
@@ -247,7 +253,10 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp for &'a OrderedFloat<T> where &'a T: $imp {
+        impl<'a, T> $imp for &'a OrderedFloat<T>
+        where
+            &'a T: $imp,
+        {
             type Output = OrderedFloat<<&'a T as $imp>::Output>;
 
             #[inline]
@@ -256,7 +265,10 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp<OrderedFloat<T>> for &'a OrderedFloat<T> where &'a T: $imp<T> {
+        impl<'a, T> $imp<OrderedFloat<T>> for &'a OrderedFloat<T>
+        where
+            &'a T: $imp<T>,
+        {
             type Output = OrderedFloat<<&'a T as $imp<T>>::Output>;
 
             #[inline]
@@ -265,7 +277,10 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp<T> for &'a OrderedFloat<T> where &'a T: $imp<T> {
+        impl<'a, T> $imp<T> for &'a OrderedFloat<T>
+        where
+            &'a T: $imp<T>,
+        {
             type Output = OrderedFloat<<&'a T as $imp<T>>::Output>;
 
             #[inline]
@@ -274,7 +289,10 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp<&'a T> for &'a OrderedFloat<T> where &'a T: $imp {
+        impl<'a, T> $imp<&'a T> for &'a OrderedFloat<T>
+        where
+            &'a T: $imp,
+        {
             type Output = OrderedFloat<<&'a T as $imp>::Output>;
 
             #[inline]
@@ -284,7 +302,10 @@ macro_rules! impl_ordered_float_binop {
         }
 
         #[doc(hidden)] // Added accidentally; remove in next major version
-        impl<'a, T> $imp<&'a Self> for &'a OrderedFloat<T> where &'a T: $imp {
+        impl<'a, T> $imp<&'a Self> for &'a OrderedFloat<T>
+        where
+            &'a T: $imp,
+        {
             type Output = OrderedFloat<<&'a T as $imp>::Output>;
 
             #[inline]
@@ -320,14 +341,14 @@ macro_rules! impl_ordered_float_binop {
                 (self.0).$assign_method(&other.0);
             }
         }
-    }
+    };
 }
 
-impl_ordered_float_binop!{Add, add, AddAssign, add_assign}
-impl_ordered_float_binop!{Sub, sub, SubAssign, sub_assign}
-impl_ordered_float_binop!{Mul, mul, MulAssign, mul_assign}
-impl_ordered_float_binop!{Div, div, DivAssign, div_assign}
-impl_ordered_float_binop!{Rem, rem, RemAssign, rem_assign}
+impl_ordered_float_binop! {Add, add, AddAssign, add_assign}
+impl_ordered_float_binop! {Sub, sub, SubAssign, sub_assign}
+impl_ordered_float_binop! {Mul, mul, MulAssign, mul_assign}
+impl_ordered_float_binop! {Div, div, DivAssign, div_assign}
+impl_ordered_float_binop! {Rem, rem, RemAssign, rem_assign}
 
 /// Adds a float directly.
 impl<T: Float + Sum> Sum for OrderedFloat<T> {
@@ -394,7 +415,10 @@ impl<T: Neg> Neg for OrderedFloat<T> {
     }
 }
 
-impl<'a, T> Neg for &'a OrderedFloat<T> where &'a T: Neg {
+impl<'a, T> Neg for &'a OrderedFloat<T>
+where
+    &'a T: Neg,
+{
     type Output = OrderedFloat<<&'a T as Neg>::Output>;
 
     #[inline]
@@ -405,15 +429,21 @@ impl<'a, T> Neg for &'a OrderedFloat<T> where &'a T: Neg {
 
 impl<T: Zero> Zero for OrderedFloat<T> {
     #[inline]
-    fn zero() -> Self { OrderedFloat(T::zero()) }
+    fn zero() -> Self {
+        OrderedFloat(T::zero())
+    }
 
     #[inline]
-    fn is_zero(&self) -> bool { self.0.is_zero() }
+    fn is_zero(&self) -> bool {
+        self.0.is_zero()
+    }
 }
 
 impl<T: One> One for OrderedFloat<T> {
     #[inline]
-    fn one() -> Self { OrderedFloat(T::one()) }
+    fn one() -> Self {
+        OrderedFloat(T::one())
+    }
 }
 
 impl<T: NumCast> NumCast for OrderedFloat<T> {
@@ -424,129 +454,342 @@ impl<T: NumCast> NumCast for OrderedFloat<T> {
 }
 
 impl<T: FromPrimitive> FromPrimitive for OrderedFloat<T> {
-    fn from_i64(n: i64) -> Option<Self> { T::from_i64(n).map(OrderedFloat) }
-    fn from_u64(n: u64) -> Option<Self> { T::from_u64(n).map(OrderedFloat) }
-    fn from_isize(n: isize) -> Option<Self> { T::from_isize(n).map(OrderedFloat) }
-    fn from_i8(n: i8) -> Option<Self> { T::from_i8(n).map(OrderedFloat) }
-    fn from_i16(n: i16) -> Option<Self> { T::from_i16(n).map(OrderedFloat) }
-    fn from_i32(n: i32) -> Option<Self> { T::from_i32(n).map(OrderedFloat) }
-    fn from_usize(n: usize) -> Option<Self> { T::from_usize(n).map(OrderedFloat) }
-    fn from_u8(n: u8) -> Option<Self> { T::from_u8(n).map(OrderedFloat) }
-    fn from_u16(n: u16) -> Option<Self> { T::from_u16(n).map(OrderedFloat) }
-    fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).map(OrderedFloat) }
-    fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).map(OrderedFloat) }
-    fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).map(OrderedFloat) }
+    fn from_i64(n: i64) -> Option<Self> {
+        T::from_i64(n).map(OrderedFloat)
+    }
+    fn from_u64(n: u64) -> Option<Self> {
+        T::from_u64(n).map(OrderedFloat)
+    }
+    fn from_isize(n: isize) -> Option<Self> {
+        T::from_isize(n).map(OrderedFloat)
+    }
+    fn from_i8(n: i8) -> Option<Self> {
+        T::from_i8(n).map(OrderedFloat)
+    }
+    fn from_i16(n: i16) -> Option<Self> {
+        T::from_i16(n).map(OrderedFloat)
+    }
+    fn from_i32(n: i32) -> Option<Self> {
+        T::from_i32(n).map(OrderedFloat)
+    }
+    fn from_usize(n: usize) -> Option<Self> {
+        T::from_usize(n).map(OrderedFloat)
+    }
+    fn from_u8(n: u8) -> Option<Self> {
+        T::from_u8(n).map(OrderedFloat)
+    }
+    fn from_u16(n: u16) -> Option<Self> {
+        T::from_u16(n).map(OrderedFloat)
+    }
+    fn from_u32(n: u32) -> Option<Self> {
+        T::from_u32(n).map(OrderedFloat)
+    }
+    fn from_f32(n: f32) -> Option<Self> {
+        T::from_f32(n).map(OrderedFloat)
+    }
+    fn from_f64(n: f64) -> Option<Self> {
+        T::from_f64(n).map(OrderedFloat)
+    }
 }
 
 impl<T: ToPrimitive> ToPrimitive for OrderedFloat<T> {
-    fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
-    fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
-    fn to_isize(&self) -> Option<isize> { self.0.to_isize() }
-    fn to_i8(&self) -> Option<i8> { self.0.to_i8() }
-    fn to_i16(&self) -> Option<i16> { self.0.to_i16() }
-    fn to_i32(&self) -> Option<i32> { self.0.to_i32() }
-    fn to_usize(&self) -> Option<usize> { self.0.to_usize() }
-    fn to_u8(&self) -> Option<u8> { self.0.to_u8() }
-    fn to_u16(&self) -> Option<u16> { self.0.to_u16() }
-    fn to_u32(&self) -> Option<u32> { self.0.to_u32() }
-    fn to_f32(&self) -> Option<f32> { self.0.to_f32() }
-    fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
+    fn to_i64(&self) -> Option<i64> {
+        self.0.to_i64()
+    }
+    fn to_u64(&self) -> Option<u64> {
+        self.0.to_u64()
+    }
+    fn to_isize(&self) -> Option<isize> {
+        self.0.to_isize()
+    }
+    fn to_i8(&self) -> Option<i8> {
+        self.0.to_i8()
+    }
+    fn to_i16(&self) -> Option<i16> {
+        self.0.to_i16()
+    }
+    fn to_i32(&self) -> Option<i32> {
+        self.0.to_i32()
+    }
+    fn to_usize(&self) -> Option<usize> {
+        self.0.to_usize()
+    }
+    fn to_u8(&self) -> Option<u8> {
+        self.0.to_u8()
+    }
+    fn to_u16(&self) -> Option<u16> {
+        self.0.to_u16()
+    }
+    fn to_u32(&self) -> Option<u32> {
+        self.0.to_u32()
+    }
+    fn to_f32(&self) -> Option<f32> {
+        self.0.to_f32()
+    }
+    fn to_f64(&self) -> Option<f64> {
+        self.0.to_f64()
+    }
 }
 
 impl<T: Float> num_traits::float::FloatCore for OrderedFloat<T> {
-    fn nan() -> Self { OrderedFloat(T::nan()) }
-    fn infinity() -> Self { OrderedFloat(T::infinity()) }
-    fn neg_infinity() -> Self { OrderedFloat(T::neg_infinity()) }
-    fn neg_zero() -> Self { OrderedFloat(T::neg_zero()) }
-    fn min_value() -> Self { OrderedFloat(T::min_value()) }
-    fn min_positive_value() -> Self { OrderedFloat(T::min_positive_value()) }
-    fn max_value() -> Self { OrderedFloat(T::max_value()) }
-    fn is_nan(self) -> bool { self.0.is_nan() }
-    fn is_infinite(self) -> bool { self.0.is_infinite() }
-    fn is_finite(self) -> bool { self.0.is_finite() }
-    fn is_normal(self) -> bool { self.0.is_normal() }
-    fn classify(self) -> FpCategory { self.0.classify() }
-    fn floor(self) -> Self { OrderedFloat(self.0.floor()) }
-    fn ceil(self) -> Self { OrderedFloat(self.0.ceil()) }
-    fn round(self) -> Self { OrderedFloat(self.0.round()) }
-    fn trunc(self) -> Self { OrderedFloat(self.0.trunc()) }
-    fn fract(self) -> Self { OrderedFloat(self.0.fract()) }
-    fn abs(self) -> Self { OrderedFloat(self.0.abs()) }
-    fn signum(self) -> Self { OrderedFloat(self.0.signum()) }
-    fn is_sign_positive(self) -> bool { self.0.is_sign_positive() }
-    fn is_sign_negative(self) -> bool { self.0.is_sign_negative() }
-    fn recip(self) -> Self { OrderedFloat(self.0.recip()) }
-    fn powi(self, n: i32) -> Self { OrderedFloat(self.0.powi(n)) }
-    fn integer_decode(self) -> (u64, i16, i8) { self.0.integer_decode() }
-    fn epsilon() -> Self { OrderedFloat(T::epsilon()) }
-    fn to_degrees(self) -> Self { OrderedFloat(self.0.to_degrees()) }
-    fn to_radians(self) -> Self { OrderedFloat(self.0.to_radians()) }
+    fn nan() -> Self {
+        OrderedFloat(T::nan())
+    }
+    fn infinity() -> Self {
+        OrderedFloat(T::infinity())
+    }
+    fn neg_infinity() -> Self {
+        OrderedFloat(T::neg_infinity())
+    }
+    fn neg_zero() -> Self {
+        OrderedFloat(T::neg_zero())
+    }
+    fn min_value() -> Self {
+        OrderedFloat(T::min_value())
+    }
+    fn min_positive_value() -> Self {
+        OrderedFloat(T::min_positive_value())
+    }
+    fn max_value() -> Self {
+        OrderedFloat(T::max_value())
+    }
+    fn is_nan(self) -> bool {
+        self.0.is_nan()
+    }
+    fn is_infinite(self) -> bool {
+        self.0.is_infinite()
+    }
+    fn is_finite(self) -> bool {
+        self.0.is_finite()
+    }
+    fn is_normal(self) -> bool {
+        self.0.is_normal()
+    }
+    fn classify(self) -> FpCategory {
+        self.0.classify()
+    }
+    fn floor(self) -> Self {
+        OrderedFloat(self.0.floor())
+    }
+    fn ceil(self) -> Self {
+        OrderedFloat(self.0.ceil())
+    }
+    fn round(self) -> Self {
+        OrderedFloat(self.0.round())
+    }
+    fn trunc(self) -> Self {
+        OrderedFloat(self.0.trunc())
+    }
+    fn fract(self) -> Self {
+        OrderedFloat(self.0.fract())
+    }
+    fn abs(self) -> Self {
+        OrderedFloat(self.0.abs())
+    }
+    fn signum(self) -> Self {
+        OrderedFloat(self.0.signum())
+    }
+    fn is_sign_positive(self) -> bool {
+        self.0.is_sign_positive()
+    }
+    fn is_sign_negative(self) -> bool {
+        self.0.is_sign_negative()
+    }
+    fn recip(self) -> Self {
+        OrderedFloat(self.0.recip())
+    }
+    fn powi(self, n: i32) -> Self {
+        OrderedFloat(self.0.powi(n))
+    }
+    fn integer_decode(self) -> (u64, i16, i8) {
+        self.0.integer_decode()
+    }
+    fn epsilon() -> Self {
+        OrderedFloat(T::epsilon())
+    }
+    fn to_degrees(self) -> Self {
+        OrderedFloat(self.0.to_degrees())
+    }
+    fn to_radians(self) -> Self {
+        OrderedFloat(self.0.to_radians())
+    }
 }
 
 #[cfg(feature = "std")]
 impl<T: Float> Float for OrderedFloat<T> {
-    fn nan() -> Self { OrderedFloat(T::nan()) }
-    fn infinity() -> Self { OrderedFloat(T::infinity()) }
-    fn neg_infinity() -> Self { OrderedFloat(T::neg_infinity()) }
-    fn neg_zero() -> Self { OrderedFloat(T::neg_zero()) }
-    fn min_value() -> Self { OrderedFloat(T::min_value()) }
-    fn min_positive_value() -> Self { OrderedFloat(T::min_positive_value()) }
-    fn max_value() -> Self { OrderedFloat(T::max_value()) }
-    fn is_nan(self) -> bool { self.0.is_nan() }
-    fn is_infinite(self) -> bool { self.0.is_infinite() }
-    fn is_finite(self) -> bool { self.0.is_finite() }
-    fn is_normal(self) -> bool { self.0.is_normal() }
-    fn classify(self) -> FpCategory { self.0.classify() }
-    fn floor(self) -> Self { OrderedFloat(self.0.floor()) }
-    fn ceil(self) -> Self { OrderedFloat(self.0.ceil()) }
-    fn round(self) -> Self { OrderedFloat(self.0.round()) }
-    fn trunc(self) -> Self { OrderedFloat(self.0.trunc()) }
-    fn fract(self) -> Self { OrderedFloat(self.0.fract()) }
-    fn abs(self) -> Self { OrderedFloat(self.0.abs()) }
-    fn signum(self) -> Self { OrderedFloat(self.0.signum()) }
-    fn is_sign_positive(self) -> bool { self.0.is_sign_positive() }
-    fn is_sign_negative(self) -> bool { self.0.is_sign_negative() }
-    fn mul_add(self, a: Self, b: Self) -> Self { OrderedFloat(self.0.mul_add(a.0, b.0)) }
-    fn recip(self) -> Self { OrderedFloat(self.0.recip()) }
-    fn powi(self, n: i32) -> Self { OrderedFloat(self.0.powi(n)) }
-    fn powf(self, n: Self) -> Self { OrderedFloat(self.0.powf(n.0)) }
-    fn sqrt(self) -> Self { OrderedFloat(self.0.sqrt()) }
-    fn exp(self) -> Self { OrderedFloat(self.0.exp()) }
-    fn exp2(self) -> Self { OrderedFloat(self.0.exp2()) }
-    fn ln(self) -> Self { OrderedFloat(self.0.ln()) }
-    fn log(self, base: Self) -> Self { OrderedFloat(self.0.log(base.0)) }
-    fn log2(self) -> Self { OrderedFloat(self.0.log2()) }
-    fn log10(self) -> Self { OrderedFloat(self.0.log10()) }
-    fn max(self, other: Self) -> Self { OrderedFloat(self.0.max(other.0)) }
-    fn min(self, other: Self) -> Self { OrderedFloat(self.0.min(other.0)) }
-    fn abs_sub(self, other: Self) -> Self { OrderedFloat(self.0.abs_sub(other.0)) }
-    fn cbrt(self) -> Self { OrderedFloat(self.0.cbrt()) }
-    fn hypot(self, other: Self) -> Self { OrderedFloat(self.0.hypot(other.0)) }
-    fn sin(self) -> Self { OrderedFloat(self.0.sin()) }
-    fn cos(self) -> Self { OrderedFloat(self.0.cos()) }
-    fn tan(self) -> Self { OrderedFloat(self.0.tan()) }
-    fn asin(self) -> Self { OrderedFloat(self.0.asin()) }
-    fn acos(self) -> Self { OrderedFloat(self.0.acos()) }
-    fn atan(self) -> Self { OrderedFloat(self.0.atan()) }
-    fn atan2(self, other: Self) -> Self { OrderedFloat(self.0.atan2(other.0)) }
+    fn nan() -> Self {
+        OrderedFloat(T::nan())
+    }
+    fn infinity() -> Self {
+        OrderedFloat(T::infinity())
+    }
+    fn neg_infinity() -> Self {
+        OrderedFloat(T::neg_infinity())
+    }
+    fn neg_zero() -> Self {
+        OrderedFloat(T::neg_zero())
+    }
+    fn min_value() -> Self {
+        OrderedFloat(T::min_value())
+    }
+    fn min_positive_value() -> Self {
+        OrderedFloat(T::min_positive_value())
+    }
+    fn max_value() -> Self {
+        OrderedFloat(T::max_value())
+    }
+    fn is_nan(self) -> bool {
+        self.0.is_nan()
+    }
+    fn is_infinite(self) -> bool {
+        self.0.is_infinite()
+    }
+    fn is_finite(self) -> bool {
+        self.0.is_finite()
+    }
+    fn is_normal(self) -> bool {
+        self.0.is_normal()
+    }
+    fn classify(self) -> FpCategory {
+        self.0.classify()
+    }
+    fn floor(self) -> Self {
+        OrderedFloat(self.0.floor())
+    }
+    fn ceil(self) -> Self {
+        OrderedFloat(self.0.ceil())
+    }
+    fn round(self) -> Self {
+        OrderedFloat(self.0.round())
+    }
+    fn trunc(self) -> Self {
+        OrderedFloat(self.0.trunc())
+    }
+    fn fract(self) -> Self {
+        OrderedFloat(self.0.fract())
+    }
+    fn abs(self) -> Self {
+        OrderedFloat(self.0.abs())
+    }
+    fn signum(self) -> Self {
+        OrderedFloat(self.0.signum())
+    }
+    fn is_sign_positive(self) -> bool {
+        self.0.is_sign_positive()
+    }
+    fn is_sign_negative(self) -> bool {
+        self.0.is_sign_negative()
+    }
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        OrderedFloat(self.0.mul_add(a.0, b.0))
+    }
+    fn recip(self) -> Self {
+        OrderedFloat(self.0.recip())
+    }
+    fn powi(self, n: i32) -> Self {
+        OrderedFloat(self.0.powi(n))
+    }
+    fn powf(self, n: Self) -> Self {
+        OrderedFloat(self.0.powf(n.0))
+    }
+    fn sqrt(self) -> Self {
+        OrderedFloat(self.0.sqrt())
+    }
+    fn exp(self) -> Self {
+        OrderedFloat(self.0.exp())
+    }
+    fn exp2(self) -> Self {
+        OrderedFloat(self.0.exp2())
+    }
+    fn ln(self) -> Self {
+        OrderedFloat(self.0.ln())
+    }
+    fn log(self, base: Self) -> Self {
+        OrderedFloat(self.0.log(base.0))
+    }
+    fn log2(self) -> Self {
+        OrderedFloat(self.0.log2())
+    }
+    fn log10(self) -> Self {
+        OrderedFloat(self.0.log10())
+    }
+    fn max(self, other: Self) -> Self {
+        OrderedFloat(self.0.max(other.0))
+    }
+    fn min(self, other: Self) -> Self {
+        OrderedFloat(self.0.min(other.0))
+    }
+    fn abs_sub(self, other: Self) -> Self {
+        OrderedFloat(self.0.abs_sub(other.0))
+    }
+    fn cbrt(self) -> Self {
+        OrderedFloat(self.0.cbrt())
+    }
+    fn hypot(self, other: Self) -> Self {
+        OrderedFloat(self.0.hypot(other.0))
+    }
+    fn sin(self) -> Self {
+        OrderedFloat(self.0.sin())
+    }
+    fn cos(self) -> Self {
+        OrderedFloat(self.0.cos())
+    }
+    fn tan(self) -> Self {
+        OrderedFloat(self.0.tan())
+    }
+    fn asin(self) -> Self {
+        OrderedFloat(self.0.asin())
+    }
+    fn acos(self) -> Self {
+        OrderedFloat(self.0.acos())
+    }
+    fn atan(self) -> Self {
+        OrderedFloat(self.0.atan())
+    }
+    fn atan2(self, other: Self) -> Self {
+        OrderedFloat(self.0.atan2(other.0))
+    }
     fn sin_cos(self) -> (Self, Self) {
         let (a, b) = self.0.sin_cos();
         (OrderedFloat(a), OrderedFloat(b))
     }
-    fn exp_m1(self) -> Self { OrderedFloat(self.0.exp_m1()) }
-    fn ln_1p(self) -> Self { OrderedFloat(self.0.ln_1p()) }
-    fn sinh(self) -> Self { OrderedFloat(self.0.sinh()) }
-    fn cosh(self) -> Self { OrderedFloat(self.0.cosh()) }
-    fn tanh(self) -> Self { OrderedFloat(self.0.tanh()) }
-    fn asinh(self) -> Self { OrderedFloat(self.0.asinh()) }
-    fn acosh(self) -> Self { OrderedFloat(self.0.acosh()) }
-    fn atanh(self) -> Self { OrderedFloat(self.0.atanh()) }
-    fn integer_decode(self) -> (u64, i16, i8) { self.0.integer_decode() }
-    fn epsilon() -> Self { OrderedFloat(T::epsilon()) }
-    fn to_degrees(self) -> Self { OrderedFloat(self.0.to_degrees()) }
-    fn to_radians(self) -> Self { OrderedFloat(self.0.to_radians()) }
+    fn exp_m1(self) -> Self {
+        OrderedFloat(self.0.exp_m1())
+    }
+    fn ln_1p(self) -> Self {
+        OrderedFloat(self.0.ln_1p())
+    }
+    fn sinh(self) -> Self {
+        OrderedFloat(self.0.sinh())
+    }
+    fn cosh(self) -> Self {
+        OrderedFloat(self.0.cosh())
+    }
+    fn tanh(self) -> Self {
+        OrderedFloat(self.0.tanh())
+    }
+    fn asinh(self) -> Self {
+        OrderedFloat(self.0.asinh())
+    }
+    fn acosh(self) -> Self {
+        OrderedFloat(self.0.acosh())
+    }
+    fn atanh(self) -> Self {
+        OrderedFloat(self.0.atanh())
+    }
+    fn integer_decode(self) -> (u64, i16, i8) {
+        self.0.integer_decode()
+    }
+    fn epsilon() -> Self {
+        OrderedFloat(T::epsilon())
+    }
+    fn to_degrees(self) -> Self {
+        OrderedFloat(self.0.to_degrees())
+    }
+    fn to_radians(self) -> Self {
+        OrderedFloat(self.0.to_radians())
+    }
 }
-
 
 impl<T: Float + Num> Num for OrderedFloat<T> {
     type FromStrRadixErr = T::FromStrRadixErr;
@@ -563,8 +806,8 @@ impl<T: Float + Num> Num for OrderedFloat<T> {
 /// use ordered_float::NotNan;
 ///
 /// let mut v = [
-///     NotNan::new(2.0).unwrap(), 
-///     NotNan::new(1.0).unwrap(), 
+///     NotNan::new(2.0).unwrap(),
+///     NotNan::new(1.0).unwrap(),
 /// ];
 /// v.sort();
 /// assert_eq!(v, [1.0, 2.0]);
@@ -706,9 +949,7 @@ impl TryFrom<f64> for NotNan<f64> {
 impl From<NotNan<f32>> for NotNan<f64> {
     #[inline]
     fn from(v: NotNan<f32>) -> NotNan<f64> {
-        unsafe {
-            NotNan::new_unchecked(v.0 as f64)
-        }
+        unsafe { NotNan::new_unchecked(v.0 as f64) }
     }
 }
 
@@ -911,14 +1152,14 @@ macro_rules! impl_not_nan_binop {
                 (*self).$assign_method(other.0);
             }
         }
-    }
+    };
 }
 
-impl_not_nan_binop!{Add, add, AddAssign, add_assign}
-impl_not_nan_binop!{Sub, sub, SubAssign, sub_assign}
-impl_not_nan_binop!{Mul, mul, MulAssign, mul_assign}
-impl_not_nan_binop!{Div, div, DivAssign, div_assign}
-impl_not_nan_binop!{Rem, rem, RemAssign, rem_assign}
+impl_not_nan_binop! {Add, add, AddAssign, add_assign}
+impl_not_nan_binop! {Sub, sub, SubAssign, sub_assign}
+impl_not_nan_binop! {Mul, mul, MulAssign, mul_assign}
+impl_not_nan_binop! {Div, div, DivAssign, div_assign}
+impl_not_nan_binop! {Rem, rem, RemAssign, rem_assign}
 
 impl<T: Float> Neg for NotNan<T> {
     type Output = Self;
@@ -986,15 +1227,21 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
 
 impl<T: Float> Zero for NotNan<T> {
     #[inline]
-    fn zero() -> Self { NotNan(T::zero()) }
+    fn zero() -> Self {
+        NotNan(T::zero())
+    }
 
     #[inline]
-    fn is_zero(&self) -> bool { self.0.is_zero() }
+    fn is_zero(&self) -> bool {
+        self.0.is_zero()
+    }
 }
 
 impl<T: Float> One for NotNan<T> {
     #[inline]
-    fn one() -> Self { NotNan(T::one()) }
+    fn one() -> Self {
+        NotNan(T::one())
+    }
 }
 
 impl<T: Float> Bounded for NotNan<T> {
@@ -1030,35 +1277,83 @@ impl<T: Float + FromStr> FromStr for NotNan<T> {
 }
 
 impl<T: Float + FromPrimitive> FromPrimitive for NotNan<T> {
-    fn from_i64(n: i64) -> Option<Self> { T::from_i64(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_u64(n: u64) -> Option<Self> { T::from_u64(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_i64(n: i64) -> Option<Self> {
+        T::from_i64(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_u64(n: u64) -> Option<Self> {
+        T::from_u64(n).and_then(|n| NotNan::new(n).ok())
+    }
 
-    fn from_isize(n: isize) -> Option<Self> { T::from_isize(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_i8(n: i8) -> Option<Self> { T::from_i8(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_i16(n: i16) -> Option<Self> { T::from_i16(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_i32(n: i32) -> Option<Self> { T::from_i32(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_usize(n: usize) -> Option<Self> { T::from_usize(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_u8(n: u8) -> Option<Self> { T::from_u8(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_u16(n: u16) -> Option<Self> { T::from_u16(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_u32(n: u32) -> Option<Self> { T::from_u32(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_f32(n: f32) -> Option<Self> { T::from_f32(n).and_then(|n| NotNan::new(n).ok()) }
-    fn from_f64(n: f64) -> Option<Self> { T::from_f64(n).and_then(|n| NotNan::new(n).ok()) }
+    fn from_isize(n: isize) -> Option<Self> {
+        T::from_isize(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_i8(n: i8) -> Option<Self> {
+        T::from_i8(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_i16(n: i16) -> Option<Self> {
+        T::from_i16(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_i32(n: i32) -> Option<Self> {
+        T::from_i32(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_usize(n: usize) -> Option<Self> {
+        T::from_usize(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_u8(n: u8) -> Option<Self> {
+        T::from_u8(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_u16(n: u16) -> Option<Self> {
+        T::from_u16(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_u32(n: u32) -> Option<Self> {
+        T::from_u32(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_f32(n: f32) -> Option<Self> {
+        T::from_f32(n).and_then(|n| NotNan::new(n).ok())
+    }
+    fn from_f64(n: f64) -> Option<Self> {
+        T::from_f64(n).and_then(|n| NotNan::new(n).ok())
+    }
 }
 
 impl<T: Float> ToPrimitive for NotNan<T> {
-    fn to_i64(&self) -> Option<i64> { self.0.to_i64() }
-    fn to_u64(&self) -> Option<u64> { self.0.to_u64() }
+    fn to_i64(&self) -> Option<i64> {
+        self.0.to_i64()
+    }
+    fn to_u64(&self) -> Option<u64> {
+        self.0.to_u64()
+    }
 
-    fn to_isize(&self) -> Option<isize> { self.0.to_isize() }
-    fn to_i8(&self) -> Option<i8> { self.0.to_i8() }
-    fn to_i16(&self) -> Option<i16> { self.0.to_i16() }
-    fn to_i32(&self) -> Option<i32> { self.0.to_i32() }
-    fn to_usize(&self) -> Option<usize> { self.0.to_usize() }
-    fn to_u8(&self) -> Option<u8> { self.0.to_u8() }
-    fn to_u16(&self) -> Option<u16> { self.0.to_u16() }
-    fn to_u32(&self) -> Option<u32> { self.0.to_u32() }
-    fn to_f32(&self) -> Option<f32> { self.0.to_f32() }
-    fn to_f64(&self) -> Option<f64> { self.0.to_f64() }
+    fn to_isize(&self) -> Option<isize> {
+        self.0.to_isize()
+    }
+    fn to_i8(&self) -> Option<i8> {
+        self.0.to_i8()
+    }
+    fn to_i16(&self) -> Option<i16> {
+        self.0.to_i16()
+    }
+    fn to_i32(&self) -> Option<i32> {
+        self.0.to_i32()
+    }
+    fn to_usize(&self) -> Option<usize> {
+        self.0.to_usize()
+    }
+    fn to_u8(&self) -> Option<u8> {
+        self.0.to_u8()
+    }
+    fn to_u16(&self) -> Option<u16> {
+        self.0.to_u16()
+    }
+    fn to_u32(&self) -> Option<u32> {
+        self.0.to_u32()
+    }
+    fn to_f32(&self) -> Option<f32> {
+        self.0.to_f32()
+    }
+    fn to_f64(&self) -> Option<f64> {
+        self.0.to_f64()
+    }
 }
 
 /// An error indicating a parse error from a string for `NotNan`.
@@ -1105,18 +1400,26 @@ impl<T: Float> Num for NotNan<T> {
 
 impl<T: Float + Signed> Signed for NotNan<T> {
     #[inline]
-    fn abs(&self) -> Self { NotNan(self.0.abs()) }
+    fn abs(&self) -> Self {
+        NotNan(self.0.abs())
+    }
 
     fn abs_sub(&self, other: &Self) -> Self {
         NotNan::new(Signed::abs_sub(&self.0, &other.0)).expect("Subtraction resulted in NaN")
     }
 
     #[inline]
-    fn signum(&self) -> Self { NotNan(self.0.signum()) }
+    fn signum(&self) -> Self {
+        NotNan(self.0.signum())
+    }
     #[inline]
-    fn is_positive(&self) -> bool { self.0.is_positive() }
+    fn is_positive(&self) -> bool {
+        self.0.is_positive()
+    }
     #[inline]
-    fn is_negative(&self) -> bool { self.0.is_negative() }
+    fn is_negative(&self) -> bool {
+        self.0.is_negative()
+    }
 }
 
 impl<T: Float> NumCast for NotNan<T> {
@@ -1128,19 +1431,19 @@ impl<T: Float> NumCast for NotNan<T> {
 #[cfg(feature = "serde")]
 mod impl_serde {
     extern crate serde;
-    use self::serde::{Serialize, Serializer, Deserialize, Deserializer};
     use self::serde::de::{Error, Unexpected};
-    use super::{OrderedFloat, NotNan};
-    #[cfg(feature = "std")]
-    use num_traits::Float;
+    use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use super::{NotNan, OrderedFloat};
+    use core::f64;
     #[cfg(not(feature = "std"))]
     use num_traits::float::FloatCore as Float;
-    use core::f64;
+    #[cfg(feature = "std")]
+    use num_traits::Float;
 
     #[cfg(test)]
     extern crate serde_test;
     #[cfg(test)]
-    use self::serde_test::{Token, assert_tokens, assert_de_tokens_error};
+    use self::serde_test::{assert_de_tokens_error, assert_tokens, Token};
 
     impl<T: Float + Serialize> Serialize for OrderedFloat<T> {
         #[inline]
@@ -1188,15 +1491,16 @@ mod impl_serde {
     fn test_fail_on_nan() {
         assert_de_tokens_error::<NotNan<f64>>(
             &[Token::F64(f64::NAN)],
-            "invalid value: floating point `NaN`, expected float (but not NaN)");
+            "invalid value: floating point `NaN`, expected float (but not NaN)",
+        );
     }
 }
 #[cfg(all(feature = "std", feature = "schemars"))]
 mod impl_schemars {
     extern crate schemars;
-    use super::{OrderedFloat, NotNan};
-    use self::schemars::schema::{Schema, InstanceType, SchemaObject};
     use self::schemars::gen::SchemaGenerator;
+    use self::schemars::schema::{InstanceType, Schema, SchemaObject};
+    use super::{NotNan, OrderedFloat};
 
     macro_rules! primitive_float_impl {
         ($type:ty, $schema_name:literal) => {
@@ -1215,10 +1519,10 @@ mod impl_schemars {
                         format: Some(std::string::String::from($schema_name)),
                         ..Default::default()
                     }
-                        .into()
+                    .into()
                 }
             }
-        }
+        };
     }
 
     primitive_float_impl!(OrderedFloat<f32>, "float");
@@ -1229,46 +1533,90 @@ mod impl_schemars {
     #[test]
     fn schema_generation_does_not_panic_for_common_floats() {
         {
-            let schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<OrderedFloat<f32>>();
-            assert_eq!(schema.schema.instance_type, Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(schemars::schema::InstanceType::Number))));
-            assert_eq!(schema.schema.metadata.unwrap().title.unwrap(), std::string::String::from("float"));
+            let schema = schemars::gen::SchemaGenerator::default()
+                .into_root_schema_for::<OrderedFloat<f32>>();
+            assert_eq!(
+                schema.schema.instance_type,
+                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
+                    schemars::schema::InstanceType::Number
+                )))
+            );
+            assert_eq!(
+                schema.schema.metadata.unwrap().title.unwrap(),
+                std::string::String::from("float")
+            );
         }
         {
-            let schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<OrderedFloat<f64>>();
-            assert_eq!(schema.schema.instance_type, Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(schemars::schema::InstanceType::Number))));
-            assert_eq!(schema.schema.metadata.unwrap().title.unwrap(), std::string::String::from("double"));
+            let schema = schemars::gen::SchemaGenerator::default()
+                .into_root_schema_for::<OrderedFloat<f64>>();
+            assert_eq!(
+                schema.schema.instance_type,
+                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
+                    schemars::schema::InstanceType::Number
+                )))
+            );
+            assert_eq!(
+                schema.schema.metadata.unwrap().title.unwrap(),
+                std::string::String::from("double")
+            );
         }
         {
-            let schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f32>>();
-            assert_eq!(schema.schema.instance_type, Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(schemars::schema::InstanceType::Number))));
-            assert_eq!(schema.schema.metadata.unwrap().title.unwrap(), std::string::String::from("float"));
+            let schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f32>>();
+            assert_eq!(
+                schema.schema.instance_type,
+                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
+                    schemars::schema::InstanceType::Number
+                )))
+            );
+            assert_eq!(
+                schema.schema.metadata.unwrap().title.unwrap(),
+                std::string::String::from("float")
+            );
         }
         {
-            let schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f64>>();
-            assert_eq!(schema.schema.instance_type, Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(schemars::schema::InstanceType::Number))));
-            assert_eq!(schema.schema.metadata.unwrap().title.unwrap(), std::string::String::from("double"));
+            let schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f64>>();
+            assert_eq!(
+                schema.schema.instance_type,
+                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
+                    schemars::schema::InstanceType::Number
+                )))
+            );
+            assert_eq!(
+                schema.schema.metadata.unwrap().title.unwrap(),
+                std::string::String::from("double")
+            );
         }
     }
     #[test]
     fn ordered_float_schema_match_primitive_schema() {
         {
-            let of_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<OrderedFloat<f32>>();
-            let prim_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<f32>();
+            let of_schema = schemars::gen::SchemaGenerator::default()
+                .into_root_schema_for::<OrderedFloat<f32>>();
+            let prim_schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f32>();
             assert_eq!(of_schema, prim_schema);
         }
         {
-            let of_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<OrderedFloat<f64>>();
-            let prim_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<f64>();
+            let of_schema = schemars::gen::SchemaGenerator::default()
+                .into_root_schema_for::<OrderedFloat<f64>>();
+            let prim_schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f64>();
             assert_eq!(of_schema, prim_schema);
         }
         {
-            let of_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f32>>();
-            let prim_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<f32>();
+            let of_schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f32>>();
+            let prim_schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f32>();
             assert_eq!(of_schema, prim_schema);
         }
         {
-            let of_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f64>>();
-            let prim_schema = schemars::gen::SchemaGenerator::default().into_root_schema_for::<f64>();
+            let of_schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f64>>();
+            let prim_schema =
+                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f64>();
             assert_eq!(of_schema, prim_schema);
         }
     }
@@ -1277,8 +1625,8 @@ mod impl_schemars {
 #[cfg(all(feature = "std", feature = "rand"))]
 mod impl_rand {
     use super::{NotNan, OrderedFloat};
-    use rand::distributions::{Distribution, Open01, OpenClosed01, Standard};
     use rand::distributions::uniform::*;
+    use rand::distributions::{Distribution, Open01, OpenClosed01, Standard};
     use rand::Rng;
 
     macro_rules! impl_distribution {
@@ -1327,14 +1675,16 @@ mod impl_rand {
             impl UniformSampler for UniformNotNan<$f> {
                 type X = NotNan<$f>;
                 fn new<B1, B2>(low: B1, high: B2) -> Self
-                    where B1: SampleBorrow<Self::X> + Sized,
-                        B2: SampleBorrow<Self::X> + Sized
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
                 {
                     UniformNotNan(UniformFloat::<$f>::new(low.borrow().0, high.borrow().0))
                 }
                 fn new_inclusive<B1, B2>(low: B1, high: B2) -> Self
-                    where B1: SampleBorrow<Self::X> + Sized,
-                        B2: SampleBorrow<Self::X> + Sized
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
                 {
                     UniformSampler::new(low, high)
                 }
@@ -1347,14 +1697,16 @@ mod impl_rand {
             impl UniformSampler for UniformOrdered<$f> {
                 type X = OrderedFloat<$f>;
                 fn new<B1, B2>(low: B1, high: B2) -> Self
-                    where B1: SampleBorrow<Self::X> + Sized,
-                        B2: SampleBorrow<Self::X> + Sized
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
                 {
                     UniformOrdered(UniformFloat::<$f>::new(low.borrow().0, high.borrow().0))
                 }
                 fn new_inclusive<B1, B2>(low: B1, high: B2) -> Self
-                    where B1: SampleBorrow<Self::X> + Sized,
-                        B2: SampleBorrow<Self::X> + Sized
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
                 {
                     UniformSampler::new(low, high)
                 }
@@ -1362,11 +1714,11 @@ mod impl_rand {
                     OrderedFloat(self.0.sample(rng))
                 }
             }
-        }
+        };
     }
 
-    impl_uniform_sampler!{ f32 }
-    impl_uniform_sampler!{ f64 }
+    impl_uniform_sampler! { f32 }
+    impl_uniform_sampler! { f64 }
 
     #[cfg(test)]
     fn sample_fuzz<T>()
@@ -1404,8 +1756,11 @@ mod impl_rand {
     #[test]
     #[should_panic]
     fn uniform_sampling_panic_on_infinity_notnan() {
-        let (low, high) = (NotNan::new(0f64).unwrap(), NotNan::new(std::f64::INFINITY).unwrap());
-        let uniform = Uniform::new(low,high);
+        let (low, high) = (
+            NotNan::new(0f64).unwrap(),
+            NotNan::new(std::f64::INFINITY).unwrap(),
+        );
+        let uniform = Uniform::new(low, high);
         let _ = uniform.sample(&mut rand::thread_rng());
     }
 
@@ -1413,7 +1768,7 @@ mod impl_rand {
     #[should_panic]
     fn uniform_sampling_panic_on_infinity_ordered() {
         let (low, high) = (OrderedFloat(0f64), OrderedFloat(std::f64::INFINITY));
-        let uniform = Uniform::new(low,high);
+        let uniform = Uniform::new(low, high);
         let _ = uniform.sample(&mut rand::thread_rng());
     }
 
@@ -1421,7 +1776,7 @@ mod impl_rand {
     #[should_panic]
     fn uniform_sampling_panic_on_nan_ordered() {
         let (low, high) = (OrderedFloat(0f64), OrderedFloat(std::f64::NAN));
-        let uniform = Uniform::new(low,high);
+        let uniform = Uniform::new(low, high);
         let _ = uniform.sample(&mut rand::thread_rng());
     }
 }
