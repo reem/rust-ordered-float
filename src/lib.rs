@@ -329,6 +329,33 @@ impl_ordered_float_binop!{Mul, mul, MulAssign, mul_assign}
 impl_ordered_float_binop!{Div, div, DivAssign, div_assign}
 impl_ordered_float_binop!{Rem, rem, RemAssign, rem_assign}
 
+/// Adds a float directly.
+impl<T: Float + Sum> Sum for OrderedFloat<T> {
+    fn sum<I: Iterator<Item = OrderedFloat<T>>>(iter: I) -> Self {
+        OrderedFloat(iter.map(|v| v.0).sum())
+    }
+}
+
+impl<'a, T: Float + Sum + 'a> Sum<&'a OrderedFloat<T>> for OrderedFloat<T> {
+    #[inline]
+    fn sum<I: Iterator<Item = &'a OrderedFloat<T>>>(iter: I) -> Self {
+        iter.cloned().sum()
+    }
+}
+
+impl<T: Float + Product> Product for OrderedFloat<T> {
+    fn product<I: Iterator<Item = OrderedFloat<T>>>(iter: I) -> Self {
+        OrderedFloat(iter.map(|v| v.0).product())
+    }
+}
+
+impl<'a, T: Float + Product + 'a> Product<&'a OrderedFloat<T>> for OrderedFloat<T> {
+    #[inline]
+    fn product<I: Iterator<Item = &'a OrderedFloat<T>>>(iter: I) -> Self {
+        iter.cloned().product()
+    }
+}
+
 impl<T: Bounded> Bounded for OrderedFloat<T> {
     #[inline]
     fn min_value() -> Self {
