@@ -39,6 +39,12 @@ jobs:
           command: test
           args: --features "std,schemars"
 
+      - name: Test (rand features subset)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --features "rand,randtest"
+
       - name: Test (all features)
         uses: actions-rs/cargo@v1
         with:

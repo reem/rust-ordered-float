@@ -1,6 +1,6 @@
 [package]
 name        = "ordered-float"
-version     = "2.5.0"
+version     = "2.5.1"
 authors     = [
   "Jonathan Reem <jonathan.reem@gmail.com>",
   "Matt Brubeck <mbrubeck@limpet.net>",
@@ -24,4 +24,5 @@ serde_test = "1.0"
 
 [features]
 default = ["std"]
-std     = ["num-traits/std", "rand/std", "rand/std_rng"]
+std = ["num-traits/std"]
+randtest = ["rand/std", "rand/std_rng"]
