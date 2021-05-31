@@ -1622,7 +1622,7 @@ mod impl_schemars {
     }
 }
 
-#[cfg(all(feature = "std", feature = "rand"))]
+#[cfg(feature = "rand")]
 mod impl_rand {
     use super::{NotNan, OrderedFloat};
     use rand::distributions::uniform::*;
@@ -1720,63 +1720,67 @@ mod impl_rand {
     impl_uniform_sampler! { f32 }
     impl_uniform_sampler! { f64 }
 
-    #[cfg(test)]
-    fn sample_fuzz<T>()
-    where
-        Standard: Distribution<NotNan<T>>,
-        Open01: Distribution<NotNan<T>>,
-        OpenClosed01: Distribution<NotNan<T>>,
-        Standard: Distribution<OrderedFloat<T>>,
-        Open01: Distribution<OrderedFloat<T>>,
-        OpenClosed01: Distribution<OrderedFloat<T>>,
-        T: super::Float,
-    {
-        let mut rng = rand::thread_rng();
-        let f1: NotNan<T> = rng.sample(Standard);
-        let f2: NotNan<T> = rng.sample(Open01);
-        let f3: NotNan<T> = rng.sample(OpenClosed01);
-        let _: OrderedFloat<T> = rng.sample(Standard);
-        let _: OrderedFloat<T> = rng.sample(Open01);
-        let _: OrderedFloat<T> = rng.sample(OpenClosed01);
-        assert!(!f1.into_inner().is_nan());
-        assert!(!f2.into_inner().is_nan());
-        assert!(!f3.into_inner().is_nan());
-    }
+    #[cfg(all(test, feature = "randtest"))]
+    mod tests {
+        use super::*;
 
-    #[test]
-    fn sampling_f32_does_not_panic() {
-        sample_fuzz::<f32>();
-    }
+        fn sample_fuzz<T>()
+        where
+            Standard: Distribution<NotNan<T>>,
+            Open01: Distribution<NotNan<T>>,
+            OpenClosed01: Distribution<NotNan<T>>,
+            Standard: Distribution<OrderedFloat<T>>,
+            Open01: Distribution<OrderedFloat<T>>,
+            OpenClosed01: Distribution<OrderedFloat<T>>,
+            T: crate::Float,
+        {
+            let mut rng = rand::thread_rng();
+            let f1: NotNan<T> = rng.sample(Standard);
+            let f2: NotNan<T> = rng.sample(Open01);
+            let f3: NotNan<T> = rng.sample(OpenClosed01);
+            let _: OrderedFloat<T> = rng.sample(Standard);
+            let _: OrderedFloat<T> = rng.sample(Open01);
+            let _: OrderedFloat<T> = rng.sample(OpenClosed01);
+            assert!(!f1.into_inner().is_nan());
+            assert!(!f2.into_inner().is_nan());
+            assert!(!f3.into_inner().is_nan());
+        }
 
-    #[test]
-    fn sampling_f64_does_not_panic() {
-        sample_fuzz::<f64>();
-    }
+        #[test]
+        fn sampling_f32_does_not_panic() {
+            sample_fuzz::<f32>();
+        }
 
-    #[test]
-    #[should_panic]
-    fn uniform_sampling_panic_on_infinity_notnan() {
-        let (low, high) = (
-            NotNan::new(0f64).unwrap(),
-            NotNan::new(std::f64::INFINITY).unwrap(),
-        );
-        let uniform = Uniform::new(low, high);
-        let _ = uniform.sample(&mut rand::thread_rng());
-    }
+        #[test]
+        fn sampling_f64_does_not_panic() {
+            sample_fuzz::<f64>();
+        }
 
-    #[test]
-    #[should_panic]
-    fn uniform_sampling_panic_on_infinity_ordered() {
-        let (low, high) = (OrderedFloat(0f64), OrderedFloat(std::f64::INFINITY));
-        let uniform = Uniform::new(low, high);
-        let _ = uniform.sample(&mut rand::thread_rng());
-    }
+        #[test]
+        #[should_panic]
+        fn uniform_sampling_panic_on_infinity_notnan() {
+            let (low, high) = (
+                NotNan::new(0f64).unwrap(),
+                NotNan::new(core::f64::INFINITY).unwrap(),
+            );
+            let uniform = Uniform::new(low, high);
+            let _ = uniform.sample(&mut rand::thread_rng());
+        }
 
-    #[test]
-    #[should_panic]
-    fn uniform_sampling_panic_on_nan_ordered() {
-        let (low, high) = (OrderedFloat(0f64), OrderedFloat(std::f64::NAN));
-        let uniform = Uniform::new(low, high);
-        let _ = uniform.sample(&mut rand::thread_rng());
+        #[test]
+        #[should_panic]
+        fn uniform_sampling_panic_on_infinity_ordered() {
+            let (low, high) = (OrderedFloat(0f64), OrderedFloat(core::f64::INFINITY));
+            let uniform = Uniform::new(low, high);
+            let _ = uniform.sample(&mut rand::thread_rng());
+        }
+
+        #[test]
+        #[should_panic]
+        fn uniform_sampling_panic_on_nan_ordered() {
+            let (low, high) = (OrderedFloat(0f64), OrderedFloat(core::f64::NAN));
+            let uniform = Uniform::new(low, high);
+            let _ = uniform.sample(&mut rand::thread_rng());
+        }
     }
 }
