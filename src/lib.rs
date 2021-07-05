@@ -377,6 +377,30 @@ impl<'a, T: Float + Product + 'a> Product<&'a OrderedFloat<T>> for OrderedFloat<
     }
 }
 
+impl<T: Float + Signed> Signed for OrderedFloat<T> {
+    #[inline]
+    fn abs(&self) -> Self {
+        OrderedFloat(self.0.abs())
+    }
+
+    fn abs_sub(&self, other: &Self) -> Self {
+        OrderedFloat(Signed::abs_sub(&self.0, &other.0))
+    }
+
+    #[inline]
+    fn signum(&self) -> Self {
+        OrderedFloat(self.0.signum())
+    }
+    #[inline]
+    fn is_positive(&self) -> bool {
+        self.0.is_positive()
+    }
+    #[inline]
+    fn is_negative(&self) -> bool {
+        self.0.is_negative()
+    }
+}
+
 impl<T: Bounded> Bounded for OrderedFloat<T> {
     #[inline]
     fn min_value() -> Self {
