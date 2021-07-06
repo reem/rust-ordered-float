@@ -1,6 +1,6 @@
 [package]
 name        = "ordered-float"
-version     = "2.5.1"
+version     = "2.6.0"
 authors     = [
   "Jonathan Reem <jonathan.reem@gmail.com>",
   "Matt Brubeck <mbrubeck@limpet.net>",
