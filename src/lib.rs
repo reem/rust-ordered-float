@@ -1519,6 +1519,104 @@ mod impl_serde {
         );
     }
 }
+
+#[cfg(feature = "rkyv")]
+mod impl_rkyv {
+    use super::{NotNan, OrderedFloat};
+    #[cfg(not(feature = "std"))]
+    use num_traits::float::FloatCore as Float;
+    #[cfg(feature = "std")]
+    use num_traits::Float;
+    #[cfg(test)]
+    use rkyv::{archived_root, ser::Serializer};
+    use rkyv::{from_archived, Archive, Deserialize, Fallible, Serialize};
+
+    #[cfg(test)]
+    type DefaultSerializer = rkyv::ser::serializers::CoreSerializer<16, 16>;
+    #[cfg(test)]
+    type DefaultDeserializer = rkyv::Infallible;
+
+    impl<T: Float + Archive> Archive for OrderedFloat<T> {
+        type Archived = OrderedFloat<T>;
+
+        type Resolver = ();
+
+        unsafe fn resolve(&self, _: usize, _: Self::Resolver, out: *mut Self::Archived) {
+            out.write(*self);
+        }
+    }
+
+    impl<T: Float + Serialize<S>, S: Fallible + ?Sized> Serialize<S> for OrderedFloat<T> {
+        fn serialize(&self, _: &mut S) -> Result<Self::Resolver, S::Error> {
+            Ok(())
+        }
+    }
+
+    impl<T: Float + Deserialize<T, D>, D: Fallible + ?Sized> Deserialize<OrderedFloat<T>, D>
+        for OrderedFloat<T>
+    {
+        fn deserialize(&self, _: &mut D) -> Result<OrderedFloat<T>, D::Error> {
+            Ok(from_archived!(*self))
+        }
+    }
+
+    impl<T: Float + Archive> Archive for NotNan<T> {
+        type Archived = NotNan<T>;
+
+        type Resolver = ();
+
+        unsafe fn resolve(&self, _: usize, _: Self::Resolver, out: *mut Self::Archived) {
+            out.write(*self);
+        }
+    }
+
+    impl<T: Float + Serialize<S>, S: Fallible + ?Sized> Serialize<S> for NotNan<T> {
+        fn serialize(&self, _: &mut S) -> Result<Self::Resolver, S::Error> {
+            Ok(())
+        }
+    }
+
+    impl<T: Float + Deserialize<T, D>, D: Fallible + ?Sized> Deserialize<NotNan<T>, D> for NotNan<T> {
+        fn deserialize(&self, _: &mut D) -> Result<NotNan<T>, D::Error> {
+            Ok(from_archived!(*self))
+        }
+    }
+
+    #[test]
+    fn test_ordered_float() {
+        let float = OrderedFloat(1.0f64);
+        let mut serializer = DefaultSerializer::default();
+        serializer
+            .serialize_value(&float)
+            .expect("failed to archive value");
+        let len = serializer.pos();
+        let buffer = serializer.into_serializer().into_inner();
+
+        let archived_value = unsafe { archived_root::<OrderedFloat<f64>>(&buffer[0..len]) };
+        assert_eq!(archived_value, &float);
+        let mut deserializer = DefaultDeserializer::default();
+        let deser_float: OrderedFloat<f64> = archived_value.deserialize(&mut deserializer).unwrap();
+        assert_eq!(deser_float, float);
+    }
+
+    #[test]
+    fn test_not_nan() {
+        let float = NotNan(1.0f64);
+        let mut serializer = DefaultSerializer::default();
+        serializer
+            .serialize_value(&float)
+            .expect("failed to archive value");
+        let len = serializer.pos();
+        let buffer = serializer.into_serializer().into_inner();
+
+        let archived_value = unsafe { archived_root::<NotNan<f64>>(&buffer[0..len]) };
+        assert_eq!(archived_value, &float);
+        let mut deserializer = DefaultDeserializer::default();
+        let deser_float: NotNan<f64> = archived_value.deserialize(&mut deserializer).unwrap();
+        assert_eq!(deser_float, float);
+    }
+}
+
 #[cfg(all(feature = "std", feature = "schemars"))]
 mod impl_schemars {
     extern crate schemars;
