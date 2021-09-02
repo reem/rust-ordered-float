@@ -34,18 +34,21 @@ jobs:
           args: --no-default-features
 
       - name: Test (schema features subset)
+        if: matrix.rust == 'stable'
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --features "std,schemars"
 
       - name: Test (rand features subset)
+        if: matrix.rust == 'stable'
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --features "rand,randtest"
 
       - name: Test (all features)
+        if: matrix.rust == 'stable'
         uses: actions-rs/cargo@v1
         with:
           command: test
