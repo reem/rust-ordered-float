@@ -9,6 +9,7 @@ extern crate std;
 #[cfg(feature = "std")]
 use std::error::Error;
 
+use core::borrow::Borrow;
 use core::cmp::Ordering;
 use core::convert::TryFrom;
 use core::fmt;
@@ -911,6 +912,20 @@ impl<T> NotNan<T> {
 impl<T: Float> AsRef<T> for NotNan<T> {
     #[inline]
     fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
+impl Borrow<f32> for NotNan<f32> {
+    #[inline]
+    fn borrow(&self) -> &f32 {
+        &self.0
+    }
+}
+
+impl Borrow<f64> for NotNan<f64> {
+    #[inline]
+    fn borrow(&self) -> &f64 {
         &self.0
     }
 }
