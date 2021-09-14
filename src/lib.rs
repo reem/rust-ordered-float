@@ -16,7 +16,6 @@ use core::fmt;
 use core::hash::{Hash, Hasher};
 use core::hint::unreachable_unchecked;
 use core::iter::{Product, Sum};
-use core::mem;
 use core::num::FpCategory;
 use core::ops::{
     Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub,
@@ -1259,7 +1258,7 @@ fn raw_double_bits<F: Float>(f: &F) -> u64 {
         return CANONICAL_ZERO_BITS;
     }
 
-    let exp_u64 = unsafe { mem::transmute::<i16, u16>(exp) } as u64;
+    let exp_u64 = exp as u16 as u64;
     let sign_u64 = if sign > 0 { 1u64 } else { 0u64 };
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
 }
