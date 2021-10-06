@@ -26,9 +26,9 @@ use core::str::FromStr;
 #[cfg(not(feature = "std"))]
 use num_traits::float::FloatCore as Float;
 #[cfg(feature = "std")]
-pub use num_traits::Float;
-#[cfg(feature = "std")]
 use num_traits::real::Real;
+#[cfg(feature = "std")]
+pub use num_traits::Float;
 use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
 
 // masks for the parts of the IEEE 754 float
