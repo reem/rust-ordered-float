@@ -27,6 +27,8 @@ use core::str::FromStr;
 use num_traits::float::FloatCore as Float;
 #[cfg(feature = "std")]
 pub use num_traits::Float;
+#[cfg(feature = "std")]
+use num_traits::real::Real;
 use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
 
 // masks for the parts of the IEEE 754 float
@@ -1463,6 +1465,152 @@ impl<T: Float + Signed> Signed for NotNan<T> {
 impl<T: Float> NumCast for NotNan<T> {
     fn from<F: ToPrimitive>(n: F) -> Option<Self> {
         T::from(n).and_then(|n| NotNan::new(n).ok())
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: Float> Real for NotNan<T> {
+    fn min_value() -> Self {
+        NotNan(T::min_value())
+    }
+    fn min_positive_value() -> Self {
+        NotNan(T::min_positive_value())
+    }
+    fn max_value() -> Self {
+        NotNan(T::max_value())
+    }
+    fn floor(self) -> Self {
+        NotNan(self.0.floor())
+    }
+    fn ceil(self) -> Self {
+        NotNan(self.0.ceil())
+    }
+    fn round(self) -> Self {
+        NotNan(self.0.round())
+    }
+    fn trunc(self) -> Self {
+        NotNan(self.0.trunc())
+    }
+    fn fract(self) -> Self {
+        NotNan(self.0.fract())
+    }
+    fn abs(self) -> Self {
+        NotNan(self.0.abs())
+    }
+    fn signum(self) -> Self {
+        NotNan(self.0.signum())
+    }
+    fn is_sign_positive(self) -> bool {
+        self.0.is_sign_positive()
+    }
+    fn is_sign_negative(self) -> bool {
+        self.0.is_sign_negative()
+    }
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        NotNan(self.0.mul_add(a.0, b.0))
+    }
+    fn recip(self) -> Self {
+        NotNan(self.0.recip())
+    }
+    fn powi(self, n: i32) -> Self {
+        NotNan(self.0.powi(n))
+    }
+    fn powf(self, n: Self) -> Self {
+        NotNan(self.0.powf(n.0))
+    }
+    fn sqrt(self) -> Self {
+        NotNan(self.0.sqrt())
+    }
+    fn exp(self) -> Self {
+        NotNan(self.0.exp())
+    }
+    fn exp2(self) -> Self {
+        NotNan(self.0.exp2())
+    }
+    fn ln(self) -> Self {
+        NotNan(self.0.ln())
+    }
+    fn log(self, base: Self) -> Self {
+        NotNan(self.0.log(base.0))
+    }
+    fn log2(self) -> Self {
+        NotNan(self.0.log2())
+    }
+    fn log10(self) -> Self {
+        NotNan(self.0.log10())
+    }
+    fn max(self, other: Self) -> Self {
+        NotNan(self.0.max(other.0))
+    }
+    fn min(self, other: Self) -> Self {
+        NotNan(self.0.min(other.0))
+    }
+    fn abs_sub(self, other: Self) -> Self {
+        NotNan(self.0.abs_sub(other.0))
+    }
+    fn cbrt(self) -> Self {
+        NotNan(self.0.cbrt())
+    }
+    fn hypot(self, other: Self) -> Self {
+        NotNan(self.0.hypot(other.0))
+    }
+    fn sin(self) -> Self {
+        NotNan(self.0.sin())
+    }
+    fn cos(self) -> Self {
+        NotNan(self.0.cos())
+    }
+    fn tan(self) -> Self {
+        NotNan(self.0.tan())
+    }
+    fn asin(self) -> Self {
+        NotNan(self.0.asin())
+    }
+    fn acos(self) -> Self {
+        NotNan(self.0.acos())
+    }
+    fn atan(self) -> Self {
+        NotNan(self.0.atan())
+    }
+    fn atan2(self, other: Self) -> Self {
+        NotNan(self.0.atan2(other.0))
+    }
+    fn sin_cos(self) -> (Self, Self) {
+        let (a, b) = self.0.sin_cos();
+        (NotNan(a), NotNan(b))
+    }
+    fn exp_m1(self) -> Self {
+        NotNan(self.0.exp_m1())
+    }
+    fn ln_1p(self) -> Self {
+        NotNan(self.0.ln_1p())
+    }
+    fn sinh(self) -> Self {
+        NotNan(self.0.sinh())
+    }
+    fn cosh(self) -> Self {
+        NotNan(self.0.cosh())
+    }
+    fn tanh(self) -> Self {
+        NotNan(self.0.tanh())
+    }
+    fn asinh(self) -> Self {
+        NotNan(self.0.asinh())
+    }
+    fn acosh(self) -> Self {
+        NotNan(self.0.acosh())
+    }
+    fn atanh(self) -> Self {
+        NotNan(self.0.atanh())
+    }
+    fn epsilon() -> Self {
+        NotNan(T::epsilon())
+    }
+    fn to_degrees(self) -> Self {
+        NotNan(self.0.to_degrees())
+    }
+    fn to_radians(self) -> Self {
+        NotNan(self.0.to_radians())
     }
 }
 
