@@ -984,6 +984,30 @@ impl TryFrom<f64> for NotNan<f64> {
     }
 }
 
+macro_rules! impl_from_int_primitive {
+    ($primitive:ty, $inner:ty) => {
+        impl From<$primitive> for NotNan<$inner> {
+            fn from(source: $primitive) -> Self {
+                // the primitives with which this macro will be called cannot hold a value that
+                // f64::from would convert to NaN, so this does not hurt invariants
+                NotNan(<$inner as From<$primitive>>::from(source))
+            }
+        }
+    };
+}
+
+impl_from_int_primitive!(i8, f64);
+impl_from_int_primitive!(i16, f64);
+impl_from_int_primitive!(i32, f64);
+impl_from_int_primitive!(u8, f64);
+impl_from_int_primitive!(u16, f64);
+impl_from_int_primitive!(u32, f64);
+
+impl_from_int_primitive!(i8, f32);
+impl_from_int_primitive!(i16, f32);
+impl_from_int_primitive!(u8, f32);
+impl_from_int_primitive!(u16, f32);
+
 impl From<NotNan<f32>> for NotNan<f64> {
     #[inline]
     fn from(v: NotNan<f32>) -> NotNan<f64> {
