@@ -692,3 +692,46 @@ fn from_ref() {
     assert_eq!(*o, 2.0f64);
     assert_eq!(f, 2.0f64);
 }
+
+#[cfg(feature = "arbitrary")]
+mod arbitrary_test {
+    use super::{NotNan, OrderedFloat};
+    use arbitrary::{Arbitrary, Unstructured};
+
+    #[test]
+    fn exhaustive() {
+        // Exhaustively search all patterns of sign and exponent bits plus a few mantissa bits.
+        for high_bytes in 0..=u16::MAX {
+            let [h1, h2] = high_bytes.to_be_bytes();
+
+            // Each of these should not
+            //   * panic,
+            //   * return an error, or
+            //   * need more bytes than given.
+            let n32: NotNan<f32> = Unstructured::new(&[h1, h2, h1, h2])
+                .arbitrary()
+                .expect("NotNan<f32> failure");
+            let n64: NotNan<f64> = Unstructured::new(&[h1, h2, h1, h2, h1, h2, h1, h2])
+                .arbitrary()
+                .expect("NotNan<f64> failure");
+            let _: OrderedFloat<f32> = Unstructured::new(&[h1, h2, h1, h2])
+                .arbitrary()
+                .expect("OrderedFloat<f32> failure");
+            let _: OrderedFloat<f64> = Unstructured::new(&[h1, h2, h1, h2, h1, h2, h1, h2])
+                .arbitrary()
+                .expect("OrderedFloat<f64> failure");
+
+            // Check for violation of NotNan's property of never containing a NaN.
+            assert!(!n32.into_inner().is_nan());
+            assert!(!n64.into_inner().is_nan());
+        }
+    }
+
+    #[test]
+    fn size_hints() {
+        assert_eq!(NotNan::<f32>::size_hint(0), (4, Some(4)));
+        assert_eq!(NotNan::<f64>::size_hint(0), (8, Some(8)));
+        assert_eq!(OrderedFloat::<f32>::size_hint(0), (4, Some(4)));
+        assert_eq!(OrderedFloat::<f64>::size_hint(0), (8, Some(8)));
+    }
+}
