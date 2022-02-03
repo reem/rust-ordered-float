@@ -17,7 +17,7 @@ edition     = "2018"
 num-traits = { version = "0.2.1", default-features = false }
 serde      = { version = "1.0", optional = true, default-features = false }
 rkyv       = { version = "0.7", optional = true, default-features = false, features = ["size_32"] }
-schemars   = { version = "0.6.5", optional = true }
+schemars   = { version = "0.8.8", optional = true }
 rand       = { version = "0.8.3", optional = true, default-features = false }
 arbitrary  = { version = "1.0.0", optional = true }
 proptest   = { version = "1.0.0", optional = true }
