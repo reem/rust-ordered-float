@@ -932,7 +932,7 @@ impl Borrow<f64> for NotNan<f64> {
 #[allow(clippy::derive_ord_xor_partial_ord)]
 impl<T: Float> Ord for NotNan<T> {
     fn cmp(&self, other: &NotNan<T>) -> Ordering {
-        match self.partial_cmp(&other) {
+        match self.partial_cmp(other) {
             Some(ord) => ord,
             None => unsafe { unreachable_unchecked() },
         }
