@@ -22,6 +22,29 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
 
+      - name: Install rustfmt + clippy
+        if: matrix.rust == 'stable'
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt, clippy
+
+      - name: Check Fmt
+        if: matrix.rust == 'stable'
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+
+      - name: Check Lints (all features)
+        if: matrix.rust == 'stable'
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --tests --all-features
+
       - name: Test (default features)
         uses: actions-rs/cargo@v1
         with:
