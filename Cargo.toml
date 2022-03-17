@@ -21,6 +21,7 @@ schemars   = { version = "0.8.8", optional = true }
 rand       = { version = "0.8.3", optional = true, default-features = false }
 arbitrary  = { version = "1.0.0", optional = true }
 proptest   = { version = "1.0.0", optional = true }
+bytemuck   = { version = "1.8.0", optional = true, default-features = false }
 
 [dev-dependencies]
 serde_test = "1.0"

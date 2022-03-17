@@ -2039,3 +2039,21 @@ mod impl_arbitrary {
     }
     impl_arbitrary! { f32, f64 }
 }
+
+#[cfg(feature = "bytemuck")]
+mod impl_bytemuck {
+    use super::{NotNan, OrderedFloat};
+    use bytemuck::{Pod, Zeroable};
+
+    unsafe impl Zeroable for OrderedFloat<f32> {}
+    unsafe impl Zeroable for OrderedFloat<f64> {}
+
+    unsafe impl Zeroable for NotNan<f32> {}
+    unsafe impl Zeroable for NotNan<f64> {}
+
+    unsafe impl Pod for OrderedFloat<f32> {}
+    unsafe impl Pod for OrderedFloat<f64> {}
+
+    unsafe impl Pod for NotNan<f32> {}
+    unsafe impl Pod for NotNan<f64> {}
+}
