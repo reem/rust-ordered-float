@@ -21,7 +21,7 @@ the default `std` feature:
 
 ```toml
 [dependencies]
-ordered-float = { version = "2.0", default-features = false }
+ordered-float = { version = "3.0", default-features = false }
 ```
 
 ## Optional features
