@@ -599,7 +599,6 @@ fn add() {
     assert_eq!(OrderedFloat(0.0) + OrderedFloat(0.0), 0.0);
     assert_eq!(OrderedFloat(0.0) + &OrderedFloat(0.0), 0.0);
     assert_eq!(&OrderedFloat(0.0) + OrderedFloat(0.0), 0.0);
-    assert_eq!(&OrderedFloat(0.0) + &OrderedFloat(0.0), 0.0);
     assert_eq!(OrderedFloat(0.0) + 0.0, 0.0);
     assert_eq!(OrderedFloat(0.0) + &0.0, 0.0);
     assert_eq!(&OrderedFloat(0.0) + 0.0, 0.0);

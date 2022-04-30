@@ -253,18 +253,6 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
-        impl<'a, T> $imp for &'a OrderedFloat<T>
-        where
-            &'a T: $imp,
-        {
-            type Output = OrderedFloat<<&'a T as $imp>::Output>;
-
-            #[inline]
-            fn $method(self, other: Self) -> Self::Output {
-                OrderedFloat((self.0).$method(&other.0))
-            }
-        }
-
         impl<'a, T> $imp<OrderedFloat<T>> for &'a OrderedFloat<T>
         where
             &'a T: $imp<T>,
@@ -298,19 +286,6 @@ macro_rules! impl_ordered_float_binop {
             #[inline]
             fn $method(self, other: &'a T) -> Self::Output {
                 OrderedFloat((self.0).$method(other))
-            }
-        }
-
-        #[doc(hidden)] // Added accidentally; remove in next major version
-        impl<'a, T> $imp<&'a Self> for &'a OrderedFloat<T>
-        where
-            &'a T: $imp,
-        {
-            type Output = OrderedFloat<<&'a T as $imp>::Output>;
-
-            #[inline]
-            fn $method(self, other: &'a Self) -> Self::Output {
-                OrderedFloat((self.0).$method(&other.0))
             }
         }
 
