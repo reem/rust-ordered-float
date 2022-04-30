@@ -958,7 +958,7 @@ impl NotNan<f64> {
     /// Converts this [`NotNan`]`<`[`f64`]`>` to a [`NotNan`]`<`[`f32`]`>` while giving up on
     /// precision, [using `roundTiesToEven` as rounding mode, yielding `Infinity` on
     /// overflow](https://doc.rust-lang.org/reference/expressions/operator-expr.html#semantics).
-    pub fn into_notnan_f32_lossy(self) -> NotNan<f32> {
+    pub fn as_f32(self) -> NotNan<f32> {
         // This is not destroying invariants, as it is a pure rounding operation. The only two special
         // cases are where f32 would be overflowing, then the operation yields Infinity, or where
         // the input is already NaN, in which case the invariant is already broken elsewhere.
