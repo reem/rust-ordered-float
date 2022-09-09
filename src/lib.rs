@@ -27,7 +27,9 @@ use core::str::FromStr;
 use num_traits::float::FloatCore as Float;
 #[cfg(feature = "std")]
 pub use num_traits::Float;
-use num_traits::{Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero};
+use num_traits::{
+    AsPrimitive, Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
+};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -451,6 +453,49 @@ impl<T: NumCast> NumCast for OrderedFloat<T> {
         T::from(n).map(OrderedFloat)
     }
 }
+
+macro_rules! impl_as_primitive {
+    (@ (OrderedFloat<$T: ty>) => $(#[$cfg:meta])* impl (OrderedFloat<$U: ty>) ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<OrderedFloat<$U>> for OrderedFloat<$T> {
+            #[inline] fn as_(self) -> OrderedFloat<$U> { OrderedFloat(self.0 as $U) }
+        }
+    };
+    (@ ($T: ty) => $(#[$cfg:meta])* impl (OrderedFloat<$U: ty>) ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<OrderedFloat<$U>> for $T {
+            #[inline] fn as_(self) -> OrderedFloat<$U> { OrderedFloat(self as $U) }
+        }
+    };
+    (@ (OrderedFloat<$T: ty>) => $(#[$cfg:meta])* impl ($U: ty) ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<$U> for OrderedFloat<$T> {
+            #[inline] fn as_(self) -> $U { self.0 as $U }
+        }
+    };
+    ($T: tt => { $( $U: tt ),* } ) => {$(
+        impl_as_primitive!(@ $T => impl $U);
+    )*};
+}
+
+impl_as_primitive!((OrderedFloat<f32>) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((OrderedFloat<f64>) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+
+impl_as_primitive!((u8) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((i8) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((u16) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((i16) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((u32) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((i32) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((u64) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((i64) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((usize) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((isize) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((f32) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+impl_as_primitive!((f64) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+
+impl_as_primitive!((OrderedFloat<f32>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
+impl_as_primitive!((OrderedFloat<f64>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
 
 impl<T: FromPrimitive> FromPrimitive for OrderedFloat<T> {
     fn from_i64(n: i64) -> Option<Self> {
