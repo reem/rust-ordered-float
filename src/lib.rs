@@ -1,6 +1,7 @@
 #![no_std]
 #![cfg_attr(test, deny(warnings))]
 #![deny(missing_docs)]
+#![allow(clippy::derive_partial_eq_without_eq)]
 
 //! Wrappers for total order on Floats.  See the [`OrderedFloat`] and [`NotNan`] docs for details.
 
