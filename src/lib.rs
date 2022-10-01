@@ -173,6 +173,20 @@ impl<T: Float + fmt::Display> fmt::Display for OrderedFloat<T> {
     }
 }
 
+impl<T: Float + fmt::LowerExp> fmt::LowerExp for OrderedFloat<T> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<T: Float + fmt::UpperExp> fmt::UpperExp for OrderedFloat<T> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 impl From<OrderedFloat<f32>> for f32 {
     #[inline]
     fn from(f: OrderedFloat<f32>) -> f32 {
