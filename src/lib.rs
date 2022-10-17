@@ -1702,6 +1702,93 @@ mod impl_rkyv {
     }
 }
 
+#[cfg(feature = "speedy")]
+mod impl_speedy {
+    use super::{NotNan, OrderedFloat};
+    use num_traits::Float;
+    use speedy::{Context, Readable, Reader, Writable, Writer};
+
+    impl<C, T> Writable<C> for OrderedFloat<T>
+    where
+        C: Context,
+        T: Writable<C>,
+    {
+        fn write_to<W: ?Sized + Writer<C>>(&self, writer: &mut W) -> Result<(), C::Error> {
+            self.0.write_to(writer)
+        }
+
+        fn bytes_needed(&self) -> Result<usize, C::Error> {
+            self.0.bytes_needed()
+        }
+    }
+
+    impl<C, T> Writable<C> for NotNan<T>
+    where
+        C: Context,
+        T: Writable<C>,
+    {
+        fn write_to<W: ?Sized + Writer<C>>(&self, writer: &mut W) -> Result<(), C::Error> {
+            self.0.write_to(writer)
+        }
+
+        fn bytes_needed(&self) -> Result<usize, C::Error> {
+            self.0.bytes_needed()
+        }
+    }
+
+    impl<'a, T, C: Context> Readable<'a, C> for OrderedFloat<T>
+    where
+        T: Readable<'a, C>,
+    {
+        fn read_from<R: Reader<'a, C>>(reader: &mut R) -> Result<Self, C::Error> {
+            T::read_from(reader).map(OrderedFloat)
+        }
+
+        fn minimum_bytes_needed() -> usize {
+            T::minimum_bytes_needed()
+        }
+    }
+
+    impl<'a, T: Float, C: Context> Readable<'a, C> for NotNan<T>
+    where
+        T: Readable<'a, C>,
+    {
+        fn read_from<R: Reader<'a, C>>(reader: &mut R) -> Result<Self, C::Error> {
+            let value: T = reader.read_value()?;
+            Self::new(value).map_err(|error| {
+                speedy::Error::custom(std::format!("failed to read NotNan: {}", error)).into()
+            })
+        }
+
+        fn minimum_bytes_needed() -> usize {
+            T::minimum_bytes_needed()
+        }
+    }
+
+    #[test]
+    fn test_ordered_float() {
+        let float = OrderedFloat(1.0f64);
+        let buffer = float.write_to_vec().unwrap();
+        let deser_float: OrderedFloat<f64> = OrderedFloat::read_from_buffer(&buffer).unwrap();
+        assert_eq!(deser_float, float);
+    }
+
+    #[test]
+    fn test_not_nan() {
+        let float = NotNan(1.0f64);
+        let buffer = float.write_to_vec().unwrap();
+        let deser_float: NotNan<f64> = NotNan::read_from_buffer(&buffer).unwrap();
+        assert_eq!(deser_float, float);
+    }
+
+    #[test]
+    fn test_not_nan_with_nan() {
+        let nan_buf = f64::nan().write_to_vec().unwrap();
+        let nan_err: Result<NotNan<f64>, _> = NotNan::read_from_buffer(&nan_buf);
+        assert!(nan_err.is_err());
+    }
+}
+
 #[cfg(all(feature = "std", feature = "schemars"))]
 mod impl_schemars {
     extern crate schemars;
