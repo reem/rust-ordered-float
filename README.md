@@ -1,6 +1,6 @@
 # Ordered Floats
 
-Provides several wrapper types for Ord and Eq implementations on f64.
+Provides several wrapper types for Ord and Eq implementations on f64 and friends.
 
 See the [API documentation](https://docs.rs/ordered-float) for further details.
 
@@ -22,6 +22,8 @@ The following optional features can be enabled in `Cargo.toml`:
 * `serde`: Implements the `serde::Serialize` and `serde::Deserialize` traits.
 * `schemars`: Implements the `schemars::JsonSchema` trait.
 * `proptest`: Implements the `proptest::Arbitrary` trait.
+* `rkyv`: Implements `rkyv`'s `Archive`, `Serialize` and `Deserialize` traits.
+* `speedy`: Implements `speedy`'s `Readable` and `Writable` traits.
 
 ## License
 
