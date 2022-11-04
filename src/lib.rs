@@ -2173,3 +2173,43 @@ mod impl_arbitrary {
     }
     impl_arbitrary! { f32, f64 }
 }
+
+#[cfg(feature = "bytemuck")]
+mod impl_bytemuck {
+    use super::{NotNan, OrderedFloat, Float};
+    use bytemuck::{CheckedBitPattern, AnyBitPattern, NoUninit, Pod, Zeroable};
+
+    unsafe impl<T: Zeroable> Zeroable for OrderedFloat<T> {}
+
+    // The zero bit pattern is indeed not a NaN bit pattern.
+    unsafe impl<T: Zeroable> Zeroable for NotNan<T> {}
+
+    unsafe impl<T: Pod> Pod for OrderedFloat<T> {}
+
+    // `NotNan<T>` can only implement `NoUninit` and not `Pod`, since not every bit pattern is
+    // valid (NaN bit patterns are invalid). `NoUninit` guarantees that we can read any bit pattern
+    // from the value, which is fine in this case.
+    unsafe impl<T: NoUninit> NoUninit for NotNan<T> {}
+
+    unsafe impl<T: Float + AnyBitPattern> CheckedBitPattern for NotNan<T> {
+        type Bits = T;
+
+        fn is_valid_bit_pattern(bits: &Self::Bits) -> bool {
+            !bits.is_nan()
+        }
+    }
+
+    #[test]
+    fn test_not_nan_bit_pattern() {
+        use bytemuck::checked::{try_cast, CheckedCastError};
+
+        let nan = f64::NAN;
+        assert_eq!(
+            try_cast::<f64, NotNan<f64>>(nan),
+            Err(CheckedCastError::InvalidBitPattern),
+        );
+
+        let pi = core::f64::consts::PI;
+        assert!(try_cast::<f64, NotNan<f64>>(pi).is_ok());
+    }
+}
