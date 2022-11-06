@@ -2176,8 +2176,8 @@ mod impl_arbitrary {
 
 #[cfg(feature = "bytemuck")]
 mod impl_bytemuck {
-    use super::{NotNan, OrderedFloat, Float};
-    use bytemuck::{CheckedBitPattern, AnyBitPattern, NoUninit, Pod, Zeroable};
+    use super::{Float, NotNan, OrderedFloat};
+    use bytemuck::{AnyBitPattern, CheckedBitPattern, NoUninit, Pod, Zeroable};
 
     unsafe impl<T: Zeroable> Zeroable for OrderedFloat<T> {}
 
