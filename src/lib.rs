@@ -29,7 +29,7 @@ use num_traits::float::FloatCore as Float;
 #[cfg(feature = "std")]
 pub use num_traits::Float;
 use num_traits::{
-    AsPrimitive, Bounded, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
+    AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
 };
 
 // masks for the parts of the IEEE 754 float
@@ -1536,6 +1536,42 @@ impl<T: Float> NumCast for NotNan<T> {
         T::from(n).and_then(|n| NotNan::new(n).ok())
     }
 }
+
+macro_rules! impl_float_const_method {
+    ($wrapper:expr, $method:ident) => {
+        #[allow(non_snake_case)]
+        fn $method() -> Self {
+            $wrapper(T::$method())
+        }
+    };
+}
+
+macro_rules! impl_float_const {
+    ($type:ident, $wrapper:expr) => {
+        impl<T: FloatConst> FloatConst for $type<T> {
+            impl_float_const_method!($wrapper, E);
+            impl_float_const_method!($wrapper, FRAC_1_PI);
+            impl_float_const_method!($wrapper, FRAC_1_SQRT_2);
+            impl_float_const_method!($wrapper, FRAC_2_PI);
+            impl_float_const_method!($wrapper, FRAC_2_SQRT_PI);
+            impl_float_const_method!($wrapper, FRAC_PI_2);
+            impl_float_const_method!($wrapper, FRAC_PI_3);
+            impl_float_const_method!($wrapper, FRAC_PI_4);
+            impl_float_const_method!($wrapper, FRAC_PI_6);
+            impl_float_const_method!($wrapper, FRAC_PI_8);
+            impl_float_const_method!($wrapper, LN_10);
+            impl_float_const_method!($wrapper, LN_2);
+            impl_float_const_method!($wrapper, LOG10_E);
+            impl_float_const_method!($wrapper, LOG2_E);
+            impl_float_const_method!($wrapper, PI);
+            impl_float_const_method!($wrapper, SQRT_2);
+        }
+    };
+}
+
+impl_float_const!(OrderedFloat, OrderedFloat);
+// Float constants are not NaN.
+impl_float_const!(NotNan, |x| unsafe { NotNan::new_unchecked(x) });
 
 #[cfg(feature = "serde")]
 mod impl_serde {
