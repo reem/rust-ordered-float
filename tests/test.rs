@@ -7,7 +7,7 @@ extern crate ordered_float;
 pub use num_traits::float::FloatCore as Float;
 #[cfg(feature = "std")]
 pub use num_traits::Float;
-pub use num_traits::{Bounded, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
+pub use num_traits::{Bounded, FloatConst, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
 pub use ordered_float::*;
 
 pub use std::cmp::Ordering::*;
@@ -691,6 +691,41 @@ fn from_ref() {
     *o = OrderedFloat(2.0);
     assert_eq!(*o, 2.0f64);
     assert_eq!(f, 2.0f64);
+}
+
+macro_rules! test_float_const_method {
+    ($type:ident < $inner:ident >, $method:ident) => {
+        assert_eq!($type::<$inner>::$method().into_inner(), $inner::$method())
+    };
+}
+
+macro_rules! test_float_const_methods {
+    ($type:ident < $inner:ident >) => {
+        test_float_const_method!($type<$inner>, E);
+        test_float_const_method!($type<$inner>, FRAC_1_PI);
+        test_float_const_method!($type<$inner>, FRAC_1_SQRT_2);
+        test_float_const_method!($type<$inner>, FRAC_2_PI);
+        test_float_const_method!($type<$inner>, FRAC_2_SQRT_PI);
+        test_float_const_method!($type<$inner>, FRAC_PI_2);
+        test_float_const_method!($type<$inner>, FRAC_PI_3);
+        test_float_const_method!($type<$inner>, FRAC_PI_4);
+        test_float_const_method!($type<$inner>, FRAC_PI_6);
+        test_float_const_method!($type<$inner>, FRAC_PI_8);
+        test_float_const_method!($type<$inner>, LN_10);
+        test_float_const_method!($type<$inner>, LN_2);
+        test_float_const_method!($type<$inner>, LOG10_E);
+        test_float_const_method!($type<$inner>, LOG2_E);
+        test_float_const_method!($type<$inner>, PI);
+        test_float_const_method!($type<$inner>, SQRT_2);
+    };
+}
+
+#[test]
+fn float_consts_equal_inner() {
+    test_float_const_methods!(OrderedFloat<f64>);
+    test_float_const_methods!(OrderedFloat<f32>);
+    test_float_const_methods!(NotNan<f64>);
+    test_float_const_methods!(NotNan<f32>);
 }
 
 #[cfg(feature = "arbitrary")]
