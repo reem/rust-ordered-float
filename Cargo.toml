@@ -30,4 +30,5 @@ serde_test = "1.0"
 [features]
 default  = ["std"]
 std      = ["num-traits/std"]
+serde    = ["dep:serde", "rand/serde1"]
 randtest = ["rand/std", "rand/std_rng"]

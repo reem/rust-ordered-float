@@ -1948,6 +1948,8 @@ mod impl_rand {
     impl_distribution! { Open01, f32, f64 }
     impl_distribution! { OpenClosed01, f32, f64 }
 
+    #[derive(Clone, Copy, Debug, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct UniformNotNan<T>(UniformFloat<T>);
     impl SampleUniform for NotNan<f32> {
         type Sampler = UniformNotNan<f32>;
@@ -1956,6 +1958,8 @@ mod impl_rand {
         type Sampler = UniformNotNan<f64>;
     }
 
+    #[derive(Clone, Copy, Debug, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct UniformOrdered<T>(UniformFloat<T>);
     impl SampleUniform for OrderedFloat<f32> {
         type Sampler = UniformOrdered<f32>;
