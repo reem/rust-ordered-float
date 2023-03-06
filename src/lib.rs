@@ -2249,3 +2249,14 @@ mod impl_bytemuck {
         assert!(try_cast::<f64, NotNan<f64>>(pi).is_ok());
     }
 }
+
+#[cfg(feature = "geo")]
+mod impl_geo {
+    use super::{Float, OrderedFloat};
+    use geo::kernels::{RobustKernel, HasKernel};
+    use geo::CoordNum;
+
+    impl<T: Float + CoordNum + HasKernel> HasKernel for OrderedFloat<T> {
+        type Ker = RobustKernel;
+    }
+}
