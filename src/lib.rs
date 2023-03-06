@@ -2253,7 +2253,7 @@ mod impl_bytemuck {
 #[cfg(feature = "geo")]
 mod impl_geo {
     use super::{Float, OrderedFloat};
-    use geo::kernels::{RobustKernel, HasKernel};
+    use geo::kernels::{HasKernel, RobustKernel};
     use geo::CoordNum;
 
     impl<T: Float + CoordNum + HasKernel> HasKernel for OrderedFloat<T> {
