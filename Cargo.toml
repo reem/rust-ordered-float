@@ -23,6 +23,7 @@ arbitrary  = { version = "1.0.0", optional = true }
 proptest   = { version = "1.0.0", optional = true }
 speedy     = { version = "0.8.3", optional = true, default-features = false }
 bytemuck   = { version = "1.12.2", optional = true, default-features = false }
+geo        = { version = "0.23", optional = true }
 
 [dev-dependencies]
 serde_test = "1.0"
