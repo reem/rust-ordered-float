@@ -974,7 +974,7 @@ impl<T: Float> Ord for NotNan<T> {
     }
 }
 
-#[allow(clippy::derive_hash_xor_eq)]
+#[allow(clippy::derived_hash_with_manual_eq)]
 impl<T: Float> Hash for NotNan<T> {
     #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -2247,5 +2247,59 @@ mod impl_bytemuck {
 
         let pi = core::f64::consts::PI;
         assert!(try_cast::<f64, NotNan<f64>>(pi).is_ok());
+    }
+}
+
+#[cfg(feature = "geo")]
+mod impl_geo {
+    use super::{Float, NotNan, OrderedFloat};
+    use geo::kernels::{HasKernel, Kernel, RobustKernel};
+    use geo::CoordNum;
+    use num_traits::NumCast;
+    use robust::{orient2d, Coord};
+
+    impl<T: Float + CoordNum + HasKernel> HasKernel for OrderedFloat<T> {
+        type Ker = RobustKernel;
+    }
+
+    impl<T: Float + CoordNum + HasKernel> HasKernel for NotNan<T> {
+        type Ker = NotNanRobustKernel;
+    }
+
+    #[derive(Default, Debug)]
+    pub struct NotNanRobustKernel;
+
+    impl<T> Kernel<NotNan<T>> for NotNanRobustKernel
+    where
+        T: Float + NumCast + CoordNum,
+    {
+        fn orient2d(
+            p: geo::Coord<NotNan<T>>,
+            q: geo::Coord<NotNan<T>>,
+            r: geo::Coord<NotNan<T>>,
+        ) -> geo::Orientation {
+            let orientation = orient2d(
+                Coord {
+                    x: <f64 as NumCast>::from(p.x).unwrap(),
+                    y: <f64 as NumCast>::from(p.y).unwrap(),
+                },
+                Coord {
+                    x: <f64 as NumCast>::from(q.x).unwrap(),
+                    y: <f64 as NumCast>::from(q.y).unwrap(),
+                },
+                Coord {
+                    x: <f64 as NumCast>::from(r.x).unwrap(),
+                    y: <f64 as NumCast>::from(r.y).unwrap(),
+                },
+            );
+
+            if orientation > 0.0 {
+                geo::Orientation::CounterClockwise
+            } else if orientation < 0.0 {
+                geo::Orientation::Clockwise
+            } else {
+                geo::Orientation::Collinear
+            }
+        }
     }
 }
