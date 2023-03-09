@@ -24,11 +24,13 @@ proptest   = { version = "1.0.0", optional = true }
 speedy     = { version = "0.8.3", optional = true, default-features = false }
 bytemuck   = { version = "1.12.2", optional = true, default-features = false }
 geo        = { version = "0.24", optional = true }
+robust     = { version = "0.2", optional = true }
 
 [dev-dependencies]
 serde_test = "1.0"
 
 [features]
-default  = ["std"]
+default  = ["std", "geo"]
+geo      = ["dep:geo", "dep:robust"]
 std      = ["num-traits/std"]
 randtest = ["rand/std", "rand/std_rng"]
