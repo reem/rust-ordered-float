@@ -30,7 +30,7 @@ robust     = { version = "0.2", optional = true }
 serde_test = "1.0"
 
 [features]
-default  = ["std", "geo"]
-geo      = ["dep:geo", "dep:robust"]
-std      = ["num-traits/std"]
-randtest = ["rand/std", "rand/std_rng"]
+default     = ["std"]
+geo-interop = ["dep:geo", "dep:robust"]
+std         = ["num-traits/std"]
+randtest    = ["rand/std", "rand/std_rng"]
