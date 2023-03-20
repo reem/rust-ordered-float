@@ -470,6 +470,12 @@ impl<T: NumCast> NumCast for OrderedFloat<T> {
 }
 
 macro_rules! impl_as_primitive {
+    (@ ($T: ty) => $(#[$cfg:meta])* impl (NotNan<$U: ty>) ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<NotNan<$U>> for $T {
+            #[inline] fn as_(self) -> NotNan<$U> { NotNan(self as $U) }
+        }
+    };
     (@ (OrderedFloat<$T: ty>) => $(#[$cfg:meta])* impl (OrderedFloat<$U: ty>) ) => {
         $(#[$cfg])*
         impl AsPrimitive<OrderedFloat<$U>> for OrderedFloat<$T> {
@@ -508,6 +514,17 @@ impl_as_primitive!((usize) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 impl_as_primitive!((isize) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 impl_as_primitive!((f32) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 impl_as_primitive!((f64) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
+
+impl_as_primitive!((u8) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((i8) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((u16) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((i16) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((u32) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((i32) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((u64) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((i64) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((usize) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((isize) => { (NotNan<f32>), (NotNan<f64>) });
 
 impl_as_primitive!((OrderedFloat<f32>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
 impl_as_primitive!((OrderedFloat<f64>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
