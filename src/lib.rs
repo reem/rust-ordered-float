@@ -991,7 +991,6 @@ impl<T: Float> Ord for NotNan<T> {
     }
 }
 
-#[allow(clippy::derive_partial_eq_without_eq)]
 impl<T: Float> Hash for NotNan<T> {
     #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
