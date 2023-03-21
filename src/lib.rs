@@ -470,10 +470,25 @@ impl<T: NumCast> NumCast for OrderedFloat<T> {
 }
 
 macro_rules! impl_as_primitive {
+    (@ (NotNan<$T: ty>) => $(#[$cfg:meta])* impl (NotNan<$U: ty>) ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<NotNan<$U>> for NotNan<$T> {
+            #[inline] fn as_(self) -> NotNan<$U> {
+                // Safety: `NotNan` guarantees that the value is not NaN.
+                unsafe {NotNan::new_unchecked(self.0 as $U) }
+            }
+        }
+    };
     (@ ($T: ty) => $(#[$cfg:meta])* impl (NotNan<$U: ty>) ) => {
         $(#[$cfg])*
         impl AsPrimitive<NotNan<$U>> for $T {
             #[inline] fn as_(self) -> NotNan<$U> { NotNan(self as $U) }
+        }
+    };
+    (@ (NotNan<$T: ty>) => $(#[$cfg:meta])* impl ($U: ty) ) => {
+        $(#[$cfg])*
+        impl AsPrimitive<$U> for NotNan<$T> {
+            #[inline] fn as_(self) -> $U { self.0 as $U }
         }
     };
     (@ (OrderedFloat<$T: ty>) => $(#[$cfg:meta])* impl (OrderedFloat<$U: ty>) ) => {
@@ -502,6 +517,9 @@ macro_rules! impl_as_primitive {
 impl_as_primitive!((OrderedFloat<f32>) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 impl_as_primitive!((OrderedFloat<f64>) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 
+impl_as_primitive!((NotNan<f32>) => { (NotNan<f32>), (NotNan<f64>) });
+impl_as_primitive!((NotNan<f64>) => { (NotNan<f32>), (NotNan<f64>) });
+
 impl_as_primitive!((u8) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 impl_as_primitive!((i8) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
 impl_as_primitive!((u16) => { (OrderedFloat<f32>), (OrderedFloat<f64>) });
@@ -528,6 +546,10 @@ impl_as_primitive!((isize) => { (NotNan<f32>), (NotNan<f64>) });
 
 impl_as_primitive!((OrderedFloat<f32>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
 impl_as_primitive!((OrderedFloat<f64>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
+
+impl_as_primitive!((NotNan<f32>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
+impl_as_primitive!((NotNan<f64>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
+
 
 impl<T: FromPrimitive> FromPrimitive for OrderedFloat<T> {
     fn from_i64(n: i64) -> Option<Self> {
