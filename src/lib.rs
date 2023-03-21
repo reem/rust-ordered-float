@@ -550,7 +550,6 @@ impl_as_primitive!((OrderedFloat<f64>) => { (u8), (u16), (u32), (u64), (usize), 
 impl_as_primitive!((NotNan<f32>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
 impl_as_primitive!((NotNan<f64>) => { (u8), (u16), (u32), (u64), (usize), (i8), (i16), (i32), (i64), (isize), (f32), (f64) });
 
-
 impl<T: FromPrimitive> FromPrimitive for OrderedFloat<T> {
     fn from_i64(n: i64) -> Option<Self> {
         T::from_i64(n).map(OrderedFloat)
