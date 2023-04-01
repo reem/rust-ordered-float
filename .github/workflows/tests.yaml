@@ -43,7 +43,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --tests --all-features
+          args: --tests --features $all_features
 
       - name: Test (default features)
         uses: actions-rs/cargo@v1
@@ -75,4 +75,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all-features
+          args: --features $all_features
+
+env:
+  all_features: "bytemuck,rand,randtest,serde,schemars,proptest,rkyv,speedy"

@@ -1678,8 +1678,9 @@ mod impl_serde {
     }
 }
 
-#[cfg(feature = "rkyv")]
+#[cfg(feature = "rkyv_xx")]
 mod impl_rkyv {
+    use rkyv_xx as rkyv;
     use super::{NotNan, OrderedFloat};
     #[cfg(not(feature = "std"))]
     use num_traits::float::FloatCore as Float;
