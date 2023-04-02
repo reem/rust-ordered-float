@@ -1678,7 +1678,7 @@ mod impl_serde {
     }
 }
 
-#[cfg(feature = "rkyv_xx")]
+#[cfg(any(feature = "rkyv_16", feature = "rkyv_32", feature = "rkyv_64"))]
 mod impl_rkyv {
     use super::{NotNan, OrderedFloat};
     #[cfg(not(feature = "std"))]
@@ -1688,7 +1688,6 @@ mod impl_rkyv {
     #[cfg(test)]
     use rkyv::{archived_root, ser::Serializer};
     use rkyv::{from_archived, Archive, Deserialize, Fallible, Serialize};
-    use rkyv_xx as rkyv;
 
     #[cfg(test)]
     type DefaultSerializer = rkyv::ser::serializers::CoreSerializer<16, 16>;
