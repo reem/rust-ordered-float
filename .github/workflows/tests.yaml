@@ -78,4 +78,4 @@ jobs:
           args: --features ${{ env.all_features }}
 
 env:
-  all_features: "bytemuck,rand,randtest,serde,schemars,proptest,rkyv,speedy"
+  all_features: "bytemuck,rand,randtest,serde,schemars,proptest,rkyv,rkyv_ck,speedy"
