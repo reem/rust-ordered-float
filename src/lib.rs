@@ -1740,6 +1740,29 @@ mod impl_rkyv {
         }
     }
 
+    #[cfg(feature = "rkyv_ck")]
+    use rkyv::bytecheck::CheckBytes;
+
+    #[cfg(feature = "rkyv_ck")]
+    impl<C: ?Sized, T: CheckBytes<C>> CheckBytes<C> for OrderedFloat<T> {
+        type Error = T::Error;
+
+        #[inline]
+        unsafe fn check_bytes<'a>(value: *const Self, c: &mut C) -> Result<&'a Self, Self::Error> {
+            T::check_bytes(value as *const T, c).map(|_| &*value)
+        }
+    }
+
+    #[cfg(feature = "rkyv_ck")]
+    impl<C: ?Sized, T: CheckBytes<C>> CheckBytes<C> for NotNan<T> {
+        type Error = T::Error;
+
+        #[inline]
+        unsafe fn check_bytes<'a>(value: *const Self, c: &mut C) -> Result<&'a Self, Self::Error> {
+            T::check_bytes(value as *const T, c).map(|_| &*value)
+        }
+    }
+
     #[test]
     fn test_ordered_float() {
         let float = OrderedFloat(1.0f64);

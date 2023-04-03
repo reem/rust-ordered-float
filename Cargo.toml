@@ -16,7 +16,7 @@ edition     = "2021"
 [dependencies]
 num-traits = { version = "0.2.1", default-features = false }
 serde      = { version = "1.0", optional = true, default-features = false }
-rkyv       = { version = "0.7", optional = true, default-features = false }
+rkyv       = { version = "0.7.41", optional = true, default-features = false }
 schemars   = { version = "0.8.8", optional = true }
 rand       = { version = "0.8.3", optional = true, default-features = false }
 arbitrary  = { version = "1.0.0", optional = true }
@@ -36,3 +36,4 @@ rkyv     = ["rkyv_32"]
 rkyv_16  = ["dep:rkyv", "rkyv?/size_16"]
 rkyv_32  = ["dep:rkyv", "rkyv?/size_32"]
 rkyv_64  = ["dep:rkyv", "rkyv?/size_64"]
+rkyv_ck  = ["rkyv?/validation"]
