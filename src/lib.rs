@@ -1741,25 +1741,29 @@ mod impl_rkyv {
     }
 
     #[cfg(feature = "rkyv_ck")]
+    use super::FloatIsNan;
+    #[cfg(feature = "rkyv_ck")]
+    use core::convert::Infallible;
+    #[cfg(feature = "rkyv_ck")]
     use rkyv::bytecheck::CheckBytes;
 
     #[cfg(feature = "rkyv_ck")]
-    impl<C: ?Sized, T: CheckBytes<C>> CheckBytes<C> for OrderedFloat<T> {
-        type Error = T::Error;
+    impl<C: ?Sized, T: Float + CheckBytes<C>> CheckBytes<C> for OrderedFloat<T> {
+        type Error = Infallible;
 
         #[inline]
-        unsafe fn check_bytes<'a>(value: *const Self, c: &mut C) -> Result<&'a Self, Self::Error> {
-            T::check_bytes(value as *const T, c).map(|_| &*value)
+        unsafe fn check_bytes<'a>(value: *const Self, _: &mut C) -> Result<&'a Self, Self::Error> {
+            Ok(&*value)
         }
     }
 
     #[cfg(feature = "rkyv_ck")]
-    impl<C: ?Sized, T: CheckBytes<C>> CheckBytes<C> for NotNan<T> {
-        type Error = T::Error;
+    impl<C: ?Sized, T: Float + CheckBytes<C>> CheckBytes<C> for NotNan<T> {
+        type Error = FloatIsNan;
 
         #[inline]
-        unsafe fn check_bytes<'a>(value: *const Self, c: &mut C) -> Result<&'a Self, Self::Error> {
-            T::check_bytes(value as *const T, c).map(|_| &*value)
+        unsafe fn check_bytes<'a>(value: *const Self, _: &mut C) -> Result<&'a Self, Self::Error> {
+            Self::new(*(value as *const T)).map(|_| &*value)
         }
     }
 
