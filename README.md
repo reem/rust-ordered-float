@@ -23,7 +23,10 @@ The following optional features can be enabled in `Cargo.toml`:
 * `serde`: Implements the `serde::Serialize` and `serde::Deserialize` traits.
 * `schemars`: Implements the `schemars::JsonSchema` trait.
 * `proptest`: Implements the `proptest::Arbitrary` trait.
-* `rkyv`: Implements `rkyv`'s `Archive`, `Serialize` and `Deserialize` traits.
+* `rkyv_16`: Implements `rkyv`'s `Archive`, `Serialize` and `Deserialize` traits with `size_16`.
+* `rkyv_32`: Implements `rkyv`'s `Archive`, `Serialize` and `Deserialize` traits with `size_32`.
+* `rkyv_64`: Implements `rkyv`'s `Archive`, `Serialize` and `Deserialize` traits with `size_64`.
+* `rkyv_ck`: Implements the `bytecheck::CheckBytes` trait.
 * `speedy`: Implements `speedy`'s `Readable` and `Writable` traits.
 
 ## License
