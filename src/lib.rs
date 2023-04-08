@@ -157,12 +157,15 @@ impl<T: Float> PartialEq<T> for OrderedFloat<T> {
 
 impl<T: Float> Hash for OrderedFloat<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        if self.is_nan() {
-            // normalize to one representation of NaN
-            hash_float(&T::nan(), state)
+        let bits = if self.is_nan() {
+            CANONICAL_NAN_BITS
+        } else if self.is_zero() {
+            CANONICAL_ZERO_BITS
         } else {
-            hash_float(&self.0, state)
-        }
+            raw_double_bits(&self.0)
+        };
+
+        bits.hash(state)
     }
 }
 
@@ -1015,7 +1018,13 @@ impl<T: Float> Ord for NotNan<T> {
 impl<T: Float> Hash for NotNan<T> {
     #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
-        hash_float(&self.0, state)
+        let bits = if self.is_zero() {
+            CANONICAL_ZERO_BITS
+        } else {
+            raw_double_bits(&self.0)
+        };
+
+        bits.hash(state)
     }
 }
 
@@ -1351,21 +1360,8 @@ impl From<FloatIsNan> for std::io::Error {
 }
 
 #[inline]
-fn hash_float<F: Float, H: Hasher>(f: &F, state: &mut H) {
-    raw_double_bits(f).hash(state);
-}
-
-#[inline]
 fn raw_double_bits<F: Float>(f: &F) -> u64 {
-    if f.is_nan() {
-        return CANONICAL_NAN_BITS;
-    }
-
     let (man, exp, sign) = f.integer_decode();
-    if man == 0 {
-        return CANONICAL_ZERO_BITS;
-    }
-
     let exp_u64 = exp as u16 as u64;
     let sign_u64 = (sign > 0) as u64;
     (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
