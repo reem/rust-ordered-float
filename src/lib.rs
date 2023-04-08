@@ -1360,6 +1360,7 @@ impl From<FloatIsNan> for std::io::Error {
 }
 
 #[inline]
+/// Used for hashing. Input must not be zero or NaN.
 fn raw_double_bits<F: Float>(f: &F) -> u64 {
     let (man, exp, sign) = f.integer_decode();
     let exp_u64 = exp as u16 as u64;
