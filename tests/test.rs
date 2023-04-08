@@ -456,12 +456,32 @@ fn not_nan64_num_cast() {
 }
 
 #[test]
-fn hash_zero_and_neg_zero_to_the_same_hc() {
+fn hash_zero_and_neg_zero_to_the_same_hc_ordered_float64() {
     let state = RandomState::new();
     let mut h1 = state.build_hasher();
     let mut h2 = state.build_hasher();
     OrderedFloat::from(0f64).hash(&mut h1);
     OrderedFloat::from(-0f64).hash(&mut h2);
+    assert_eq!(h1.finish(), h2.finish());
+}
+
+#[test]
+fn hash_zero_and_neg_zero_to_the_same_hc_not_nan32() {
+    let state = RandomState::new();
+    let mut h1 = state.build_hasher();
+    let mut h2 = state.build_hasher();
+    NotNan::try_from(0f32).unwrap().hash(&mut h1);
+    NotNan::try_from(-0f32).unwrap().hash(&mut h2);
+    assert_eq!(h1.finish(), h2.finish());
+}
+
+#[test]
+fn hash_different_nans_to_the_same_hc() {
+    let state = RandomState::new();
+    let mut h1 = state.build_hasher();
+    let mut h2 = state.build_hasher();
+    OrderedFloat::from(f64::nan()).hash(&mut h1);
+    OrderedFloat::from(-f64::nan()).hash(&mut h2);
     assert_eq!(h1.finish(), h2.finish());
 }
 
