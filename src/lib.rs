@@ -347,15 +347,12 @@ impl_ordered_float_binop! {Div, div, DivAssign, div_assign}
 impl_ordered_float_binop! {Rem, rem, RemAssign, rem_assign}
 
 macro_rules! impl_ordered_float_pow {
-    ($inner:ty, $rhs:ty, $from_expr:expr) => {
+    ($inner:ty, $rhs:ty) => {
         impl Pow<$rhs> for OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
             fn pow(self, rhs: $rhs) -> OrderedFloat<$inner> {
-                match $from_expr(<$inner>::pow(self.0, rhs)) {
-                    Some(x) => x,
-                    None => OrderedFloat::nan(),
-                }
+                OrderedFloat(<$inner>::pow(self.0, rhs))
             }
         }
 
@@ -363,10 +360,7 @@ macro_rules! impl_ordered_float_pow {
             type Output = OrderedFloat<$inner>;
             #[inline]
             fn pow(self, rhs: &'a $rhs) -> OrderedFloat<$inner> {
-                match $from_expr(<$inner>::pow(self.0, *rhs)) {
-                    Some(x) => x,
-                    None => OrderedFloat::nan(),
-                }
+                OrderedFloat(<$inner>::pow(self.0, *rhs))
             }
         }
 
@@ -374,10 +368,7 @@ macro_rules! impl_ordered_float_pow {
             type Output = OrderedFloat<$inner>;
             #[inline]
             fn pow(self, rhs: $rhs) -> OrderedFloat<$inner> {
-                match $from_expr(<$inner>::pow(self.0, rhs)) {
-                    Some(x) => x,
-                    None => OrderedFloat::nan(),
-                }
+                OrderedFloat(<$inner>::pow(self.0, rhs))
             }
         }
 
@@ -385,28 +376,25 @@ macro_rules! impl_ordered_float_pow {
             type Output = OrderedFloat<$inner>;
             #[inline]
             fn pow(self, rhs: &'a $rhs) -> OrderedFloat<$inner> {
-                match $from_expr(<$inner>::pow(self.0, *rhs)) {
-                    Some(x) => x,
-                    None => OrderedFloat::nan(),
-                }
+                OrderedFloat(<$inner>::pow(self.0, *rhs))
             }
         }
     };
 }
 
-impl_ordered_float_pow! {f32, i8, OrderedFloat::from_f32}
-impl_ordered_float_pow! {f32, i16, OrderedFloat::from_f32}
-impl_ordered_float_pow! {f32, u8, OrderedFloat::from_f32}
-impl_ordered_float_pow! {f32, u16, OrderedFloat::from_f32}
-impl_ordered_float_pow! {f32, i32, OrderedFloat::from_f32}
-impl_ordered_float_pow! {f64, i8, OrderedFloat::from_f64}
-impl_ordered_float_pow! {f64, i16, OrderedFloat::from_f64}
-impl_ordered_float_pow! {f64, u8, OrderedFloat::from_f64}
-impl_ordered_float_pow! {f64, u16, OrderedFloat::from_f64}
-impl_ordered_float_pow! {f64, i32, OrderedFloat::from_f64}
-impl_ordered_float_pow! {f32, f32, OrderedFloat::from_f32}
-impl_ordered_float_pow! {f64, f32, OrderedFloat::from_f64}
-impl_ordered_float_pow! {f64, f64, OrderedFloat::from_f64}
+impl_ordered_float_pow! {f32, i8}
+impl_ordered_float_pow! {f32, i16}
+impl_ordered_float_pow! {f32, u8}
+impl_ordered_float_pow! {f32, u16}
+impl_ordered_float_pow! {f32, i32}
+impl_ordered_float_pow! {f64, i8}
+impl_ordered_float_pow! {f64, i16}
+impl_ordered_float_pow! {f64, u8}
+impl_ordered_float_pow! {f64, u16}
+impl_ordered_float_pow! {f64, i32}
+impl_ordered_float_pow! {f32, f32}
+impl_ordered_float_pow! {f64, f32}
+impl_ordered_float_pow! {f64, f64}
 
 macro_rules! impl_ordered_float_self_pow {
     ($base:ty, $exp:ty) => {
@@ -1397,12 +1385,12 @@ impl_not_nan_binop! {Rem, rem, RemAssign, rem_assign}
 
 // Will panic if NaN value is return from the operation
 macro_rules! impl_not_nan_pow {
-    ($inner:ty, $rhs:ty, $from_expr:expr) => {
+    ($inner:ty, $rhs:ty) => {
         impl Pow<$rhs> for NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: $rhs) -> NotNan<$inner> {
-                $from_expr(<$inner>::pow(self.0, rhs)).expect("Pow resulted in NaN")
+                NotNan::new(<$inner>::pow(self.0, rhs)).expect("Pow resulted in NaN")
             }
         }
 
@@ -1410,7 +1398,7 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: &'a $rhs) -> NotNan<$inner> {
-                $from_expr(<$inner>::pow(self.0, *rhs)).expect("Pow resulted in NaN")
+                NotNan::new(<$inner>::pow(self.0, *rhs)).expect("Pow resulted in NaN")
             }
         }
 
@@ -1418,7 +1406,7 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: $rhs) -> NotNan<$inner> {
-                $from_expr(<$inner>::pow(self.0, rhs)).expect("Pow resulted in NaN")
+                NotNan::new(<$inner>::pow(self.0, rhs)).expect("Pow resulted in NaN")
             }
         }
 
@@ -1426,25 +1414,25 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: &'a $rhs) -> NotNan<$inner> {
-                $from_expr(<$inner>::pow(self.0, *rhs)).expect("Pow resulted in NaN")
+                NotNan::new(<$inner>::pow(self.0, *rhs)).expect("Pow resulted in NaN")
             }
         }
     };
 }
 
-impl_not_nan_pow! {f32, i8, NotNan::new}
-impl_not_nan_pow! {f32, i16, NotNan::new}
-impl_not_nan_pow! {f32, u8, NotNan::new}
-impl_not_nan_pow! {f32, u16, NotNan::new}
-impl_not_nan_pow! {f32, i32, NotNan::new}
-impl_not_nan_pow! {f64, i8, NotNan::new}
-impl_not_nan_pow! {f64, i16, NotNan::new}
-impl_not_nan_pow! {f64, u8, NotNan::new}
-impl_not_nan_pow! {f64, u16, NotNan::new}
-impl_not_nan_pow! {f64, i32, NotNan::new}
-impl_not_nan_pow! {f32, f32, NotNan::new}
-impl_not_nan_pow! {f64, f32, NotNan::new}
-impl_not_nan_pow! {f64, f64, NotNan::new}
+impl_not_nan_pow! {f32, i8}
+impl_not_nan_pow! {f32, i16}
+impl_not_nan_pow! {f32, u8}
+impl_not_nan_pow! {f32, u16}
+impl_not_nan_pow! {f32, i32}
+impl_not_nan_pow! {f64, i8}
+impl_not_nan_pow! {f64, i16}
+impl_not_nan_pow! {f64, u8}
+impl_not_nan_pow! {f64, u16}
+impl_not_nan_pow! {f64, i32}
+impl_not_nan_pow! {f32, f32}
+impl_not_nan_pow! {f64, f32}
+impl_not_nan_pow! {f64, f64}
 
 // This also should panic on NaN
 macro_rules! impl_not_nan_self_pow {
