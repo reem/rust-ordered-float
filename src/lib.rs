@@ -396,10 +396,17 @@ macro_rules! impl_ordered_float_pow {
 
 impl_ordered_float_pow! {f32, i8, OrderedFloat::from_f32}
 impl_ordered_float_pow! {f32, i16, OrderedFloat::from_f32}
+impl_ordered_float_pow! {f32, u8, OrderedFloat::from_f32}
+impl_ordered_float_pow! {f32, u16, OrderedFloat::from_f32}
 impl_ordered_float_pow! {f32, i32, OrderedFloat::from_f32}
 impl_ordered_float_pow! {f64, i8, OrderedFloat::from_f64}
 impl_ordered_float_pow! {f64, i16, OrderedFloat::from_f64}
+impl_ordered_float_pow! {f64, u8, OrderedFloat::from_f64}
+impl_ordered_float_pow! {f64, u16, OrderedFloat::from_f64}
 impl_ordered_float_pow! {f64, i32, OrderedFloat::from_f64}
+impl_ordered_float_pow! {f32, f32, OrderedFloat::from_f32}
+impl_ordered_float_pow! {f64, f32, OrderedFloat::from_f64}
+impl_ordered_float_pow! {f64, f64, OrderedFloat::from_f64}
 
 /// Adds a float directly.
 impl<T: Float + Sum> Sum for OrderedFloat<T> {
@@ -1379,7 +1386,7 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: $rhs) -> NotNan<$inner> {
-                unsafe { $from_expr(<$inner>::pow(self.0, rhs)) }
+                $from_expr(<$inner>::pow(self.0, rhs)).expect("Rem resulted in NaN")
             }
         }
 
@@ -1387,7 +1394,7 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: &'a $rhs) -> NotNan<$inner> {
-                unsafe { $from_expr(<$inner>::pow(self.0, *rhs)) }
+                $from_expr(<$inner>::pow(self.0, *rhs)).expect("Rem resulted in NaN")
             }
         }
 
@@ -1395,7 +1402,7 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: $rhs) -> NotNan<$inner> {
-                unsafe { $from_expr(<$inner>::pow(self.0, rhs)) }
+                $from_expr(<$inner>::pow(self.0, rhs)).expect("Rem resulted in NaN")
             }
         }
 
@@ -1403,18 +1410,25 @@ macro_rules! impl_not_nan_pow {
             type Output = NotNan<$inner>;
             #[inline]
             fn pow(self, rhs: &'a $rhs) -> NotNan<$inner> {
-                unsafe { $from_expr(<$inner>::pow(self.0, *rhs)) }
+                $from_expr(<$inner>::pow(self.0, *rhs)).expect("Rem resulted in NaN")
             }
         }
     };
 }
 
-impl_not_nan_pow! {f32, i8, NotNan::new_unchecked}
-impl_not_nan_pow! {f32, i16, NotNan::new_unchecked}
-impl_not_nan_pow! {f32, i32, NotNan::new_unchecked}
-impl_not_nan_pow! {f64, i8, NotNan::new_unchecked}
-impl_not_nan_pow! {f64, i16, NotNan::new_unchecked}
-impl_not_nan_pow! {f64, i32, NotNan::new_unchecked}
+impl_not_nan_pow! {f32, i8, NotNan::new}
+impl_not_nan_pow! {f32, i16, NotNan::new}
+impl_not_nan_pow! {f32, u8, NotNan::new}
+impl_not_nan_pow! {f32, u16, NotNan::new}
+impl_not_nan_pow! {f32, i32, NotNan::new}
+impl_not_nan_pow! {f64, i8, NotNan::new}
+impl_not_nan_pow! {f64, i16, NotNan::new}
+impl_not_nan_pow! {f64, u8, NotNan::new}
+impl_not_nan_pow! {f64, u16, NotNan::new}
+impl_not_nan_pow! {f64, i32, NotNan::new}
+impl_not_nan_pow! {f32, f32, NotNan::new}
+impl_not_nan_pow! {f64, f32, NotNan::new}
+impl_not_nan_pow! {f64, f64, NotNan::new}
 
 impl<T: Float> Neg for NotNan<T> {
     type Output = Self;
