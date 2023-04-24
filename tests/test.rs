@@ -790,8 +790,13 @@ macro_rules! test_pow_nn {
 
 #[test]
 fn test_pow_works() {
+    assert_eq!(OrderedFloat(3.0).pow(OrderedFloat(2.0)), OrderedFloat(9.0));
     test_pow_ord!(OrderedFloat<f32>);
     test_pow_ord!(OrderedFloat<f64>);
+    assert_eq!(
+        NotNan::new(3.0).unwrap().pow(NotNan::new(2.0).unwrap()),
+        NotNan::new(9.0).unwrap()
+    );
     test_pow_nn!(NotNan<f32>);
     test_pow_nn!(NotNan<f64>);
     // Only f64 have Pow<f64> impl by default, so checking those seperate from macro
