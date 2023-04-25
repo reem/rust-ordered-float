@@ -746,6 +746,8 @@ fn float_consts_equal_inner() {
     test_float_const_methods!(NotNan<f64>);
     test_float_const_methods!(NotNan<f32>);
 }
+
+#[cfg(feature = "std")]
 macro_rules! test_pow_ord {
     ($type:ident < $inner:ident >) => {
         assert_eq!($type::<$inner>::from(3.0).pow(2i8), OrderedFloat(9.0));
@@ -757,6 +759,7 @@ macro_rules! test_pow_ord {
     };
 }
 
+#[cfg(feature = "std")]
 macro_rules! test_pow_nn {
     ($type:ident < $inner:ident >) => {
         assert_eq!(
@@ -786,6 +789,7 @@ macro_rules! test_pow_nn {
     };
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_pow_works() {
     assert_eq!(OrderedFloat(3.0).pow(OrderedFloat(2.0)), OrderedFloat(9.0));
@@ -805,6 +809,7 @@ fn test_pow_works() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 #[should_panic]
 fn test_pow_fails_on_nan() {
