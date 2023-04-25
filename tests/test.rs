@@ -5,9 +5,9 @@ extern crate ordered_float;
 
 #[cfg(not(feature = "std"))]
 pub use num_traits::float::FloatCore as Float;
-#[cfg(feature = "std")]
-pub use num_traits::Float;
 pub use num_traits::{Bounded, FloatConst, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
+#[cfg(feature = "std")]
+pub use num_traits::{Float, Pow};
 pub use ordered_float::*;
 
 pub use std::cmp::Ordering::*;
@@ -745,6 +745,77 @@ fn float_consts_equal_inner() {
     test_float_const_methods!(OrderedFloat<f32>);
     test_float_const_methods!(NotNan<f64>);
     test_float_const_methods!(NotNan<f32>);
+}
+
+#[cfg(feature = "std")]
+macro_rules! test_pow_ord {
+    ($type:ident < $inner:ident >) => {
+        assert_eq!($type::<$inner>::from(3.0).pow(2i8), OrderedFloat(9.0));
+        assert_eq!($type::<$inner>::from(3.0).pow(2i16), OrderedFloat(9.0));
+        assert_eq!($type::<$inner>::from(3.0).pow(2i32), OrderedFloat(9.0));
+        assert_eq!($type::<$inner>::from(3.0).pow(2u8), OrderedFloat(9.0));
+        assert_eq!($type::<$inner>::from(3.0).pow(2u16), OrderedFloat(9.0));
+        assert_eq!($type::<$inner>::from(3.0).pow(2f32), OrderedFloat(9.0));
+    };
+}
+
+#[cfg(feature = "std")]
+macro_rules! test_pow_nn {
+    ($type:ident < $inner:ident >) => {
+        assert_eq!(
+            $type::<$inner>::new(3.0).unwrap().pow(2i8),
+            NotNan::new(9.0).unwrap()
+        );
+        assert_eq!(
+            $type::<$inner>::new(3.0).unwrap().pow(2u8),
+            NotNan::new(9.0).unwrap()
+        );
+        assert_eq!(
+            $type::<$inner>::new(3.0).unwrap().pow(2i16),
+            NotNan::new(9.0).unwrap()
+        );
+        assert_eq!(
+            $type::<$inner>::new(3.0).unwrap().pow(2u16),
+            NotNan::new(9.0).unwrap()
+        );
+        assert_eq!(
+            $type::<$inner>::new(3.0).unwrap().pow(2i32),
+            NotNan::new(9.0).unwrap()
+        );
+        assert_eq!(
+            $type::<$inner>::new(3.0).unwrap().pow(2f32),
+            NotNan::new(9.0).unwrap()
+        );
+    };
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn test_pow_works() {
+    assert_eq!(OrderedFloat(3.0).pow(OrderedFloat(2.0)), OrderedFloat(9.0));
+    test_pow_ord!(OrderedFloat<f32>);
+    test_pow_ord!(OrderedFloat<f64>);
+    assert_eq!(
+        NotNan::new(3.0).unwrap().pow(NotNan::new(2.0).unwrap()),
+        NotNan::new(9.0).unwrap()
+    );
+    test_pow_nn!(NotNan<f32>);
+    test_pow_nn!(NotNan<f64>);
+    // Only f64 have Pow<f64> impl by default, so checking those seperate from macro
+    assert_eq!(OrderedFloat::<f64>::from(3.0).pow(2f64), OrderedFloat(9.0));
+    assert_eq!(
+        NotNan::<f64>::new(3.0).unwrap().pow(2f64),
+        NotNan::new(9.0).unwrap()
+    );
+}
+
+#[cfg(feature = "std")]
+#[test]
+#[should_panic]
+fn test_pow_fails_on_nan() {
+    let a = not_nan(-1.0);
+    let b = f32::NAN;
+    a.pow(b);
 }
 
 #[cfg(feature = "arbitrary")]
