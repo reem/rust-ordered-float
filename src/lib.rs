@@ -348,6 +348,7 @@ impl_ordered_float_binop! {Rem, rem, RemAssign, rem_assign}
 
 macro_rules! impl_ordered_float_pow {
     ($inner:ty, $rhs:ty) => {
+        #[cfg(feature = "std")]
         impl Pow<$rhs> for OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -356,6 +357,7 @@ macro_rules! impl_ordered_float_pow {
             }
         }
 
+        #[cfg(feature = "std")]
         impl<'a> Pow<&'a $rhs> for OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -364,6 +366,7 @@ macro_rules! impl_ordered_float_pow {
             }
         }
 
+        #[cfg(feature = "std")]
         impl<'a> Pow<$rhs> for &'a OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -372,6 +375,7 @@ macro_rules! impl_ordered_float_pow {
             }
         }
 
+        #[cfg(feature = "std")]
         impl<'a, 'b> Pow<&'a $rhs> for &'b OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -398,10 +402,38 @@ impl_ordered_float_pow! {f64, f64}
 
 macro_rules! impl_ordered_float_self_pow {
     ($base:ty, $exp:ty) => {
+        #[cfg(feature = "std")]
         impl Pow<OrderedFloat<$exp>> for OrderedFloat<$base> {
             type Output = OrderedFloat<$base>;
             #[inline]
             fn pow(self, rhs: OrderedFloat<$exp>) -> OrderedFloat<$base> {
+                OrderedFloat(<$base>::pow(self.0, rhs.0))
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<'a> Pow<&'a OrderedFloat<$exp>> for OrderedFloat<$base> {
+            type Output = OrderedFloat<$base>;
+            #[inline]
+            fn pow(self, rhs: &'a OrderedFloat<$exp>) -> OrderedFloat<$base> {
+                OrderedFloat(<$base>::pow(self.0, rhs.0))
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<'a> Pow<OrderedFloat<$exp>> for &'a OrderedFloat<$base> {
+            type Output = OrderedFloat<$base>;
+            #[inline]
+            fn pow(self, rhs: OrderedFloat<$exp>) -> OrderedFloat<$base> {
+                OrderedFloat(<$base>::pow(self.0, rhs.0))
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<'a, 'b> Pow<&'a OrderedFloat<$exp>> for &'b OrderedFloat<$base> {
+            type Output = OrderedFloat<$base>;
+            #[inline]
+            fn pow(self, rhs: &'a OrderedFloat<$exp>) -> OrderedFloat<$base> {
                 OrderedFloat(<$base>::pow(self.0, rhs.0))
             }
         }
@@ -1386,6 +1418,7 @@ impl_not_nan_binop! {Rem, rem, RemAssign, rem_assign}
 // Will panic if NaN value is return from the operation
 macro_rules! impl_not_nan_pow {
     ($inner:ty, $rhs:ty) => {
+        #[cfg(feature = "std")]
         impl Pow<$rhs> for NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1394,6 +1427,7 @@ macro_rules! impl_not_nan_pow {
             }
         }
 
+        #[cfg(feature = "std")]
         impl<'a> Pow<&'a $rhs> for NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1402,6 +1436,7 @@ macro_rules! impl_not_nan_pow {
             }
         }
 
+        #[cfg(feature = "std")]
         impl<'a> Pow<$rhs> for &'a NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1410,6 +1445,7 @@ macro_rules! impl_not_nan_pow {
             }
         }
 
+        #[cfg(feature = "std")]
         impl<'a, 'b> Pow<&'a $rhs> for &'b NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1437,10 +1473,38 @@ impl_not_nan_pow! {f64, f64}
 // This also should panic on NaN
 macro_rules! impl_not_nan_self_pow {
     ($base:ty, $exp:ty) => {
+        #[cfg(feature = "std")]
         impl Pow<NotNan<$exp>> for NotNan<$base> {
             type Output = NotNan<$base>;
             #[inline]
             fn pow(self, rhs: NotNan<$exp>) -> NotNan<$base> {
+                NotNan::new(self.0.pow(rhs.0)).expect("Pow resulted in NaN")
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<'a> Pow<&'a NotNan<$exp>> for NotNan<$base> {
+            type Output = NotNan<$base>;
+            #[inline]
+            fn pow(self, rhs: &'a NotNan<$exp>) -> NotNan<$base> {
+                NotNan::new(self.0.pow(rhs.0)).expect("Pow resulted in NaN")
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<'a> Pow<NotNan<$exp>> for &'a NotNan<$base> {
+            type Output = NotNan<$base>;
+            #[inline]
+            fn pow(self, rhs: NotNan<$exp>) -> NotNan<$base> {
+                NotNan::new(self.0.pow(rhs.0)).expect("Pow resulted in NaN")
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<'a, 'b> Pow<&'a NotNan<$exp>> for &'b NotNan<$base> {
+            type Output = NotNan<$base>;
+            #[inline]
+            fn pow(self, rhs: &'a NotNan<$exp>) -> NotNan<$base> {
                 NotNan::new(self.0.pow(rhs.0)).expect("Pow resulted in NaN")
             }
         }
