@@ -5,11 +5,9 @@ extern crate ordered_float;
 
 #[cfg(not(feature = "std"))]
 pub use num_traits::float::FloatCore as Float;
+pub use num_traits::{Bounded, FloatConst, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
 #[cfg(feature = "std")]
-pub use num_traits::Float;
-pub use num_traits::{
-    Bounded, FloatConst, FromPrimitive, Num, One, Pow, Signed, ToPrimitive, Zero,
-};
+pub use num_traits::{Float, Pow};
 pub use ordered_float::*;
 
 pub use std::cmp::Ordering::*;

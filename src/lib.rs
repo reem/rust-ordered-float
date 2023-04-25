@@ -26,12 +26,11 @@ use core::str::FromStr;
 
 #[cfg(not(feature = "std"))]
 use num_traits::float::FloatCore as Float;
-#[cfg(feature = "std")]
-pub use num_traits::Float;
 use num_traits::{
-    AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Pow, Signed, ToPrimitive,
-    Zero,
+    AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
 };
+#[cfg(feature = "std")]
+pub use num_traits::{Float, Pow};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
