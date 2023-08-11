@@ -2212,7 +2212,7 @@ mod impl_schemars {
 }
 
 #[cfg(feature = "rand")]
-mod impl_rand {
+pub mod impl_rand {
     use super::{NotNan, OrderedFloat};
     use rand::distributions::uniform::*;
     use rand::distributions::{Distribution, Open01, OpenClosed01, Standard};
