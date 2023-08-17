@@ -32,6 +32,9 @@ use num_traits::{
 #[cfg(feature = "std")]
 pub use num_traits::{Float, Pow};
 
+#[cfg(feature = "rand")]
+pub use impl_rand::{UniformNotNan, UniformOrdered};
+
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
 const EXP_MASK: u64 = 0x7ff0000000000000u64;
@@ -2212,7 +2215,7 @@ mod impl_schemars {
 }
 
 #[cfg(feature = "rand")]
-pub mod impl_rand {
+mod impl_rand {
     use super::{NotNan, OrderedFloat};
     use rand::distributions::uniform::*;
     use rand::distributions::{Distribution, Open01, OpenClosed01, Standard};
