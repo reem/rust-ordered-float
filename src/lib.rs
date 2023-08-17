@@ -211,6 +211,18 @@ impl<T: Float> From<T> for OrderedFloat<T> {
     }
 }
 
+impl From<bool> for OrderedFloat<f32> {
+    fn from(val: bool) -> Self {
+        OrderedFloat(val as u8 as f32)
+    }
+}
+
+impl From<bool> for OrderedFloat<f64> {
+    fn from(val: bool) -> Self {
+        OrderedFloat(val as u8 as f64)
+    }
+}
+
 macro_rules! impl_ordered_float_from {
     ($dst:ty, $src:ty) => {
         impl From<$src> for OrderedFloat<$dst> {
@@ -220,14 +232,12 @@ macro_rules! impl_ordered_float_from {
         }
     };
 }
-impl_ordered_float_from! {f64, bool}
 impl_ordered_float_from! {f64, i8}
 impl_ordered_float_from! {f64, i16}
 impl_ordered_float_from! {f64, i32}
 impl_ordered_float_from! {f64, u8}
 impl_ordered_float_from! {f64, u16}
 impl_ordered_float_from! {f64, u32}
-impl_ordered_float_from! {f32, bool}
 impl_ordered_float_from! {f32, i8}
 impl_ordered_float_from! {f32, i16}
 impl_ordered_float_from! {f32, u8}
