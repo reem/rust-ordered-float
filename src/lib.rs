@@ -211,6 +211,28 @@ impl<T: Float> From<T> for OrderedFloat<T> {
     }
 }
 
+macro_rules! impl_ordered_float_from {
+    ($dst:ty, $src:ty) => {
+        impl From<$src> for OrderedFloat<$dst> {
+            fn from(val: $src) -> Self {
+                OrderedFloat(val.into())
+            }
+        }
+    };
+}
+impl_ordered_float_from! {f64, bool}
+impl_ordered_float_from! {f64, i8}
+impl_ordered_float_from! {f64, i16}
+impl_ordered_float_from! {f64, i32}
+impl_ordered_float_from! {f64, u8}
+impl_ordered_float_from! {f64, u16}
+impl_ordered_float_from! {f64, u32}
+impl_ordered_float_from! {f32, bool}
+impl_ordered_float_from! {f32, i8}
+impl_ordered_float_from! {f32, i16}
+impl_ordered_float_from! {f32, u8}
+impl_ordered_float_from! {f32, u16}
+
 impl<T: Float> Deref for OrderedFloat<T> {
     type Target = T;
 
