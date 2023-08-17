@@ -33,7 +33,7 @@ use num_traits::{
 pub use num_traits::{Float, Pow};
 
 #[cfg(feature = "rand")]
-pub use impl_rand::UniformOrdered;
+pub use impl_rand::{UniformNotNan, UniformOrdered};
 
 // masks for the parts of the IEEE 754 float
 const SIGN_MASK: u64 = 0x8000000000000000u64;
@@ -2246,6 +2246,7 @@ mod impl_rand {
     impl_distribution! { Open01, f32, f64 }
     impl_distribution! { OpenClosed01, f32, f64 }
 
+    /// A sampler for a uniform distribution
     #[derive(Clone, Copy, Debug, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct UniformNotNan<T>(UniformFloat<T>);
