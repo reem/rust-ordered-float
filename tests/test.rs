@@ -67,10 +67,10 @@ fn ordered_f32_compare_nan_op() {
     assert!(f32_nan >= OrderedFloat(-100000.0f32));
     assert!(OrderedFloat(-100.0f32) < f32_nan);
     assert!(OrderedFloat(-100.0f32) <= f32_nan);
-    assert!(f32_nan > OrderedFloat(Float::infinity()));
-    assert!(f32_nan >= OrderedFloat(Float::infinity()));
-    assert!(f32_nan > OrderedFloat(Float::neg_infinity()));
-    assert!(f32_nan >= OrderedFloat(Float::neg_infinity()));
+    assert!(f32_nan > OrderedFloat(f32::infinity()));
+    assert!(f32_nan >= OrderedFloat(f32::infinity()));
+    assert!(f32_nan > OrderedFloat(f32::neg_infinity()));
+    assert!(f32_nan >= OrderedFloat(f32::neg_infinity()));
 }
 
 #[test]
@@ -198,10 +198,10 @@ fn ordered_f64_compare_nan_op() {
     assert!(f64_nan >= OrderedFloat(-100000.0));
     assert!(OrderedFloat(-100.0) < f64_nan);
     assert!(OrderedFloat(-100.0) <= f64_nan);
-    assert!(f64_nan > OrderedFloat(Float::infinity()));
-    assert!(f64_nan >= OrderedFloat(Float::infinity()));
-    assert!(f64_nan > OrderedFloat(Float::neg_infinity()));
-    assert!(f64_nan >= OrderedFloat(Float::neg_infinity()));
+    assert!(f64_nan > OrderedFloat(f64::infinity()));
+    assert!(f64_nan >= OrderedFloat(f64::infinity()));
+    assert!(f64_nan > OrderedFloat(f64::neg_infinity()));
+    assert!(f64_nan >= OrderedFloat(f64::neg_infinity()));
 }
 
 #[test]
