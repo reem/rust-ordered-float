@@ -1917,7 +1917,7 @@ mod impl_rkyv {
     use num_traits::Float;
     #[cfg(test)]
     use rkyv::{archived_root, ser::Serializer};
-    use rkyv::{from_archived, Archive, Deserialize, Fallible, Serialize};
+    use rkyv::{Archive, Deserialize, Fallible, Serialize};
 
     #[cfg(test)]
     type DefaultSerializer = rkyv::ser::serializers::CoreSerializer<16, 16>;
@@ -1925,50 +1925,92 @@ mod impl_rkyv {
     type DefaultDeserializer = rkyv::Infallible;
 
     impl<T: Float + Archive> Archive for OrderedFloat<T> {
-        type Archived = OrderedFloat<T>;
+        type Archived = OrderedFloat<T::Archived>;
 
-        type Resolver = ();
+        type Resolver = T::Resolver;
 
-        unsafe fn resolve(&self, _: usize, _: Self::Resolver, out: *mut Self::Archived) {
-            out.write(*self);
+        unsafe fn resolve(&self, pos: usize, resolver: Self::Resolver, out: *mut Self::Archived) {
+            self.0.resolve(pos, resolver, out.cast())
         }
     }
 
     impl<T: Float + Serialize<S>, S: Fallible + ?Sized> Serialize<S> for OrderedFloat<T> {
-        fn serialize(&self, _: &mut S) -> Result<Self::Resolver, S::Error> {
-            Ok(())
+        fn serialize(&self, s: &mut S) -> Result<Self::Resolver, S::Error> {
+            self.0.serialize(s)
         }
     }
 
-    impl<T: Float + Deserialize<T, D>, D: Fallible + ?Sized> Deserialize<OrderedFloat<T>, D>
-        for OrderedFloat<T>
+    impl<T: Float, AT: Deserialize<T, D>, D: Fallible + ?Sized> Deserialize<OrderedFloat<T>, D>
+        for OrderedFloat<AT>
     {
-        fn deserialize(&self, _: &mut D) -> Result<OrderedFloat<T>, D::Error> {
-            Ok(from_archived!(*self))
+        fn deserialize(&self, d: &mut D) -> Result<OrderedFloat<T>, D::Error> {
+            self.0.deserialize(d).map(OrderedFloat)
         }
     }
 
     impl<T: Float + Archive> Archive for NotNan<T> {
-        type Archived = NotNan<T>;
+        type Archived = NotNan<T::Archived>;
 
-        type Resolver = ();
+        type Resolver = T::Resolver;
 
-        unsafe fn resolve(&self, _: usize, _: Self::Resolver, out: *mut Self::Archived) {
-            out.write(*self);
+        unsafe fn resolve(&self, pos: usize, resolver: Self::Resolver, out: *mut Self::Archived) {
+            self.0.resolve(pos, resolver, out.cast())
         }
     }
 
     impl<T: Float + Serialize<S>, S: Fallible + ?Sized> Serialize<S> for NotNan<T> {
-        fn serialize(&self, _: &mut S) -> Result<Self::Resolver, S::Error> {
-            Ok(())
+        fn serialize(&self, s: &mut S) -> Result<Self::Resolver, S::Error> {
+            self.0.serialize(s)
         }
     }
 
-    impl<T: Float + Deserialize<T, D>, D: Fallible + ?Sized> Deserialize<NotNan<T>, D> for NotNan<T> {
-        fn deserialize(&self, _: &mut D) -> Result<NotNan<T>, D::Error> {
-            Ok(from_archived!(*self))
+    impl<T: Float, AT: Deserialize<T, D>, D: Fallible + ?Sized> Deserialize<NotNan<T>, D>
+        for NotNan<AT>
+    {
+        fn deserialize(&self, d: &mut D) -> Result<NotNan<T>, D::Error> {
+            self.0.deserialize(d).map(NotNan)
         }
     }
+
+    macro_rules! rkyv_eq_ord {
+        ($main:ident, $float:ty, $rend:ty) => {
+            impl PartialEq<$main<$float>> for $main<$rend> {
+                fn eq(&self, other: &$main<$float>) -> bool {
+                    other.eq(&self.0.value())
+                }
+            }
+            impl PartialEq<$main<$rend>> for $main<$float> {
+                fn eq(&self, other: &$main<$rend>) -> bool {
+                    self.eq(&other.0.value())
+                }
+            }
+
+            impl PartialOrd<$main<$float>> for $main<$rend> {
+                fn partial_cmp(&self, other: &$main<$float>) -> Option<core::cmp::Ordering> {
+                    self.0.value().partial_cmp(other)
+                }
+            }
+
+            impl PartialOrd<$main<$rend>> for $main<$float> {
+                fn partial_cmp(&self, other: &$main<$rend>) -> Option<core::cmp::Ordering> {
+                    other
+                        .0
+                        .value()
+                        .partial_cmp(self)
+                        .map(core::cmp::Ordering::reverse)
+                }
+            }
+        };
+    }
+
+    rkyv_eq_ord! { OrderedFloat, f32, rkyv::rend::f32_le }
+    rkyv_eq_ord! { OrderedFloat, f32, rkyv::rend::f32_be }
+    rkyv_eq_ord! { OrderedFloat, f64, rkyv::rend::f64_le }
+    rkyv_eq_ord! { OrderedFloat, f64, rkyv::rend::f64_be }
+    rkyv_eq_ord! { NotNan, f32, rkyv::rend::f32_le }
+    rkyv_eq_ord! { NotNan, f32, rkyv::rend::f32_be }
+    rkyv_eq_ord! { NotNan, f64, rkyv::rend::f64_le }
+    rkyv_eq_ord! { NotNan, f64, rkyv::rend::f64_be }
 
     #[cfg(feature = "rkyv_ck")]
     use super::FloatIsNan;
