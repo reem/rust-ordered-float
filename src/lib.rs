@@ -1807,6 +1807,7 @@ impl<T: Float> NumCast for NotNan<T> {
 macro_rules! impl_float_const_method {
     ($wrapper:expr, $method:ident) => {
         #[allow(non_snake_case)]
+        #[allow(clippy::redundant_closure_call)]
         fn $method() -> Self {
             $wrapper(T::$method())
         }
