@@ -24,7 +24,7 @@ use core::ops::{
 };
 use core::str::FromStr;
 
-use num_traits::float::FloatCore;
+pub use num_traits::float::FloatCore;
 use num_traits::{
     AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
 };
