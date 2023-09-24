@@ -1,8 +1,9 @@
-# Ordered Floats
+# ordered-float
 
-Provides several wrapper types for Ord and Eq implementations on f64 and friends.
+Provides several wrapper types for `Ord` and `Eq` implementations on f64 and friends.
 
-See the [API documentation](https://docs.rs/ordered-float) for further details.
+* [API documentation](https://docs.rs/ordered-float)
+* [Release notes](https://github.com/reem/rust-ordered-float/releases)
 
 ## no_std
 
