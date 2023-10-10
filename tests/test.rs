@@ -23,6 +23,31 @@ fn not_nan<T: Float>(x: T) -> NotNan<T> {
 }
 
 #[test]
+fn test_total_order() {
+    let numberline = [
+        (-f32::INFINITY, 0),
+        (-1.0, 1),
+        (-0.0, 2), (0.0, 2),
+        (1.0, 3),
+        (f32::INFINITY, 4),
+        (f32::NAN, 5),
+        (-f32::NAN, 5),
+    ];
+    
+    for &(fi, i) in &numberline {
+        for &(fj, j) in &numberline {
+            assert_eq!(OrderedFloat(fi) < OrderedFloat(fj), i < j);
+            assert_eq!(OrderedFloat(fi) > OrderedFloat(fj), i > j);
+            assert_eq!(OrderedFloat(fi) <= OrderedFloat(fj), i <= j);
+            assert_eq!(OrderedFloat(fi) >= OrderedFloat(fj), i >= j);
+            assert_eq!(OrderedFloat(fi) == OrderedFloat(fj), i == j);
+            assert_eq!(OrderedFloat(fi) != OrderedFloat(fj), i != j);
+            assert_eq!(OrderedFloat(fi).cmp(&OrderedFloat(fj)), i.cmp(&j));
+        }
+    }
+}
+
+#[test]
 fn ordered_f32_compare_regular_floats() {
     assert_eq!(OrderedFloat(7.0f32).cmp(&OrderedFloat(7.0)), Equal);
     assert_eq!(OrderedFloat(8.0f32).cmp(&OrderedFloat(7.0)), Greater);
