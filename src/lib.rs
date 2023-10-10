@@ -41,7 +41,14 @@ const MAN_MASK: u64 = 0x000fffffffffffffu64;
 
 // canonical raw bit patterns (for hashing)
 const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000u64;
-const CANONICAL_ZERO_BITS: u64 = 0x0u64;
+
+#[inline(always)]
+fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
+    // -0.0 + 0.0 == +0.0 under IEEE754 roundTiesToEven rounding mode,
+    // which Rust guarantees. Thus by adding a positive zero we
+    // canonicalize signed zero without any branches in one instruction.
+    x + T::zero()
+}
 
 /// A wrapper around floats providing implementations of `Eq`, `Ord`, and `Hash`.
 ///
@@ -173,10 +180,8 @@ impl<T: FloatCore> Hash for OrderedFloat<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let bits = if self.is_nan() {
             CANONICAL_NAN_BITS
-        } else if self.is_zero() {
-            CANONICAL_ZERO_BITS
         } else {
-            raw_double_bits(&self.0)
+            raw_double_bits(&canonicalize_signed_zero(self.0))
         };
 
         bits.hash(state)
@@ -1162,12 +1167,7 @@ impl<T: FloatCore> Ord for NotNan<T> {
 impl<T: FloatCore> Hash for NotNan<T> {
     #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let bits = if self.is_zero() {
-            CANONICAL_ZERO_BITS
-        } else {
-            raw_double_bits(&self.0)
-        };
-
+        let bits = raw_double_bits(&canonicalize_signed_zero(self.0));
         bits.hash(state)
     }
 }
