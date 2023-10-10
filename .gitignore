@@ -15,5 +15,3 @@
 /target/
 /examples/*
 !/examples/*.rs
-Cargo.lock
-
