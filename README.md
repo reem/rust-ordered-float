@@ -19,6 +19,7 @@ ordered-float = { version = "4.0", default-features = false }
 
 The following optional features can be enabled in `Cargo.toml`:
 
+* `arbitrary`: Implements the `arbitrary::Arbitrary` trait.
 * `bytemuck`: Adds implementations for traits provided by the `bytemuck` crate.
 * `rand`: Adds implementations for various distribution types provided by the `rand` crate.
 * `serde`: Implements the `serde::Serialize` and `serde::Deserialize` traits.
