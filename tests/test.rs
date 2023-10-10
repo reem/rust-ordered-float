@@ -26,13 +26,14 @@ fn test_total_order() {
     let numberline = [
         (-f32::INFINITY, 0),
         (-1.0, 1),
-        (-0.0, 2), (0.0, 2),
+        (-0.0, 2),
+        (0.0, 2),
         (1.0, 3),
         (f32::INFINITY, 4),
         (f32::NAN, 5),
         (-f32::NAN, 5),
     ];
-    
+
     for &(fi, i) in &numberline {
         for &(fj, j) in &numberline {
             assert_eq!(OrderedFloat(fi) < OrderedFloat(fj), i < j);
