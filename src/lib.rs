@@ -119,18 +119,22 @@ impl<T: Float> PartialOrd for OrderedFloat<T> {
         Some(self.cmp(other))
     }
 
+    #[inline]
     fn lt(&self, other: &Self) -> bool {
-        !(self >= other)
+        !self.ge(other)
     }
 
+    #[inline]
     fn le(&self, other: &Self) -> bool {
-        other >= self
+        other.ge(self)
     }
 
+    #[inline]
     fn gt(&self, other: &Self) -> bool {
-        !(other >= self)
+        !other.ge(self)
     }
 
+    #[inline]
     fn ge(&self, other: &Self) -> bool {
         // We consider all NaNs equal, and NaN is the largest possible
         // value. Thus if self is NaN we always return true. Otherwise
@@ -142,6 +146,8 @@ impl<T: Float> PartialOrd for OrderedFloat<T> {
 }
 
 impl<T: Float> Ord for OrderedFloat<T> {
+    #[inline]
+    #[allow(clippy::comparison_chain)]
     fn cmp(&self, other: &Self) -> Ordering {
         if self < other {
             Ordering::Less
