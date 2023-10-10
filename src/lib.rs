@@ -117,25 +117,37 @@ impl<T: Float> PartialOrd for OrderedFloat<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
+
+    fn lt(&self, other: &Self) -> bool {
+        !(self >= other)
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        other >= self
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        !(other >= self)
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        // We consider all NaNs equal, and NaN is the largest possible
+        // value. Thus if self is NaN we always return true. Otherwise
+        // self >= other is correct. If other is also not NaN it is trivially
+        // correct, and if it is we note that nothing can be greater or
+        // equal to NaN except NaN itself, which we already handled earlier.
+        self.0.is_nan() | (self.0 >= other.0)
+    }
 }
 
 impl<T: Float> Ord for OrderedFloat<T> {
     fn cmp(&self, other: &Self) -> Ordering {
-        let lhs = &self.0;
-        let rhs = &other.0;
-        match lhs.partial_cmp(rhs) {
-            Some(ordering) => ordering,
-            None => {
-                if lhs.is_nan() {
-                    if rhs.is_nan() {
-                        Ordering::Equal
-                    } else {
-                        Ordering::Greater
-                    }
-                } else {
-                    Ordering::Less
-                }
-            }
+        if self < other {
+            Ordering::Less
+        } else if self > other {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
         }
     }
 }
