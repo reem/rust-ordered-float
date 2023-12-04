@@ -21,6 +21,7 @@ The following optional features can be enabled in `Cargo.toml`:
 
 * `arbitrary`: Implements the `arbitrary::Arbitrary` trait.
 * `bytemuck`: Adds implementations for traits provided by the `bytemuck` crate.
+* `borsh`: Adds implementations for traits provided by the `borsh` crate.
 * `rand`: Adds implementations for various distribution types provided by the `rand` crate.
 * `serde`: Implements the `serde::Serialize` and `serde::Deserialize` traits.
 * `schemars`: Implements the `schemars::JsonSchema` trait.
