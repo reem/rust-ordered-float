@@ -2173,6 +2173,77 @@ mod impl_speedy {
     }
 }
 
+#[cfg(feature = "borsh")]
+mod impl_borsh {
+    extern crate borsh;
+    use super::{NotNan, OrderedFloat};
+    use num_traits::float::FloatCore;
+
+    impl<T> borsh::BorshSerialize for OrderedFloat<T>
+    where
+        T: borsh::BorshSerialize,
+    {
+        #[inline]
+        fn serialize<W: borsh::io::Write>(&self, writer: &mut W) -> borsh::io::Result<()> {
+            <T as borsh::BorshSerialize>::serialize(&self.0, writer)
+        }
+    }
+
+    impl<T> borsh::BorshDeserialize for OrderedFloat<T>
+    where
+        T: borsh::BorshDeserialize,
+    {
+        #[inline]
+        fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+            <T as borsh::BorshDeserialize>::deserialize_reader(reader).map(Self)
+        }
+    }
+
+    impl<T> borsh::BorshSerialize for NotNan<T>
+    where
+        T: borsh::BorshSerialize,
+    {
+        #[inline]
+        fn serialize<W: borsh::io::Write>(&self, writer: &mut W) -> borsh::io::Result<()> {
+            <T as borsh::BorshSerialize>::serialize(&self.0, writer)
+        }
+    }
+
+    impl<T> borsh::BorshDeserialize for NotNan<T>
+    where
+        T: FloatCore + borsh::BorshDeserialize,
+    {
+        #[inline]
+        fn deserialize_reader<R: borsh::io::Read>(reader: &mut R) -> borsh::io::Result<Self> {
+            let float = <T as borsh::BorshDeserialize>::deserialize_reader(reader)?;
+            NotNan::new(float).map_err(|_| {
+                borsh::io::Error::new(
+                    borsh::io::ErrorKind::InvalidData,
+                    "expected a non-NaN float",
+                )
+            })
+        }
+    }
+
+    #[test]
+    fn test_ordered_float() {
+        let float = crate::OrderedFloat(1.0f64);
+        let buffer = borsh::to_vec(&float).expect("failed to serialize value");
+        let deser_float: crate::OrderedFloat<f64> =
+            borsh::from_slice(&buffer).expect("failed to deserialize value");
+        assert_eq!(deser_float, float);
+    }
+
+    #[test]
+    fn test_not_nan() {
+        let float = crate::NotNan(1.0f64);
+        let buffer = borsh::to_vec(&float).expect("failed to serialize value");
+        let deser_float: crate::NotNan<f64> =
+            borsh::from_slice(&buffer).expect("failed to deserialize value");
+        assert_eq!(deser_float, float);
+    }
+}
+
 #[cfg(all(feature = "std", feature = "schemars"))]
 mod impl_schemars {
     extern crate schemars;
