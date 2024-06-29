@@ -576,72 +576,72 @@ fn hash_is_good_for_fractional_numbers() {
 #[test]
 #[should_panic]
 fn test_add_fails_on_nan() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = not_nan(std::f32::NEG_INFINITY);
+    let a = not_nan(f32::INFINITY);
+    let b = not_nan(f32::NEG_INFINITY);
     let _c = a + b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_fails_on_nan_ref() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = not_nan(std::f32::NEG_INFINITY);
+    let a = not_nan(f32::INFINITY);
+    let b = not_nan(f32::NEG_INFINITY);
     let _c = a + &b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_fails_on_nan_ref_ref() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = not_nan(std::f32::NEG_INFINITY);
+    let a = not_nan(f32::INFINITY);
+    let b = not_nan(f32::NEG_INFINITY);
     let _c = &a + &b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_fails_on_nan_t_ref() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = std::f32::NEG_INFINITY;
+    let a = not_nan(f32::INFINITY);
+    let b = f32::NEG_INFINITY;
     let _c = a + &b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_fails_on_nan_ref_t_ref() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = std::f32::NEG_INFINITY;
+    let a = not_nan(f32::INFINITY);
+    let b = f32::NEG_INFINITY;
     let _c = &a + &b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_fails_on_nan_ref_t() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = std::f32::NEG_INFINITY;
+    let a = not_nan(f32::INFINITY);
+    let b = f32::NEG_INFINITY;
     let _c = &a + b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_assign_fails_on_nan_ref() {
-    let mut a = not_nan(std::f32::INFINITY);
-    let b = not_nan(std::f32::NEG_INFINITY);
+    let mut a = not_nan(f32::INFINITY);
+    let b = not_nan(f32::NEG_INFINITY);
     a += &b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_assign_fails_on_nan_t_ref() {
-    let mut a = not_nan(std::f32::INFINITY);
-    let b = std::f32::NEG_INFINITY;
+    let mut a = not_nan(f32::INFINITY);
+    let b = f32::NEG_INFINITY;
     a += &b;
 }
 
 #[test]
 #[should_panic]
 fn test_add_assign_fails_on_nan_t() {
-    let mut a = not_nan(std::f32::INFINITY);
-    let b = std::f32::NEG_INFINITY;
+    let mut a = not_nan(f32::INFINITY);
+    let b = f32::NEG_INFINITY;
     a += b;
 }
 
@@ -678,15 +678,15 @@ fn ordered_f64_neg() {
 #[test]
 #[should_panic]
 fn test_sum_fails_on_nan() {
-    let a = not_nan(std::f32::INFINITY);
-    let b = not_nan(std::f32::NEG_INFINITY);
+    let a = not_nan(f32::INFINITY);
+    let b = not_nan(f32::NEG_INFINITY);
     let _c: NotNan<_> = [a, b].iter().sum();
 }
 
 #[test]
 #[should_panic]
 fn test_product_fails_on_nan() {
-    let a = not_nan(std::f32::INFINITY);
+    let a = not_nan(f32::INFINITY);
     let b = not_nan(0f32);
     let _c: NotNan<_> = [a, b].iter().product();
 }
