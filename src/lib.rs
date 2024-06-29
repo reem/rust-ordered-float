@@ -15,7 +15,6 @@ use core::cmp::Ordering;
 use core::convert::TryFrom;
 use core::fmt;
 use core::hash::{Hash, Hasher};
-use core::hint::unreachable_unchecked;
 use core::iter::{Product, Sum};
 use core::num::FpCategory;
 use core::ops::{
@@ -1163,10 +1162,10 @@ impl Borrow<f64> for NotNan<f64> {
 #[allow(clippy::derive_ord_xor_partial_ord)]
 impl<T: FloatCore> Ord for NotNan<T> {
     fn cmp(&self, other: &NotNan<T>) -> Ordering {
-        match self.partial_cmp(other) {
-            Some(ord) => ord,
-            None => unsafe { unreachable_unchecked() },
-        }
+        // Can't use unreachable_unchecked because unsafe code can't depend on FloatCore impl.
+        // https://github.com/reem/rust-ordered-float/issues/150
+        self.partial_cmp(other)
+            .expect("partial_cmp failed for non-NaN value")
     }
 }
 
@@ -2535,7 +2534,7 @@ mod impl_rand {
         fn uniform_sampling_panic_on_infinity_notnan() {
             let (low, high) = (
                 NotNan::new(0f64).unwrap(),
-                NotNan::new(core::f64::INFINITY).unwrap(),
+                NotNan::new(f64::INFINITY).unwrap(),
             );
             let uniform = Uniform::new(low, high);
             let _ = uniform.sample(&mut rand::thread_rng());
@@ -2544,7 +2543,7 @@ mod impl_rand {
         #[test]
         #[should_panic]
         fn uniform_sampling_panic_on_infinity_ordered() {
-            let (low, high) = (OrderedFloat(0f64), OrderedFloat(core::f64::INFINITY));
+            let (low, high) = (OrderedFloat(0f64), OrderedFloat(f64::INFINITY));
             let uniform = Uniform::new(low, high);
             let _ = uniform.sample(&mut rand::thread_rng());
         }
@@ -2552,7 +2551,7 @@ mod impl_rand {
         #[test]
         #[should_panic]
         fn uniform_sampling_panic_on_nan_ordered() {
-            let (low, high) = (OrderedFloat(0f64), OrderedFloat(core::f64::NAN));
+            let (low, high) = (OrderedFloat(0f64), OrderedFloat(f64::NAN));
             let uniform = Uniform::new(low, high);
             let _ = uniform.sample(&mut rand::thread_rng());
         }
