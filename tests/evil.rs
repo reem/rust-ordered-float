@@ -1,8 +1,8 @@
-use std::num::FpCategory;
-use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use num_traits::float::FloatCore;
 use num_traits::{Num, NumCast, One, ToPrimitive, Zero};
-use ordered_float::{NotNan};
+use ordered_float::NotNan;
+use std::num::FpCategory;
+use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 #[derive(PartialOrd, PartialEq)]
 struct EvilFloat(f32);
@@ -99,19 +99,42 @@ impl FloatCore for EvilFloat {
     fn is_nan(self) -> bool {
         false
     }
-  fn infinity() -> Self { todo!() }
-  fn neg_infinity() -> Self { todo!() }
-  fn nan() -> Self { todo!() }
-  fn neg_zero() -> Self { todo!() }
-  fn min_value() -> Self { todo!() }
-  fn min_positive_value() -> Self { todo!() }
-  fn epsilon() -> Self { todo!() }
-  fn max_value() -> Self { todo!() }
-  fn classify(self) -> FpCategory { todo!() }
-  fn to_degrees(self) -> Self { todo!() }
-  fn to_radians(self) -> Self { todo!() }
-  fn integer_decode(self) -> (u64, i16, i8) { todo!() }
-
+    fn infinity() -> Self {
+        todo!()
+    }
+    fn neg_infinity() -> Self {
+        todo!()
+    }
+    fn nan() -> Self {
+        todo!()
+    }
+    fn neg_zero() -> Self {
+        todo!()
+    }
+    fn min_value() -> Self {
+        todo!()
+    }
+    fn min_positive_value() -> Self {
+        todo!()
+    }
+    fn epsilon() -> Self {
+        todo!()
+    }
+    fn max_value() -> Self {
+        todo!()
+    }
+    fn classify(self) -> FpCategory {
+        todo!()
+    }
+    fn to_degrees(self) -> Self {
+        todo!()
+    }
+    fn to_radians(self) -> Self {
+        todo!()
+    }
+    fn integer_decode(self) -> (u64, i16, i8) {
+        todo!()
+    }
 }
 
 impl Num for EvilFloat {
