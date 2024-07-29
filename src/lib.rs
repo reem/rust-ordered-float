@@ -75,7 +75,7 @@ fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
 /// s.insert(OrderedFloat(NAN));
 /// assert!(s.contains(&OrderedFloat(NAN)));
 /// ```
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct OrderedFloat<T>(pub T);
 
@@ -190,6 +190,13 @@ impl<T: FloatCore> Hash for OrderedFloat<T> {
         };
 
         bits.hash(state)
+    }
+}
+
+impl<T: fmt::Debug> fmt::Debug for OrderedFloat<T> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
     }
 }
 
@@ -1090,7 +1097,7 @@ impl<T: FloatCore + Num> Num for OrderedFloat<T> {
 /// // This will panic:
 /// let c = a + b;
 /// ```
-#[derive(PartialOrd, PartialEq, Debug, Default, Clone, Copy)]
+#[derive(PartialOrd, PartialEq, Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct NotNan<T>(T);
 
@@ -1174,6 +1181,13 @@ impl<T: FloatCore> Hash for NotNan<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let bits = raw_double_bits(&canonicalize_signed_zero(self.0));
         bits.hash(state)
+    }
+}
+
+impl<T: fmt::Debug> fmt::Debug for NotNan<T> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
     }
 }
 
