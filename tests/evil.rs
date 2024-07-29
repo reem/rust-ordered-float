@@ -4,7 +4,7 @@ use ordered_float::NotNan;
 use std::num::FpCategory;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
-#[derive(PartialOrd, PartialEq)]
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
 struct EvilFloat(f32);
 
 impl Zero for EvilFloat {
@@ -83,14 +83,6 @@ impl Neg for EvilFloat {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
-        todo!()
-    }
-}
-
-impl Copy for EvilFloat {}
-
-impl Clone for EvilFloat {
-    fn clone(&self) -> Self {
         todo!()
     }
 }
