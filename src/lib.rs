@@ -79,6 +79,20 @@ fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
 #[repr(transparent)]
 pub struct OrderedFloat<T>(pub T);
 
+impl Borrow<f32> for OrderedFloat<f32> {
+    #[inline]
+    fn borrow(&self) -> &f32 {
+        &self.0
+    }
+}
+
+impl Borrow<f64> for OrderedFloat<f64> {
+    #[inline]
+    fn borrow(&self) -> &f64 {
+        &self.0
+    }
+}
+
 #[cfg(feature = "num-cmp")]
 mod impl_num_cmp {
     use super::OrderedFloat;
