@@ -78,7 +78,7 @@ fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
 ///
 /// # Representation
 ///
-/// `OrderedFloat` has `#[repr(transparent)]` and permits any value, so it is sound to use
+/// `OrderedFloat` has `#[repr(transparent)]` and permits any value, so it is sound to use
 /// [transmute](core::mem::transmute) or pointer casts to convert between any type `T` and
 /// `OrderedFloat<T>`.
 /// However, consider using [`bytemuck`] as a safe alternative if possible.
@@ -2754,7 +2754,7 @@ mod impl_arbitrary {
 #[cfg(feature = "bytemuck")]
 mod impl_bytemuck {
     use super::{FloatCore, NotNan, OrderedFloat};
-    use bytemuck::{AnyBitPattern, CheckedBitPattern, NoUninit, Pod, Zeroable};
+    use bytemuck::{AnyBitPattern, CheckedBitPattern, NoUninit, Pod, TransparentWrapper, Zeroable};
 
     unsafe impl<T: Zeroable> Zeroable for OrderedFloat<T> {}
 
@@ -2775,6 +2775,10 @@ mod impl_bytemuck {
             !bits.is_nan()
         }
     }
+
+    // OrderedFloat allows any value of the contained type, so it is a TransparentWrapper.
+    // NotNan does not, so it is not.
+    unsafe impl<T> TransparentWrapper<T> for OrderedFloat<T> {}
 
     #[test]
     fn test_not_nan_bit_pattern() {
