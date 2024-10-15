@@ -12,70 +12,49 @@ jobs:
           - stable
           - 1.60.0
     steps:
+      - uses: r7kamura/rust-problem-matchers@v1
+
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --profile=minimal
+          rustup override set ${{ matrix.rust }}
 
       - name: Install rustfmt + clippy
         if: matrix.rust == 'stable'
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
-          components: rustfmt, clippy
+        run: |
+          # remove non-rustup-managed versions already present in default image
+          rm -f /home/runner/.cargo/bin/{rustfmt,cargo-fmt}
+
+          rustup toolchain install ${{ matrix.rust }} --profile=minimal --component=clippy,rustfmt
 
       - name: Check Fmt
         if: matrix.rust == 'stable'
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
+        run: cargo fmt --check
 
       - name: Check Lints (all features)
         if: matrix.rust == 'stable'
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --tests --features ${{ env.all_features }}
+        run: cargo clippy --tests --features ${{ env.all_features }}
 
       - name: Test (default features)
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test
 
       - name: Test (no default features)
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features
+        run: cargo test --no-default-features
 
       - name: Test (schema features subset)
         if: matrix.rust == 'stable'
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --features "std,schemars"
+        run: cargo test --features "std,schemars"
 
       - name: Test (rand features subset)
         if: matrix.rust == 'stable'
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --features "rand,randtest"
+        run: cargo test --features "rand,randtest"
 
       - name: Test (all features)
         if: matrix.rust == 'stable'
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --features ${{ env.all_features }}
+        run: cargo test --features ${{ env.all_features }}
 
 env:
   all_features: "arbitrary,bytemuck,rand,randtest,serde,schemars,proptest,rkyv,rkyv_ck,speedy"
