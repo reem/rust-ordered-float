@@ -75,6 +75,18 @@ fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
 /// s.insert(OrderedFloat(NAN));
 /// assert!(s.contains(&OrderedFloat(NAN)));
 /// ```
+///
+/// # Representation
+///
+/// `OrderedFloat` has `#[repr(transparent)]` and permits any value, so it is sound to use
+/// [transmute](core::mem::transmute) or pointer casts to convert between any type `T` and
+/// `OrderedFloat<T>`.
+/// However, consider using [`bytemuck`] as a safe alternative if possible.
+///
+#[cfg_attr(
+    not(feature = "bytemuck"),
+    doc = "[`bytemuck`]: https://docs.rs/bytemuck/1/"
+)]
 #[derive(Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct OrderedFloat<T>(pub T);
@@ -1157,6 +1169,18 @@ impl<T: FloatCore + Num> Num for OrderedFloat<T> {
 /// // This will panic:
 /// let c = a + b;
 /// ```
+///
+/// # Representation
+///
+/// `NotNan` has `#[repr(transparent)]`, so it is sound to use
+/// [transmute](core::mem::transmute) or pointer casts to convert between any type `T` and
+/// `NotNan<T>`, as long as this does not create a NaN value.
+/// However, consider using [`bytemuck`] as a safe alternative if possible.
+///
+#[cfg_attr(
+    not(feature = "bytemuck"),
+    doc = "[`bytemuck`]: https://docs.rs/bytemuck/1/"
+)]
 #[derive(PartialOrd, PartialEq, Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct NotNan<T>(T);
@@ -2730,7 +2754,7 @@ mod impl_arbitrary {
 #[cfg(feature = "bytemuck")]
 mod impl_bytemuck {
     use super::{FloatCore, NotNan, OrderedFloat};
-    use bytemuck::{AnyBitPattern, CheckedBitPattern, NoUninit, Pod, Zeroable};
+    use bytemuck::{AnyBitPattern, CheckedBitPattern, NoUninit, Pod, TransparentWrapper, Zeroable};
 
     unsafe impl<T: Zeroable> Zeroable for OrderedFloat<T> {}
 
@@ -2751,6 +2775,10 @@ mod impl_bytemuck {
             !bits.is_nan()
         }
     }
+
+    // OrderedFloat allows any value of the contained type, so it is a TransparentWrapper.
+    // NotNan does not, so it is not.
+    unsafe impl<T> TransparentWrapper<T> for OrderedFloat<T> {}
 
     #[test]
     fn test_not_nan_bit_pattern() {
