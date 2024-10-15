@@ -70,11 +70,25 @@ fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
 /// # use ordered_float::OrderedFloat;
 /// # use std::collections::HashSet;
 /// # use std::f32::NAN;
-///
 /// let mut s: HashSet<OrderedFloat<f32>> = HashSet::new();
 /// s.insert(OrderedFloat(NAN));
 /// assert!(s.contains(&OrderedFloat(NAN)));
 /// ```
+///
+/// Some non-identical values are still considered equal by the [`PartialEq`] implementation,
+/// and will therefore also be considered equal by maps, sets, and the `==` operator:
+///
+/// * `-0.0` and `+0.0` are considered equal.
+///   This different sign may show up in printing, or when dividing by zero (the sign of the zero
+///   becomes the sign of the resulting infinity).
+/// * All NaN values are considered equal, even though they may have different
+///   [bits](https://doc.rust-lang.org/std/primitive.f64.html#method.to_bits), and therefore
+///   different [sign](https://doc.rust-lang.org/std/primitive.f64.html#method.is_sign_positive),
+///   signaling/quiet status, and NaN payload bits.
+///   
+/// Therefore, `OrderedFloat` may be unsuitable for use as a key in interning and memoization
+/// applications which require equal results from equal inputs, unless these cases make no
+/// difference or are canonicalized before insertion.
 ///
 /// # Representation
 ///
@@ -1152,12 +1166,17 @@ impl<T: FloatCore + Num> Num for OrderedFloat<T> {
 /// ```
 /// # use ordered_float::NotNan;
 /// # use std::collections::HashSet;
-///
 /// let mut s: HashSet<NotNan<f32>> = HashSet::new();
 /// let key = NotNan::new(1.0).unwrap();
 /// s.insert(key);
 /// assert!(s.contains(&key));
 /// ```
+///
+/// `-0.0` and `+0.0` are still considered equal. This different sign may show up in printing,
+/// or when dividing by zero (the sign of the zero becomes the sign of the resulting infinity).
+/// Therefore, `NotNan` may be unsuitable for use as a key in interning and memoization
+/// applications which require equal results from equal inputs, unless signed zeros make no
+/// difference or are canonicalized before insertion.
 ///
 /// Arithmetic on NotNan values will panic if it produces a NaN value:
 ///
