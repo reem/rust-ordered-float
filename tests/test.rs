@@ -859,14 +859,13 @@ fn test_pow_fails_on_nan() {
     a.pow(b);
 }
 
-
 #[test]
 fn test_ref_ref_binop_regression() {
-    // repro from: 
+    // repro from:
     // https://github.com/reem/rust-ordered-float/issues/91
     //
     // impl<'a, T> $imp<Self> for &'a OrderedFloat<T>
-    // where 
+    // where
     //     &'a T: $imp
     // {
     //     type Output = OrderedFloat<<&'a T as $imp>::Output>;
