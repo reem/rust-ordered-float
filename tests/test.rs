@@ -659,6 +659,7 @@ fn add() {
     assert_eq!(OrderedFloat(0.0) + OrderedFloat(0.0), 0.0);
     assert_eq!(OrderedFloat(0.0) + &OrderedFloat(0.0), 0.0);
     assert_eq!(&OrderedFloat(0.0) + OrderedFloat(0.0), 0.0);
+    assert_eq!(&OrderedFloat(0.0) + &OrderedFloat(0.0), 0.0);
     assert_eq!(OrderedFloat(0.0) + 0.0, 0.0);
     assert_eq!(OrderedFloat(0.0) + &0.0, 0.0);
     assert_eq!(&OrderedFloat(0.0) + 0.0, 0.0);
@@ -856,6 +857,35 @@ fn test_pow_fails_on_nan() {
     let a = not_nan(-1.0);
     let b = f32::NAN;
     a.pow(b);
+}
+
+#[test]
+fn test_ref_ref_binop_regression() {
+    // repro from:
+    // https://github.com/reem/rust-ordered-float/issues/91
+    //
+    // impl<'a, T> $imp<Self> for &'a OrderedFloat<T>
+    // where
+    //     &'a T: $imp
+    // {
+    //     type Output = OrderedFloat<<&'a T as $imp>::Output>;
+    //     #[inline]
+    //     fn $method(self, other: Self) -> Self::Output {
+    //         OrderedFloat((self.0).$method(&other.0))
+    //     }
+    // }
+    fn regression<T>(p: T) -> T
+    where
+        for<'a> &'a T: std::ops::Sub<&'a T, Output = T>,
+    {
+        &p - &p
+    }
+
+    assert_eq!(regression(0.0_f64), 0.0);
+
+    let x = OrderedFloat(50.0);
+    let y = OrderedFloat(40.0);
+    assert_eq!(&x - &y, OrderedFloat(10.0));
 }
 
 #[cfg(feature = "arbitrary")]

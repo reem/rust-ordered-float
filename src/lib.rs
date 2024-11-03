@@ -454,6 +454,16 @@ macro_rules! impl_ordered_float_binop {
             }
         }
 
+        // Work around for: https://github.com/reem/rust-ordered-float/issues/91
+        impl<'a, T: $imp + Copy> $imp<Self> for &'a OrderedFloat<T> {
+            type Output = OrderedFloat<T::Output>;
+
+            #[inline]
+            fn $method(self, other: Self) -> Self::Output {
+                OrderedFloat((self.0).$method(other.0))
+            }
+        }
+
         impl<T: $imp> $imp<T> for OrderedFloat<T> {
             type Output = OrderedFloat<T::Output>;
 
