@@ -15,10 +15,13 @@ the default `std` feature:
 ordered-float = { version = "4.0", default-features = false }
 ```
 
+If you still want to have access to the `Pow` and `Float` traits, enable the `libm` feature.
+
 ## Optional features
 
 The following optional features can be enabled in `Cargo.toml`:
 
+* `libm`: When not using the `std` feature, enable the `libm` feature of `num-traits` to still access the `Pow` and `Float` traits.
 * `arbitrary`: Implements the `arbitrary::Arbitrary` trait.
 * `borsh`: Adds implementations for traits provided by the `borsh` crate.
 * `bytemuck`: Adds implementations for traits provided by the `bytemuck` crate.
