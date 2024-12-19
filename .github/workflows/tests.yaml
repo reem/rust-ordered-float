@@ -10,7 +10,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - 1.60.0
+          - 1.63.0
     steps:
       - uses: r7kamura/rust-problem-matchers@v1
 
