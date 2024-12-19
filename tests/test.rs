@@ -5,7 +5,7 @@ extern crate ordered_float;
 
 pub use num_traits::float::FloatCore;
 pub use num_traits::{Bounded, FloatConst, FromPrimitive, Num, One, Signed, ToPrimitive, Zero};
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 pub use num_traits::{Float, Pow};
 pub use ordered_float::*;
 
@@ -788,7 +788,7 @@ fn float_consts_equal_inner() {
     test_float_const_methods!(NotNan<f32>);
 }
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 macro_rules! test_pow_ord {
     ($type:ident < $inner:ident >) => {
         assert_eq!($type::<$inner>::from(3.0).pow(2i8), OrderedFloat(9.0));
@@ -800,7 +800,7 @@ macro_rules! test_pow_ord {
     };
 }
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 macro_rules! test_pow_nn {
     ($type:ident < $inner:ident >) => {
         assert_eq!(
@@ -830,7 +830,7 @@ macro_rules! test_pow_nn {
     };
 }
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 #[test]
 fn test_pow_works() {
     assert_eq!(OrderedFloat(3.0).pow(OrderedFloat(2.0)), OrderedFloat(9.0));
@@ -850,7 +850,7 @@ fn test_pow_works() {
     );
 }
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 #[test]
 #[should_panic]
 fn test_pow_fails_on_nan() {

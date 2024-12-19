@@ -27,7 +27,7 @@ pub use num_traits::float::FloatCore;
 use num_traits::{
     AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
 };
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 pub use num_traits::{Float, Pow};
 
 #[cfg(feature = "rand")]
@@ -571,7 +571,7 @@ impl_ordered_float_binop! {Rem, rem, RemAssign, rem_assign}
 
 macro_rules! impl_ordered_float_pow {
     ($inner:ty, $rhs:ty) => {
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl Pow<$rhs> for OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -580,7 +580,7 @@ macro_rules! impl_ordered_float_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<&'a $rhs> for OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -589,7 +589,7 @@ macro_rules! impl_ordered_float_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<$rhs> for &'a OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -598,7 +598,7 @@ macro_rules! impl_ordered_float_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a, 'b> Pow<&'a $rhs> for &'b OrderedFloat<$inner> {
             type Output = OrderedFloat<$inner>;
             #[inline]
@@ -625,7 +625,7 @@ impl_ordered_float_pow! {f64, f64}
 
 macro_rules! impl_ordered_float_self_pow {
     ($base:ty, $exp:ty) => {
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl Pow<OrderedFloat<$exp>> for OrderedFloat<$base> {
             type Output = OrderedFloat<$base>;
             #[inline]
@@ -634,7 +634,7 @@ macro_rules! impl_ordered_float_self_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<&'a OrderedFloat<$exp>> for OrderedFloat<$base> {
             type Output = OrderedFloat<$base>;
             #[inline]
@@ -643,7 +643,7 @@ macro_rules! impl_ordered_float_self_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<OrderedFloat<$exp>> for &'a OrderedFloat<$base> {
             type Output = OrderedFloat<$base>;
             #[inline]
@@ -652,7 +652,7 @@ macro_rules! impl_ordered_float_self_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a, 'b> Pow<&'a OrderedFloat<$exp>> for &'b OrderedFloat<$base> {
             type Output = OrderedFloat<$base>;
             #[inline]
@@ -1037,7 +1037,7 @@ impl<T: FloatCore> FloatCore for OrderedFloat<T> {
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "libm"))]
 impl<T: Float + FloatCore> Float for OrderedFloat<T> {
     fn nan() -> Self {
         OrderedFloat(<T as Float>::nan())
@@ -1663,7 +1663,7 @@ impl_not_nan_binop! {Rem, rem, RemAssign, rem_assign}
 // Will panic if NaN value is return from the operation
 macro_rules! impl_not_nan_pow {
     ($inner:ty, $rhs:ty) => {
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl Pow<$rhs> for NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1672,7 +1672,7 @@ macro_rules! impl_not_nan_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<&'a $rhs> for NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1681,7 +1681,7 @@ macro_rules! impl_not_nan_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<$rhs> for &'a NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1690,7 +1690,7 @@ macro_rules! impl_not_nan_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a, 'b> Pow<&'a $rhs> for &'b NotNan<$inner> {
             type Output = NotNan<$inner>;
             #[inline]
@@ -1718,7 +1718,7 @@ impl_not_nan_pow! {f64, f64}
 // This also should panic on NaN
 macro_rules! impl_not_nan_self_pow {
     ($base:ty, $exp:ty) => {
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl Pow<NotNan<$exp>> for NotNan<$base> {
             type Output = NotNan<$base>;
             #[inline]
@@ -1727,7 +1727,7 @@ macro_rules! impl_not_nan_self_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<&'a NotNan<$exp>> for NotNan<$base> {
             type Output = NotNan<$base>;
             #[inline]
@@ -1736,7 +1736,7 @@ macro_rules! impl_not_nan_self_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a> Pow<NotNan<$exp>> for &'a NotNan<$base> {
             type Output = NotNan<$base>;
             #[inline]
@@ -1745,7 +1745,7 @@ macro_rules! impl_not_nan_self_pow {
             }
         }
 
-        #[cfg(feature = "std")]
+        #[cfg(any(feature = "std", feature = "libm"))]
         impl<'a, 'b> Pow<&'a NotNan<$exp>> for &'b NotNan<$base> {
             type Output = NotNan<$base>;
             #[inline]
