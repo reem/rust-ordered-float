@@ -44,6 +44,9 @@ jobs:
       - name: Test (no default features)
         run: cargo test --no-default-features
 
+      - name: Test (libm only)
+        run: cargo test --no-default-features --features "libm"
+
       - name: Test (schema features subset)
         if: matrix.rust == 'stable'
         run: cargo test --features "std,schemars"
