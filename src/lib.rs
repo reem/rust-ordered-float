@@ -1469,15 +1469,15 @@ impl<T: FloatCore> PartialEq<T> for NotNan<T> {
 
 /// Adds a float directly.
 ///
-/// Panics if the provided value is NaN or the computation results in NaN
-/*impl<T: FloatCore> Add<T> for NotNan<T> {
-    type Output = Self;
+/// This returns a `T` and not a `NotNan<T>` because if the added value is NaN, this will be NaN
+impl<T: FloatCore> Add<T> for NotNan<T> {
+    type Output = T;
 
     #[inline]
-    fn add(self, other: T) -> Self {
-        NotNan::new(self.0 + other).expect("Addition resulted in NaN")
+    fn add(self, other: T) -> Self::Output {
+        self.0 + other
     }
-}*/
+}
 
 /// Adds a float directly.
 ///
@@ -1497,27 +1497,29 @@ impl<'a, T: FloatCore + Sum + 'a> Sum<&'a NotNan<T>> for NotNan<T> {
 
 /// Subtracts a float directly.
 ///
-/// Panics if the provided value is NaN or the computation results in NaN
-/*impl<T: FloatCore> Sub<T> for NotNan<T> {
-    type Output = Self;
+/// This returns a `T` and not a `NotNan<T>` because if the substracted value is NaN, this will be
+/// NaN
+impl<T: FloatCore> Sub<T> for NotNan<T> {
+    type Output = T;
 
     #[inline]
-    fn sub(self, other: T) -> Self {
-        NotNan::new(self.0 - other).expect("Subtraction resulted in NaN")
+    fn sub(self, other: T) -> Self::Output {
+        self.0 - other
     }
-}*/
+}
 
 /// Multiplies a float directly.
 ///
-/// Panics if the provided value is NaN or the computation results in NaN
-/*impl<T: FloatCore> Mul<T> for NotNan<T> {
-    type Output = Self;
+/// This returns a `T` and not a `NotNan<T>` because if the multiplied value is NaN, this will be
+/// NaN
+impl<T: FloatCore> Mul<T> for NotNan<T> {
+    type Output = T;
 
     #[inline]
-    fn mul(self, other: T) -> Self {
-        NotNan::new(self.0 * other).expect("Multiplication resulted in NaN")
+    fn mul(self, other: T) -> Self::Output {
+        self.0 * other
     }
-}*/
+}
 
 impl<T: FloatCore + Product> Product for NotNan<T> {
     fn product<I: Iterator<Item = NotNan<T>>>(iter: I) -> Self {
@@ -1532,30 +1534,30 @@ impl<'a, T: FloatCore + Product + 'a> Product<&'a NotNan<T>> for NotNan<T> {
     }
 }
 
-/*
 /// Divides a float directly.
 ///
-/// Panics if the provided value is NaN or the computation results in NaN
+/// This returns a `T` and not a `NotNan<T>` because if the divided-by value is NaN, this will be
+/// NaN
 impl<T: FloatCore> Div<T> for NotNan<T> {
-    type Output = Self;
+    type Output = T;
 
     #[inline]
-    fn div(self, other: T) -> Self {
-        NotNan::new(self.0 / other).expect("Division resulted in NaN")
+    fn div(self, other: T) -> Self::Output {
+        self.0 / other
     }
 }
 
 /// Calculates `%` with a float directly.
 ///
-/// Panics if the provided value is NaN or the computation results in NaN
+/// This returns a `T` and not a `NotNan<T>` because if the RHS is NaN, this will be NaN
 impl<T: FloatCore> Rem<T> for NotNan<T> {
-    type Output = Self;
+    type Output = T;
 
     #[inline]
-    fn rem(self, other: T) -> Self {
-        NotNan::new(self.0 % other).expect("Rem resulted in NaN")
+    fn rem(self, other: T) -> Self::Output {
+        self.0 % other
     }
-}*/
+}
 
 macro_rules! impl_not_nan_binop {
     ($imp:ident, $method:ident, $assign_imp:ident, $assign_method:ident) => {
@@ -1569,14 +1571,14 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        /*impl<T: FloatCore> $imp<&T> for NotNan<T> {
-            type Output = NotNan<T>;
+        impl<T: FloatCore> $imp<&T> for NotNan<T> {
+            type Output = T;
 
             #[inline]
             fn $method(self, other: &T) -> Self::Output {
                 self.$method(*other)
             }
-        }*/
+        }
 
         impl<T: FloatCore> $imp<&Self> for NotNan<T> {
             type Output = NotNan<T>;
@@ -1605,8 +1607,8 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        /*impl<T: FloatCore> $imp<T> for &NotNan<T> {
-            type Output = NotNan<T>;
+        impl<T: FloatCore> $imp<T> for &NotNan<T> {
+            type Output = T;
 
             #[inline]
             fn $method(self, other: T) -> Self::Output {
@@ -1615,27 +1617,13 @@ macro_rules! impl_not_nan_binop {
         }
 
         impl<T: FloatCore> $imp<&T> for &NotNan<T> {
-            type Output = NotNan<T>;
+            type Output = T;
 
             #[inline]
             fn $method(self, other: &T) -> Self::Output {
                 (*self).$method(*other)
             }
         }
-
-        impl<T: FloatCore + $assign_imp> $assign_imp<T> for NotNan<T> {
-            #[inline]
-            fn $assign_method(&mut self, other: T) {
-                *self = (*self).$method(other);
-            }
-        }
-
-        impl<T: FloatCore + $assign_imp> $assign_imp<&T> for NotNan<T> {
-            #[inline]
-            fn $assign_method(&mut self, other: &T) {
-                *self = (*self).$method(*other);
-            }
-        }*/
 
         impl<T: FloatCore + $assign_imp> $assign_imp for NotNan<T> {
             #[inline]
