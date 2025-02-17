@@ -33,22 +33,6 @@ pub use num_traits::{Float, Pow};
 #[cfg(feature = "rand")]
 pub use impl_rand::{UniformNotNan, UniformOrdered};
 
-// masks for the parts of the IEEE 754 float
-const SIGN_MASK: u64 = 0x8000000000000000u64;
-const EXP_MASK: u64 = 0x7ff0000000000000u64;
-const MAN_MASK: u64 = 0x000fffffffffffffu64;
-
-// canonical raw bit patterns (for hashing)
-const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000u64;
-
-#[inline(always)]
-fn canonicalize_signed_zero<T: FloatCore>(x: T) -> T {
-    // -0.0 + 0.0 == +0.0 under IEEE754 roundTiesToEven rounding mode,
-    // which Rust guarantees. Thus by adding a positive zero we
-    // canonicalize signed zero without any branches in one instruction.
-    x + T::zero()
-}
-
 /// A wrapper around floats providing implementations of `Eq`, `Ord`, and `Hash`.
 ///
 /// NaN is sorted as *greater* than all other values and *equal*
@@ -329,18 +313,6 @@ impl<T: FloatCore> PartialEq<T> for OrderedFloat<T> {
     #[inline]
     fn eq(&self, other: &T) -> bool {
         self.0 == *other
-    }
-}
-
-impl<T: FloatCore> Hash for OrderedFloat<T> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let bits = if self.is_nan() {
-            CANONICAL_NAN_BITS
-        } else {
-            raw_double_bits(&canonicalize_signed_zero(self.0))
-        };
-
-        bits.hash(state)
     }
 }
 
@@ -1350,14 +1322,6 @@ impl<T: FloatCore> Ord for NotNan<T> {
     }
 }
 
-impl<T: FloatCore> Hash for NotNan<T> {
-    #[inline]
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let bits = raw_double_bits(&canonicalize_signed_zero(self.0));
-        bits.hash(state)
-    }
-}
-
 impl<T: fmt::Debug> fmt::Debug for NotNan<T> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -1790,15 +1754,6 @@ impl From<FloatIsNan> for std::io::Error {
     }
 }
 
-#[inline]
-/// Used for hashing. Input must not be zero or NaN.
-fn raw_double_bits<F: FloatCore>(f: &F) -> u64 {
-    let (man, exp, sign) = f.integer_decode();
-    let exp_u64 = exp as u16 as u64;
-    let sign_u64 = (sign > 0) as u64;
-    (man & MAN_MASK) | ((exp_u64 << 52) & EXP_MASK) | ((sign_u64 << 63) & SIGN_MASK)
-}
-
 impl<T: FloatCore> Zero for NotNan<T> {
     #[inline]
     fn zero() -> Self {
@@ -2038,6 +1993,65 @@ macro_rules! impl_float_const {
 impl_float_const!(OrderedFloat, OrderedFloat);
 // Float constants are not NaN.
 impl_float_const!(NotNan, |x| unsafe { NotNan::new_unchecked(x) });
+
+// canonical raw bit patterns (for hashing)
+
+mod hash_internals {
+    pub trait SealedTrait: Copy + num_traits::float::FloatCore {
+        type Bits: core::hash::Hash;
+
+        const CANONICAL_NAN_BITS: Self::Bits;
+
+        fn canonical_bits(self) -> Self::Bits;
+    }
+
+    impl SealedTrait for f32 {
+        type Bits = u32;
+
+        const CANONICAL_NAN_BITS: u32 = 0x7fc00000;
+
+        fn canonical_bits(self) -> u32 {
+            // -0.0 + 0.0 == +0.0 under IEEE754 roundTiesToEven rounding mode,
+            // which Rust guarantees. Thus by adding a positive zero we
+            // canonicalize signed zero without any branches in one instruction.
+            (self + 0.0).to_bits()
+        }
+    }
+
+    impl SealedTrait for f64 {
+        type Bits = u64;
+
+        const CANONICAL_NAN_BITS: u64 = 0x7ff8000000000000;
+
+        fn canonical_bits(self) -> u64 {
+            (self + 0.0).to_bits()
+        }
+    }
+}
+
+/// The built-in floating point types `f32` and `f64`.
+///
+/// This is a "sealed" trait that cannot be implemented for any other types.
+pub trait PrimitiveFloat: hash_internals::SealedTrait {}
+impl PrimitiveFloat for f32 {}
+impl PrimitiveFloat for f64 {}
+
+impl<T: PrimitiveFloat> Hash for OrderedFloat<T> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        let bits = if self.0.is_nan() {
+            T::CANONICAL_NAN_BITS
+        } else {
+            self.0.canonical_bits()
+        };
+        bits.hash(hasher);
+    }
+}
+
+impl<T: PrimitiveFloat> Hash for NotNan<T> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        self.0.canonical_bits().hash(hasher);
+    }
+}
 
 #[cfg(feature = "serde")]
 mod impl_serde {
