@@ -1994,8 +1994,6 @@ impl_float_const!(OrderedFloat, OrderedFloat);
 // Float constants are not NaN.
 impl_float_const!(NotNan, |x| unsafe { NotNan::new_unchecked(x) });
 
-// canonical raw bit patterns (for hashing)
-
 mod hash_internals {
     pub trait SealedTrait: Copy + num_traits::float::FloatCore {
         type Bits: core::hash::Hash;
