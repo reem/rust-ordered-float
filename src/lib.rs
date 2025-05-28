@@ -26,6 +26,7 @@ use core::str::FromStr;
 pub use num_traits::float::FloatCore;
 use num_traits::{
     AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
+    SaturatingAdd,SaturatingSub,SaturatingMul,
 };
 #[cfg(any(feature = "std", feature = "libm"))]
 pub use num_traits::{Float, Pow};
@@ -416,7 +417,7 @@ impl<T: FloatCore> DerefMut for OrderedFloat<T> {
 impl<T: FloatCore> Eq for OrderedFloat<T> {}
 
 macro_rules! impl_ordered_float_binop {
-    ($imp:ident, $method:ident, $assign_imp:ident, $assign_method:ident) => {
+    ($imp:ident, $method:ident) => {
         impl<T: $imp> $imp for OrderedFloat<T> {
             type Output = OrderedFloat<T::Output>;
 
@@ -504,7 +505,30 @@ macro_rules! impl_ordered_float_binop {
                 OrderedFloat((self.0).$method(other))
             }
         }
+    };
+}
+impl_ordered_float_binop! {Add, add}
+impl_ordered_float_binop! {Sub, sub}
+impl_ordered_float_binop! {Mul, mul}
+impl_ordered_float_binop! {Div, div}
+impl_ordered_float_binop! {Rem, rem}
 
+macro_rules! impl_ordered_float_saturating_binop {
+    ($imp:ident, $method:ident) => {
+        impl<T: $imp> $imp for OrderedFloat<T> {
+            #[inline]
+            fn $method(&self, other: &Self) -> Self {
+                OrderedFloat((self.0).$method(&other.0))
+            }
+        }
+    };
+}
+impl_ordered_float_saturating_binop! {SaturatingAdd, saturating_add}
+impl_ordered_float_saturating_binop! {SaturatingSub, saturating_sub}
+impl_ordered_float_saturating_binop! {SaturatingMul, saturating_mul}
+
+macro_rules! impl_ordered_float_assign_binop {
+    ($assign_imp:ident, $assign_method:ident) => {
         impl<T: $assign_imp> $assign_imp<T> for OrderedFloat<T> {
             #[inline]
             fn $assign_method(&mut self, other: T) {
@@ -534,12 +558,11 @@ macro_rules! impl_ordered_float_binop {
         }
     };
 }
-
-impl_ordered_float_binop! {Add, add, AddAssign, add_assign}
-impl_ordered_float_binop! {Sub, sub, SubAssign, sub_assign}
-impl_ordered_float_binop! {Mul, mul, MulAssign, mul_assign}
-impl_ordered_float_binop! {Div, div, DivAssign, div_assign}
-impl_ordered_float_binop! {Rem, rem, RemAssign, rem_assign}
+impl_ordered_float_assign_binop! {AddAssign, add_assign}
+impl_ordered_float_assign_binop! {SubAssign, sub_assign}
+impl_ordered_float_assign_binop! {MulAssign, mul_assign}
+impl_ordered_float_assign_binop! {DivAssign, div_assign}
+impl_ordered_float_assign_binop! {RemAssign, rem_assign}
 
 macro_rules! impl_ordered_float_pow {
     ($inner:ty, $rhs:ty) => {

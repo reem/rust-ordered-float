@@ -551,6 +551,15 @@ fn add() {
 }
 
 #[test]
+fn saturating_add() {
+    pub use num_traits::SaturatingAdd;
+
+    let a = OrderedFloat(0.0f32);
+    let inf = OrderedFloat(f32::INFINITY);
+    assert_eq!(a.saturating_add(inf), inf);
+}
+
+#[test]
 fn ordered_f32_neg() {
     assert_eq!(OrderedFloat(-7.0f32), -OrderedFloat(7.0f32));
 }
