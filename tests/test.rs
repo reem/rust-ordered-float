@@ -475,7 +475,7 @@ fn hash_is_good_for_whole_numbers() {
     // many, but should guard against transient issues
     // that will result from using RandomState
     let pct_unique = set.len() as f64 / limit as f64;
-    assert!(0.99f64 < pct_unique, "percent-unique={}", pct_unique);
+    assert!(0.99f64 < pct_unique, "percent-unique={pct_unique}");
 }
 
 #[test]
@@ -494,7 +494,7 @@ fn hash_is_good_for_fractional_numbers() {
     // many, but should guard against transient issues
     // that will result from using RandomState
     let pct_unique = set.len() as f64 / limit as f64;
-    assert!(0.99f64 < pct_unique, "percent-unique={}", pct_unique);
+    assert!(0.99f64 < pct_unique, "percent-unique={pct_unique}");
 }
 
 #[test]

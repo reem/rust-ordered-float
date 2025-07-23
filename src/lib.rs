@@ -1911,7 +1911,7 @@ impl<E: fmt::Debug + Error + 'static> Error for ParseNotNanError<E> {
 impl<E: fmt::Display> fmt::Display for ParseNotNanError<E> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ParseNotNanError::ParseFloatError(e) => write!(f, "Parse error: {}", e),
+            ParseNotNanError::ParseFloatError(e) => write!(f, "Parse error: {e}"),
             ParseNotNanError::IsNaN => write!(f, "NotNan parser encounter a NaN"),
         }
     }
@@ -2333,7 +2333,7 @@ mod impl_speedy {
         fn read_from<R: Reader<'a, C>>(reader: &mut R) -> Result<Self, C::Error> {
             let value: T = reader.read_value()?;
             Self::new(value).map_err(|error| {
-                speedy::Error::custom(std::format!("failed to read NotNan: {}", error)).into()
+                speedy::Error::custom(std::format!("failed to read NotNan: {error}")).into()
             })
         }
 

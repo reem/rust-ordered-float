@@ -22,14 +22,6 @@ jobs:
           rustup toolchain install ${{ matrix.rust }} --profile=minimal
           rustup override set ${{ matrix.rust }}
 
-      - name: Install rustfmt + clippy
-        if: matrix.rust == 'stable'
-        run: |
-          # remove non-rustup-managed versions already present in default image
-          rm -f /home/runner/.cargo/bin/{rustfmt,cargo-fmt}
-
-          rustup toolchain install ${{ matrix.rust }} --profile=minimal --component=clippy,rustfmt
-
       - name: Check Fmt
         if: matrix.rust == 'stable'
         run: cargo fmt --check
