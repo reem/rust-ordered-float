@@ -772,6 +772,134 @@ fn test_ref_ref_binop_regression() {
     assert_eq!(&x - &y, OrderedFloat(10.0));
 }
 
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_powf_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::powf(not_nan(-1.0), not_nan(-1.5));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_sqrt_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::sqrt(not_nan(-1.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_ln_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::ln(not_nan(-1.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_log_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::log(not_nan(-1.0), not_nan(2.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_log_fails_on_negative_base() {
+    use num_traits::real::Real;
+    Real::log(not_nan(1.0), not_nan(-2.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_log2_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::log2(not_nan(-1.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_log10_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::log10(not_nan(-1.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_sin_fails_on_infinite() {
+    use num_traits::real::Real;
+    Real::sin(not_nan(f64::INFINITY));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_cos_fails_on_infinite() {
+    use num_traits::real::Real;
+    Real::cos(not_nan(f64::INFINITY));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_tan_fails_on_infinite() {
+    use num_traits::real::Real;
+    Real::tan(not_nan(f64::INFINITY));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_asin_fails_on_big() {
+    use num_traits::real::Real;
+    Real::asin(not_nan(10.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_acos_fails_on_big() {
+    use num_traits::real::Real;
+    Real::acos(not_nan(10.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_sin_cos_fails_on_infinite() {
+    use num_traits::real::Real;
+    Real::sin_cos(not_nan(f64::INFINITY));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_ln_1p_fails_on_negative() {
+    use num_traits::real::Real;
+    Real::ln_1p(not_nan(-1.1));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_acosh_fails_on_zero() {
+    use num_traits::real::Real;
+    Real::acosh(not_nan(-0.0));
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+#[test]
+#[should_panic]
+fn test_atanh_fails_on_big() {
+    use num_traits::real::Real;
+    Real::atanh(not_nan(10.0));
+}
+
 #[cfg(feature = "arbitrary")]
 mod arbitrary_test {
     use super::{NotNan, OrderedFloat};

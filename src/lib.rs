@@ -24,6 +24,7 @@ use core::ops::{
 use core::str::FromStr;
 
 pub use num_traits::float::FloatCore;
+use num_traits::real::Real;
 use num_traits::{
     AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
 };
@@ -1954,6 +1955,170 @@ impl<T: FloatCore + Signed> Signed for NotNan<T> {
 impl<T: FloatCore> NumCast for NotNan<T> {
     fn from<F: ToPrimitive>(n: F) -> Option<Self> {
         T::from(n).and_then(|n| NotNan::new(n).ok())
+    }
+}
+
+#[cfg(any(feature = "std", feature = "libm"))]
+impl<T: Real + FloatCore> Real for NotNan<T> {
+    fn min_value() -> Self {
+        NotNan(<T as Real>::min_value())
+    }
+    fn min_positive_value() -> Self {
+        NotNan(<T as Real>::min_positive_value())
+    }
+    fn epsilon() -> Self {
+        NotNan(Real::epsilon())
+    }
+    fn max_value() -> Self {
+        NotNan(<T as Real>::max_value())
+    }
+    fn floor(self) -> Self {
+        NotNan(Real::floor(self.0))
+    }
+    fn ceil(self) -> Self {
+        NotNan(Real::ceil(self.0))
+    }
+    fn round(self) -> Self {
+        NotNan(Real::round(self.0))
+    }
+    fn trunc(self) -> Self {
+        NotNan(Real::trunc(self.0))
+    }
+    fn fract(self) -> Self {
+        NotNan(Real::fract(self.0))
+    }
+    fn abs(self) -> Self {
+        NotNan(Real::abs(self.0))
+    }
+    fn signum(self) -> Self {
+        NotNan(Real::signum(self.0))
+    }
+    fn is_sign_positive(self) -> bool {
+        Real::is_sign_positive(self.0)
+    }
+    fn is_sign_negative(self) -> bool {
+        Real::is_sign_negative(self.0)
+    }
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        NotNan(self.0.mul_add(a.0, b.0))
+    }
+    fn recip(self) -> Self {
+        NotNan(Real::recip(self.0))
+    }
+    fn powi(self, n: i32) -> Self {
+        NotNan(Real::powi(self.0, n))
+    }
+    fn powf(self, n: Self) -> Self {
+        // Panics if  self < 0 and n is not an integer
+        NotNan::new(self.0.powf(n.0)).expect("Power resulted in NaN")
+    }
+    fn sqrt(self) -> Self {
+        // Panics if self < 0
+        NotNan::new(self.0.sqrt()).expect("Square root resulted in NaN")
+    }
+    fn exp(self) -> Self {
+        NotNan(self.0.exp())
+    }
+    fn exp2(self) -> Self {
+        NotNan(self.0.exp2())
+    }
+    fn ln(self) -> Self {
+        // Panics if self <= 0
+        NotNan::new(self.0.ln()).expect("Natural logarithm resulted in NaN")
+    }
+    fn log(self, base: Self) -> Self {
+        // Panics if self <= 0 or base <= 0
+        NotNan::new(self.0.log(base.0)).expect("Logarithm resulted in NaN")
+    }
+    fn log2(self) -> Self {
+        // Panics if self <= 0
+        NotNan::new(self.0.log2()).expect("Logarithm resulted in NaN")
+    }
+    fn log10(self) -> Self {
+        // Panics if self <= 0
+        NotNan::new(self.0.log10()).expect("Logarithm resulted in NaN")
+    }
+    fn to_degrees(self) -> Self {
+        NotNan(Real::to_degrees(self.0))
+    }
+    fn to_radians(self) -> Self {
+        NotNan(Real::to_radians(self.0))
+    }
+    fn max(self, other: Self) -> Self {
+        NotNan(Real::max(self.0, other.0))
+    }
+    fn min(self, other: Self) -> Self {
+        NotNan(Real::min(self.0, other.0))
+    }
+    fn abs_sub(self, other: Self) -> Self {
+        NotNan(self.0.abs_sub(other.0))
+    }
+    fn cbrt(self) -> Self {
+        NotNan(self.0.cbrt())
+    }
+    fn hypot(self, other: Self) -> Self {
+        NotNan(self.0.hypot(other.0))
+    }
+    fn sin(self) -> Self {
+        // Panics if self is +/-infinity
+        NotNan::new(self.0.sin()).expect("Sine resulted in NaN")
+    }
+    fn cos(self) -> Self {
+        // Panics if self is +/-infinity
+        NotNan::new(self.0.cos()).expect("Cosine resulted in NaN")
+    }
+    fn tan(self) -> Self {
+        // Panics if self is +/-infinity or self == pi/2 + k*pi
+        NotNan::new(self.0.tan()).expect("Tangent resulted in NaN")
+    }
+    fn asin(self) -> Self {
+        // Panics if self < -1.0 or self > 1.0
+        NotNan::new(self.0.asin()).expect("Arcsine resulted in NaN")
+    }
+    fn acos(self) -> Self {
+        // Panics if self < -1.0 or self > 1.0
+        NotNan::new(self.0.acos()).expect("Arccosine resulted in NaN")
+    }
+    fn atan(self) -> Self {
+        NotNan(self.0.atan())
+    }
+    fn atan2(self, other: Self) -> Self {
+        NotNan(self.0.atan2(other.0))
+    }
+    fn sin_cos(self) -> (Self, Self) {
+        // Panics if self is +/-infinity
+        let (a, b) = self.0.sin_cos();
+        (
+            NotNan::new(a).expect("Sine resulted in NaN"),
+            NotNan::new(b).expect("Cosine resulted in NaN"),
+        )
+    }
+    fn exp_m1(self) -> Self {
+        NotNan(self.0.exp_m1())
+    }
+    fn ln_1p(self) -> Self {
+        // Panics if self <= -1.0
+        NotNan::new(self.0.ln_1p()).expect("Natural logarithm resulted in NaN")
+    }
+    fn sinh(self) -> Self {
+        NotNan(self.0.sinh())
+    }
+    fn cosh(self) -> Self {
+        NotNan(self.0.cosh())
+    }
+    fn tanh(self) -> Self {
+        NotNan(self.0.tanh())
+    }
+    fn asinh(self) -> Self {
+        NotNan(self.0.asinh())
+    }
+    fn acosh(self) -> Self {
+        // Panics if self < 1.0
+        NotNan::new(self.0.acosh()).expect("Arccosh resulted in NaN")
+    }
+    fn atanh(self) -> Self {
+        // Panics if self < -1.0 or self > 1.0
+        NotNan::new(self.0.atanh()).expect("Arctanh resulted in NaN")
     }
 }
 
