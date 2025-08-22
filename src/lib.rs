@@ -24,6 +24,7 @@ use core::ops::{
 use core::str::FromStr;
 
 pub use num_traits::float::FloatCore;
+#[cfg(any(feature = "std", feature = "libm"))]
 use num_traits::real::Real;
 use num_traits::{
     AsPrimitive, Bounded, FloatConst, FromPrimitive, Num, NumCast, One, Signed, ToPrimitive, Zero,
