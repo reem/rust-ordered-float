@@ -2606,28 +2606,27 @@ mod impl_borsh {
 #[cfg(all(feature = "std", feature = "schemars"))]
 mod impl_schemars {
     extern crate schemars;
-    use self::schemars::gen::SchemaGenerator;
-    use self::schemars::schema::{InstanceType, Schema, SchemaObject};
+    use self::schemars::generate::SchemaGenerator;
+    use self::schemars::Schema;
     use super::{NotNan, OrderedFloat};
 
     macro_rules! primitive_float_impl {
         ($type:ty, $schema_name:literal) => {
             impl schemars::JsonSchema for $type {
-                fn is_referenceable() -> bool {
-                    false
+                fn inline_schema() -> bool {
+                    true
                 }
 
-                fn schema_name() -> std::string::String {
-                    std::string::String::from($schema_name)
+                fn schema_name() -> std::borrow::Cow<'static, str> {
+                    std::borrow::Cow::from($schema_name)
                 }
 
                 fn json_schema(_: &mut SchemaGenerator) -> Schema {
-                    SchemaObject {
-                        instance_type: Some(InstanceType::Number.into()),
-                        format: Some(std::string::String::from($schema_name)),
-                        ..Default::default()
-                    }
-                    .into()
+                    schemars::json_schema!({
+                        "type": "number",
+                        "title": $schema_name,
+                        "format": $schema_name,
+                    })
                 }
             }
         };
@@ -2640,93 +2639,34 @@ mod impl_schemars {
 
     #[test]
     fn schema_generation_does_not_panic_for_common_floats() {
-        {
-            let schema = schemars::gen::SchemaGenerator::default()
-                .into_root_schema_for::<OrderedFloat<f32>>();
-            assert_eq!(
-                schema.schema.instance_type,
-                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
-                    schemars::schema::InstanceType::Number
-                )))
-            );
-            assert_eq!(
-                schema.schema.metadata.unwrap().title.unwrap(),
-                std::string::String::from("float")
-            );
+        fn test<T: schemars::JsonSchema>(title: &str) {
+            let schema = schemars::generate::SchemaGenerator::default().into_root_schema_for::<T>();
+
+            assert_eq!(schema.get("type").unwrap().as_str().unwrap(), "number");
+            assert_eq!(schema.get("title").unwrap().as_str().unwrap(), title);
+            assert_eq!(schema.get("format").unwrap().as_str().unwrap(), title);
         }
-        {
-            let schema = schemars::gen::SchemaGenerator::default()
-                .into_root_schema_for::<OrderedFloat<f64>>();
-            assert_eq!(
-                schema.schema.instance_type,
-                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
-                    schemars::schema::InstanceType::Number
-                )))
-            );
-            assert_eq!(
-                schema.schema.metadata.unwrap().title.unwrap(),
-                std::string::String::from("double")
-            );
-        }
-        {
-            let schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f32>>();
-            assert_eq!(
-                schema.schema.instance_type,
-                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
-                    schemars::schema::InstanceType::Number
-                )))
-            );
-            assert_eq!(
-                schema.schema.metadata.unwrap().title.unwrap(),
-                std::string::String::from("float")
-            );
-        }
-        {
-            let schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f64>>();
-            assert_eq!(
-                schema.schema.instance_type,
-                Some(schemars::schema::SingleOrVec::Single(std::boxed::Box::new(
-                    schemars::schema::InstanceType::Number
-                )))
-            );
-            assert_eq!(
-                schema.schema.metadata.unwrap().title.unwrap(),
-                std::string::String::from("double")
-            );
-        }
+
+        test::<OrderedFloat<f32>>("float");
+        test::<NotNan<f32>>("float");
+        test::<OrderedFloat<f64>>("double");
+        test::<NotNan<f64>>("double");
     }
+
     #[test]
     fn ordered_float_schema_match_primitive_schema() {
-        {
-            let of_schema = schemars::gen::SchemaGenerator::default()
-                .into_root_schema_for::<OrderedFloat<f32>>();
-            let prim_schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f32>();
-            assert_eq!(of_schema, prim_schema);
-        }
-        {
-            let of_schema = schemars::gen::SchemaGenerator::default()
-                .into_root_schema_for::<OrderedFloat<f64>>();
-            let prim_schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f64>();
-            assert_eq!(of_schema, prim_schema);
-        }
-        {
+        fn test<Wrapped: schemars::JsonSchema, Inner: schemars::JsonSchema>() {
             let of_schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f32>>();
+                schemars::generate::SchemaGenerator::default().into_root_schema_for::<Wrapped>();
             let prim_schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f32>();
+                schemars::generate::SchemaGenerator::default().into_root_schema_for::<Inner>();
             assert_eq!(of_schema, prim_schema);
         }
-        {
-            let of_schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<NotNan<f64>>();
-            let prim_schema =
-                schemars::gen::SchemaGenerator::default().into_root_schema_for::<f64>();
-            assert_eq!(of_schema, prim_schema);
-        }
+
+        test::<OrderedFloat<f32>, f32>();
+        test::<NotNan<f32>, f32>();
+        test::<OrderedFloat<f64>, f64>();
+        test::<NotNan<f64>, f64>();
     }
 }
 
