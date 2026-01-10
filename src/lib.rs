@@ -1243,7 +1243,7 @@ impl<T: FloatCore + Num> Num for OrderedFloat<T> {
     not(feature = "bytemuck"),
     doc = "[`bytemuck`]: https://docs.rs/bytemuck/1/"
 )]
-#[derive(PartialOrd, PartialEq, Default, Clone, Copy)]
+#[derive(PartialEq, Default, Clone, Copy)]
 #[repr(transparent)]
 pub struct NotNan<T>(T);
 
@@ -1312,12 +1312,20 @@ impl Borrow<f64> for NotNan<f64> {
     }
 }
 
-#[allow(clippy::derive_ord_xor_partial_ord)]
+impl<T: FloatCore> PartialOrd for NotNan<T> {
+    #[inline]
+    fn partial_cmp(&self, other: &NotNan<T>) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl<T: FloatCore> Ord for NotNan<T> {
+    #[inline]
     fn cmp(&self, other: &NotNan<T>) -> Ordering {
         // Can't use unreachable_unchecked because unsafe code can't depend on FloatCore impl.
         // https://github.com/reem/rust-ordered-float/issues/150
-        self.partial_cmp(other)
+        self.0
+            .partial_cmp(&other.0)
             .expect("partial_cmp failed for non-NaN value")
     }
 }
