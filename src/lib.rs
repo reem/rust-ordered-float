@@ -23,6 +23,8 @@ use core::ops::{
 };
 use core::str::FromStr;
 
+#[cfg(feature = "facet")]
+use facet::Facet;
 pub use num_traits::float::FloatCore;
 #[cfg(any(feature = "std", feature = "libm"))]
 use num_traits::real::Real;
@@ -88,7 +90,8 @@ pub use impl_rand::{UniformNotNan, UniformOrdered};
     doc = "[`bytemuck`]: https://docs.rs/bytemuck/1/"
 )]
 #[derive(Default, Clone, Copy)]
-#[repr(transparent)]
+#[cfg_attr(feature = "facet", derive(Facet))]
+#[cfg_attr(feature = "facet", facet(transparent))]
 pub struct OrderedFloat<T>(pub T);
 
 #[cfg(feature = "derive-visitor")]
@@ -1246,6 +1249,8 @@ impl<T: FloatCore + Num> Num for OrderedFloat<T> {
     doc = "[`bytemuck`]: https://docs.rs/bytemuck/1/"
 )]
 #[derive(PartialOrd, PartialEq, Default, Clone, Copy)]
+#[cfg_attr(feature = "facet", derive(Facet))]
+#[cfg_attr(feature = "facet", facet(transparent))]
 #[repr(transparent)]
 pub struct NotNan<T>(T);
 
