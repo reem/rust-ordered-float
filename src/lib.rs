@@ -1261,6 +1261,18 @@ impl<T: FloatCore> NotNan<T> {
     }
 }
 
+impl NotNan<f32> {
+    /// Create a `NotNan` value possibly at compile-time.
+    ///
+    /// Returns `Err` if `val` is NaN
+    pub const fn new_const(val: f32) -> Result<Self, FloatIsNan> {
+        match val {
+            ref val if val.is_nan() => Err(FloatIsNan),
+            val => Ok(NotNan(val)),
+        }
+    }
+}
+
 impl<T> NotNan<T> {
     /// Get the value out.
     #[inline]
