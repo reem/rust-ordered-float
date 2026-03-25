@@ -429,11 +429,11 @@ macro_rules! impl_ordered_float_binop {
         }
 
         // Work around for: https://github.com/reem/rust-ordered-float/issues/91
-        impl<'a, T: $imp + Copy> $imp<Self> for &'a OrderedFloat<T> {
+        impl<'a, 'b, T: $imp + Copy> $imp<&'b OrderedFloat<T>> for &'a OrderedFloat<T> {
             type Output = OrderedFloat<T::Output>;
 
             #[inline]
-            fn $method(self, other: Self) -> Self::Output {
+            fn $method(self, other: &'b OrderedFloat<T>) -> Self::Output {
                 OrderedFloat((self.0).$method(other.0))
             }
         }
@@ -1555,11 +1555,11 @@ macro_rules! impl_not_nan_binop {
             }
         }
 
-        impl<T: FloatCore> $imp for &NotNan<T> {
+        impl<T: FloatCore> $imp<&NotNan<T>> for &NotNan<T> {
             type Output = NotNan<T>;
 
             #[inline]
-            fn $method(self, other: Self) -> Self::Output {
+            fn $method(self, other: &NotNan<T>) -> Self::Output {
                 (*self).$method(*other)
             }
         }
