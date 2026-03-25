@@ -1241,6 +1241,7 @@ impl<T: FloatCore + Num> Num for OrderedFloat<T> {
 /// [transmute](core::mem::transmute) or pointer casts to convert between any type `T` and
 /// `NotNan<T>`, as long as this does not create a NaN value.
 /// However, consider using [`bytemuck`] as a safe alternative if possible.
+///
 #[cfg_attr(
     not(feature = "bytemuck"),
     doc = "[`bytemuck`]: https://docs.rs/bytemuck/1/"
