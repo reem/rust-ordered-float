@@ -1559,7 +1559,7 @@ macro_rules! impl_not_nan_binop {
             type Output = NotNan<T>;
 
             #[inline]
-            fn $method(self, other: Self) -> Self::Output {
+            fn $method(self, other: $NotNan<T>) -> Self::Output {
                 (*self).$method(*other)
             }
         }
