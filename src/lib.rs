@@ -2446,6 +2446,9 @@ mod impl_rkyv {
     }
 }
 
+#[cfg(any(feature = "rkyv_08_16", feature = "rkyv_08_32", feature = "rkyv_08_64"))]
+mod impl_rkyv_08;
+
 #[cfg(feature = "speedy")]
 mod impl_speedy {
     use super::{NotNan, OrderedFloat};
