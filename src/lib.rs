@@ -399,6 +399,13 @@ impl_ordered_float_from! {f32, i16}
 impl_ordered_float_from! {f32, u8}
 impl_ordered_float_from! {f32, u16}
 
+impl From<OrderedFloat<f32>> for OrderedFloat<f64> {
+    #[inline]
+    fn from(v: OrderedFloat<f32>) -> OrderedFloat<f64> {
+        OrderedFloat(v.0 as f64)
+    }
+}
+
 impl<T: FloatCore> Deref for OrderedFloat<T> {
     type Target = T;
 
