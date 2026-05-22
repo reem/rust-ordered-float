@@ -2690,6 +2690,98 @@ mod impl_schemars {
     }
 }
 
+#[cfg(all(feature = "std", feature = "schemars1"))]
+mod impl_schemars1 {
+    extern crate schemars1 as schemars;
+    use self::schemars::generate::SchemaGenerator;
+    use self::schemars::Schema;
+    use super::{NotNan, OrderedFloat};
+
+    macro_rules! primitive_float_impl {
+        ($type:ty, $schema_name:literal) => {
+            impl schemars::JsonSchema for $type {
+                fn inline_schema() -> bool {
+                    true
+                }
+
+                fn schema_id() -> std::borrow::Cow<'static, str> {
+                    concat!(module_path!(), "::", core::stringify!($type)).into()
+                }
+
+                fn schema_name() -> std::borrow::Cow<'static, str> {
+                    std::borrow::Cow::from($schema_name)
+                }
+
+                fn json_schema(_: &mut SchemaGenerator) -> Schema {
+                    schemars1::json_schema!({
+                        "type": "number",
+                        "title": $schema_name,
+                        "format": $schema_name,
+                    })
+                }
+            }
+        };
+    }
+
+    primitive_float_impl!(OrderedFloat<f32>, "float");
+    primitive_float_impl!(OrderedFloat<f64>, "double");
+    primitive_float_impl!(NotNan<f32>, "float");
+    primitive_float_impl!(NotNan<f64>, "double");
+
+    #[test]
+    fn schema_generation_does_not_panic_for_common_floats() {
+        fn test_schema_properties<T: schemars::JsonSchema>(title: &str) {
+            let schema = schemars::generate::SchemaGenerator::default().into_root_schema_for::<T>();
+
+            assert_eq!(
+                schema
+                    .get("type")
+                    .expect("schema defines `type` key")
+                    .as_str()
+                    .expect("value for the `type` key is a string"),
+                "number"
+            );
+            assert_eq!(
+                schema
+                    .get("title")
+                    .expect("schema defines `title` key")
+                    .as_str()
+                    .expect("value for the `title` key is a string"),
+                title
+            );
+            assert_eq!(
+                schema
+                    .get("format")
+                    .expect("schema defines `format` key")
+                    .as_str()
+                    .expect("value for the `format` key is a string"),
+                title
+            );
+        }
+
+        test_schema_properties::<OrderedFloat<f32>>("float");
+        test_schema_properties::<NotNan<f32>>("float");
+        test_schema_properties::<OrderedFloat<f64>>("double");
+        test_schema_properties::<NotNan<f64>>("double");
+    }
+
+    #[test]
+    fn ordered_float_schema_match_primitive_schema() {
+        fn test_schema_eq<Wrapped: schemars::JsonSchema, Inner: schemars::JsonSchema>() {
+            let wrapped_schema =
+                schemars::generate::SchemaGenerator::default().into_root_schema_for::<Wrapped>();
+            let primitive_schema =
+                schemars::generate::SchemaGenerator::default().into_root_schema_for::<Inner>();
+            assert_eq!(wrapped_schema, primitive_schema);
+        }
+
+        test_schema_eq::<OrderedFloat<f32>, f32>();
+        test_schema_eq::<NotNan<f32>, f32>();
+        test_schema_eq::<OrderedFloat<f64>, f64>();
+        test_schema_eq::<NotNan<f64>, f64>();
+    }
+}
+
 #[cfg(feature = "rand")]
 mod impl_rand {
     use super::{NotNan, OrderedFloat};

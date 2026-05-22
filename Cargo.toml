@@ -26,6 +26,7 @@ rand       = { version = "0.8.3", optional = true, default-features = false }
 rkyv       = { version = "0.7.41", optional = true, default-features = false, features = ["rend"] }
 rkyv_08    = { version = "0.8", optional = true, default-features = false, package = "rkyv" }
 schemars   = { version = "0.8.8", optional = true }
+schemars1   = { package = "schemars", version = "1.2", optional = true }
 serde      = { version = "1.0", optional = true, default-features = false }
 speedy     = { version = "0.8.3", optional = true, default-features = false }
 
