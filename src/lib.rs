@@ -2929,10 +2929,10 @@ mod impl_rand {
 #[cfg(feature = "proptest")]
 mod impl_proptest {
     use super::{NotNan, OrderedFloat};
+    use core::convert::TryFrom;
     use proptest::arbitrary::{Arbitrary, StrategyFor};
     use proptest::num::{f32, f64};
     use proptest::strategy::{FilterMap, Map, Strategy};
-    use core::convert::TryFrom;
 
     macro_rules! impl_arbitrary {
         ($($f:ident),+) => {
