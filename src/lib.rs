@@ -2314,7 +2314,7 @@ mod impl_rkyv {
         type Resolver = T::Resolver;
 
         unsafe fn resolve(&self, pos: usize, resolver: Self::Resolver, out: *mut Self::Archived) {
-            self.0.resolve(pos, resolver, out.cast())
+            unsafe { self.0.resolve(pos, resolver, out.cast()) }
         }
     }
 
@@ -2338,7 +2338,7 @@ mod impl_rkyv {
         type Resolver = T::Resolver;
 
         unsafe fn resolve(&self, pos: usize, resolver: Self::Resolver, out: *mut Self::Archived) {
-            self.0.resolve(pos, resolver, out.cast())
+            unsafe { self.0.resolve(pos, resolver, out.cast()) }
         }
     }
 
@@ -2409,7 +2409,7 @@ mod impl_rkyv {
 
         #[inline]
         unsafe fn check_bytes<'a>(value: *const Self, _: &mut C) -> Result<&'a Self, Self::Error> {
-            Ok(&*value)
+            unsafe { Ok(&*value) }
         }
     }
 
@@ -2419,7 +2419,7 @@ mod impl_rkyv {
 
         #[inline]
         unsafe fn check_bytes<'a>(value: *const Self, _: &mut C) -> Result<&'a Self, Self::Error> {
-            Self::new(*(value as *const T)).map(|_| &*value)
+            unsafe { Self::new(*(value as *const T)).map(|_| &*value) }
         }
     }
 
