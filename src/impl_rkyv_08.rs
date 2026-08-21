@@ -1,6 +1,6 @@
 use crate::{NotNan, OrderedFloat};
 use num_traits::float::FloatCore;
-use rkyv_08::{rancor::Fallible, Archive, Deserialize, Place, Portable, Serialize};
+use rkyv_08::{Archive, Deserialize, Place, Portable, Serialize, rancor::Fallible};
 
 // Safety: OrderedFloat and NotNan are #[repr(transparent)] wrappers,
 // so they have the same layout as their inner type.
@@ -104,7 +104,7 @@ mod checkbytes {
     use super::*;
     use crate::FloatIsNan;
     use rkyv_08::bytecheck::CheckBytes;
-    use rkyv_08::rancor::{fail, Source};
+    use rkyv_08::rancor::{Source, fail};
 
     unsafe impl<C, T> CheckBytes<C> for OrderedFloat<T>
     where

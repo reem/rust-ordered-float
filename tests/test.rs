@@ -13,8 +13,8 @@ pub use std::cmp::Ordering::*;
 pub use std::convert::TryFrom;
 pub use std::{f32, f64, panic};
 
-pub use std::collections::hash_map::RandomState;
 pub use std::collections::HashSet;
+pub use std::collections::hash_map::RandomState;
 pub use std::hash::*;
 
 fn not_nan<T: FloatCore>(x: T) -> NotNan<T> {

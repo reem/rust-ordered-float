@@ -1301,9 +1301,9 @@ impl<T> NotNan<T> {
         note = "Please use the new_unchecked function instead."
     )]
     #[inline]
-    pub const unsafe fn unchecked_new(val: T) -> Self { unsafe {
-        Self::new_unchecked(val)
-    }}
+    pub const unsafe fn unchecked_new(val: T) -> Self {
+        unsafe { Self::new_unchecked(val) }
+    }
 }
 
 impl<T: FloatCore> AsRef<T> for NotNan<T> {
@@ -2242,7 +2242,7 @@ mod impl_serde {
     #[cfg(test)]
     extern crate serde_test;
     #[cfg(test)]
-    use self::serde_test::{assert_de_tokens_error, assert_tokens, Token};
+    use self::serde_test::{Token, assert_de_tokens_error, assert_tokens};
 
     impl<T: FloatCore + Serialize> Serialize for OrderedFloat<T> {
         #[inline]
@@ -2299,9 +2299,9 @@ mod impl_serde {
 mod impl_rkyv {
     use super::{NotNan, OrderedFloat};
     use num_traits::float::FloatCore;
+    use rkyv::{Archive, Deserialize, Fallible, Serialize};
     #[cfg(test)]
     use rkyv::{archived_root, ser::Serializer};
-    use rkyv::{Archive, Deserialize, Fallible, Serialize};
 
     #[cfg(test)]
     type DefaultSerializer = rkyv::ser::serializers::CoreSerializer<16, 16>;
@@ -2698,8 +2698,8 @@ mod impl_schemars {
 #[cfg(all(feature = "std", feature = "schemars1"))]
 mod impl_schemars1 {
     extern crate schemars1 as schemars;
-    use self::schemars::generate::SchemaGenerator;
     use self::schemars::Schema;
+    use self::schemars::generate::SchemaGenerator;
     use super::{NotNan, OrderedFloat};
 
     macro_rules! primitive_float_impl {
@@ -2790,9 +2790,9 @@ mod impl_schemars1 {
 #[cfg(feature = "rand")]
 mod impl_rand {
     use super::{NotNan, OrderedFloat};
+    use rand::Rng;
     use rand::distributions::uniform::*;
     use rand::distributions::{Distribution, Open01, OpenClosed01, Standard};
-    use rand::Rng;
 
     macro_rules! impl_distribution {
         ($dist:ident, $($f:ty),+) => {
@@ -3098,7 +3098,7 @@ mod impl_bytemuck {
 
     #[test]
     fn test_not_nan_bit_pattern() {
-        use bytemuck::checked::{try_cast, CheckedCastError};
+        use bytemuck::checked::{CheckedCastError, try_cast};
 
         let nan = f64::NAN;
         assert_eq!(
