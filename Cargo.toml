@@ -11,7 +11,7 @@ repository  = "https://github.com/reem/rust-ordered-float"
 readme      = "README.md"
 keywords    = ["no_std", "ord", "f64", "f32", "sort"]
 categories  = ["science", "rust-patterns", "no-std"]
-edition     = "2021"
+edition     = "2024"
 rust-version = "1.90"
 
 [dependencies]
