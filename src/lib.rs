@@ -1301,9 +1301,9 @@ impl<T> NotNan<T> {
         note = "Please use the new_unchecked function instead."
     )]
     #[inline]
-    pub const unsafe fn unchecked_new(val: T) -> Self {
+    pub const unsafe fn unchecked_new(val: T) -> Self { unsafe {
         Self::new_unchecked(val)
-    }
+    }}
 }
 
 impl<T: FloatCore> AsRef<T> for NotNan<T> {
@@ -2137,7 +2137,7 @@ impl<T: Real + FloatCore> Real for NotNan<T> {
 }
 
 macro_rules! impl_float_const_method {
-    ($wrapper:expr, $method:ident) => {
+    ($wrapper:expr_2021, $method:ident) => {
         #[allow(non_snake_case)]
         #[allow(clippy::redundant_closure_call)]
         fn $method() -> Self {
@@ -2147,7 +2147,7 @@ macro_rules! impl_float_const_method {
 }
 
 macro_rules! impl_float_const {
-    ($type:ident, $wrapper:expr) => {
+    ($type:ident, $wrapper:expr_2021) => {
         impl<T: FloatConst> FloatConst for $type<T> {
             impl_float_const_method!($wrapper, E);
             impl_float_const_method!($wrapper, FRAC_1_PI);
@@ -2622,7 +2622,7 @@ mod impl_borsh {
 #[cfg(all(feature = "std", feature = "schemars"))]
 mod impl_schemars {
     extern crate schemars;
-    use self::schemars::gen::SchemaGenerator;
+    use self::schemars::r#gen::SchemaGenerator;
     use self::schemars::schema::{InstanceType, Schema, SchemaObject};
     use super::{NotNan, OrderedFloat};
 
