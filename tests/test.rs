@@ -431,41 +431,41 @@ fn not_nan64_num_cast() {
 #[test]
 fn hash_zero_and_neg_zero_to_the_same_hc_ordered_float64() {
     let state = RandomState::new();
-    let mut h1 = state.build_hasher();
-    let mut h2 = state.build_hasher();
-    OrderedFloat::from(0f64).hash(&mut h1);
-    OrderedFloat::from(-0f64).hash(&mut h2);
-    assert_eq!(h1.finish(), h2.finish());
+
+    assert_eq!(
+        state.hash_one(OrderedFloat::from(0f64)),
+        state.hash_one(OrderedFloat::from(-0f64))
+    );
 }
 
 #[test]
 fn hash_zero_and_neg_zero_to_the_same_hc_not_nan32() {
     let state = RandomState::new();
-    let mut h1 = state.build_hasher();
-    let mut h2 = state.build_hasher();
-    NotNan::try_from(0f32).unwrap().hash(&mut h1);
-    NotNan::try_from(-0f32).unwrap().hash(&mut h2);
-    assert_eq!(h1.finish(), h2.finish());
+
+    assert_eq!(
+        state.hash_one(NotNan::try_from(0f32).unwrap()),
+        state.hash_one(NotNan::try_from(-0f32).unwrap())
+    );
 }
 
 #[test]
 fn hash_different_nans_to_the_same_hc() {
     let state = RandomState::new();
-    let mut h1 = state.build_hasher();
-    let mut h2 = state.build_hasher();
-    OrderedFloat::from(<f64 as FloatCore>::nan()).hash(&mut h1);
-    OrderedFloat::from(-<f64 as FloatCore>::nan()).hash(&mut h2);
-    assert_eq!(h1.finish(), h2.finish());
+
+    assert_eq!(
+        state.hash_one(OrderedFloat::from(<f64 as FloatCore>::nan())),
+        state.hash_one(OrderedFloat::from(-<f64 as FloatCore>::nan()))
+    );
 }
 
 #[test]
 fn hash_inf_and_neg_inf_to_different_hcs() {
     let state = RandomState::new();
-    let mut h1 = state.build_hasher();
-    let mut h2 = state.build_hasher();
-    OrderedFloat::from(f64::INFINITY).hash(&mut h1);
-    OrderedFloat::from(f64::NEG_INFINITY).hash(&mut h2);
-    assert!(h1.finish() != h2.finish());
+
+    assert!(
+        state.hash_one(OrderedFloat::from(f64::INFINITY))
+            != state.hash_one(OrderedFloat::from(f64::NEG_INFINITY))
+    );
 }
 
 #[test]
@@ -475,9 +475,7 @@ fn hash_is_good_for_whole_numbers() {
 
     let mut set = ::std::collections::HashSet::with_capacity(limit);
     for i in 0..limit {
-        let mut h = state.build_hasher();
-        OrderedFloat::from(i as f64).hash(&mut h);
-        set.insert(h.finish());
+        set.insert(state.hash_one(OrderedFloat::from(i as f64)));
     }
 
     // This allows 100 collisions, which is far too
@@ -494,9 +492,7 @@ fn hash_is_good_for_fractional_numbers() {
 
     let mut set = ::std::collections::HashSet::with_capacity(limit);
     for i in 0..limit {
-        let mut h = state.build_hasher();
-        OrderedFloat::from(i as f64 * (1f64 / limit as f64)).hash(&mut h);
-        set.insert(h.finish());
+        set.insert(state.hash_one(OrderedFloat::from(i as f64 * (1f64 / limit as f64))));
     }
 
     // This allows 100 collisions, which is far too
