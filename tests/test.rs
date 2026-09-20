@@ -99,10 +99,64 @@ fn ordered_f32_compare_nan_op() {
 }
 
 #[test]
+fn ordered_f32_mixed_eq_controls() {
+    assert!(OrderedFloat(1.0f32) == 1.0);
+    assert!(OrderedFloat(1.0f32) != 2.0);
+    assert!(OrderedFloat(f32::INFINITY) == f32::INFINITY);
+    assert!(OrderedFloat(f32::NEG_INFINITY) == f32::NEG_INFINITY);
+    assert!(OrderedFloat(f32::INFINITY) != f32::NEG_INFINITY);
+    assert!(OrderedFloat(0.0f32) == -0.0);
+    assert!(OrderedFloat(-0.0f32) == 0.0);
+}
+
+#[test]
+fn ordered_f32_mixed_eq_nan() {
+    let first = f32::from_bits(0x7fc0_0001);
+    let second = f32::from_bits(0xffc0_0002);
+
+    assert!(OrderedFloat(first) == OrderedFloat(second));
+    assert!(OrderedFloat(first) == first);
+    assert!(OrderedFloat(second) == first);
+    assert!(!(OrderedFloat(first) != first));
+    assert!(!(OrderedFloat(second) != first));
+    assert!(OrderedFloat(first) != 1.0);
+    assert!(OrderedFloat(1.0f32) != first);
+    assert!(OrderedFloat(first) != f32::INFINITY);
+    assert!(OrderedFloat(f32::INFINITY) != first);
+}
+
+#[test]
 fn ordered_f64_compare_regular_floats() {
     assert_eq!(OrderedFloat(7.0f64).cmp(&OrderedFloat(7.0)), Equal);
     assert_eq!(OrderedFloat(8.0f64).cmp(&OrderedFloat(7.0)), Greater);
     assert_eq!(OrderedFloat(4.0f64).cmp(&OrderedFloat(7.0)), Less);
+}
+
+#[test]
+fn ordered_f64_mixed_eq_controls() {
+    assert!(OrderedFloat(1.0f64) == 1.0);
+    assert!(OrderedFloat(1.0f64) != 2.0);
+    assert!(OrderedFloat(f64::INFINITY) == f64::INFINITY);
+    assert!(OrderedFloat(f64::NEG_INFINITY) == f64::NEG_INFINITY);
+    assert!(OrderedFloat(f64::INFINITY) != f64::NEG_INFINITY);
+    assert!(OrderedFloat(0.0f64) == -0.0);
+    assert!(OrderedFloat(-0.0f64) == 0.0);
+}
+
+#[test]
+fn ordered_f64_mixed_eq_nan() {
+    let first = f64::from_bits(0x7ff8_0000_0000_0001);
+    let second = f64::from_bits(0xfff8_0000_0000_0002);
+
+    assert!(OrderedFloat(first) == OrderedFloat(second));
+    assert!(OrderedFloat(first) == first);
+    assert!(OrderedFloat(second) == first);
+    assert!(!(OrderedFloat(first) != first));
+    assert!(!(OrderedFloat(second) != first));
+    assert!(OrderedFloat(first) != 1.0);
+    assert!(OrderedFloat(1.0f64) != first);
+    assert!(OrderedFloat(first) != f64::INFINITY);
+    assert!(OrderedFloat(f64::INFINITY) != first);
 }
 
 /// This code is not run, but successfully compiling it checks that the given bounds

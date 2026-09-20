@@ -317,7 +317,7 @@ impl<T: FloatCore> PartialEq for OrderedFloat<T> {
 impl<T: FloatCore> PartialEq<T> for OrderedFloat<T> {
     #[inline]
     fn eq(&self, other: &T) -> bool {
-        self.0 == *other
+        <OrderedFloat<T> as PartialEq>::eq(self, &OrderedFloat(*other))
     }
 }
 
