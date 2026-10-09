@@ -2236,7 +2236,6 @@ mod impl_serde {
     use self::serde::de::{Error, Unexpected};
     use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
     use super::{NotNan, OrderedFloat};
-    use core::f64;
     use num_traits::float::FloatCore;
 
     #[cfg(test)]
@@ -3106,7 +3105,7 @@ mod impl_bytemuck {
             Err(CheckedCastError::InvalidBitPattern),
         );
 
-        let pi = core::f64::consts::PI;
+        let pi = f64::consts::PI;
         assert!(try_cast::<f64, NotNan<f64>>(pi).is_ok());
     }
 }
