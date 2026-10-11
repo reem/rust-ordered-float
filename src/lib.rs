@@ -2236,7 +2236,6 @@ mod impl_serde {
     use self::serde::de::{Error, Unexpected};
     use self::serde::{Deserialize, Deserializer, Serialize, Serializer};
     use super::{NotNan, OrderedFloat};
-    use core::f64;
     use num_traits::float::FloatCore;
 
     #[cfg(test)]
