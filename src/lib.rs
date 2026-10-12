@@ -3105,7 +3105,7 @@ mod impl_bytemuck {
             Err(CheckedCastError::InvalidBitPattern),
         );
 
-        let pi = core::f64::consts::PI;
+        let pi = f64::consts::PI;
         assert!(try_cast::<f64, NotNan<f64>>(pi).is_ok());
     }
 }
